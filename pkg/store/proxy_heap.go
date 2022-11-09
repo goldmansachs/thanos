@@ -360,7 +360,7 @@ func newLazyRespSet(
 	cl storepb.Store_SeriesClient,
 	shardMatcher *storepb.ShardMatcher,
 	applySharding bool,
-	emptyStreamResponses prometheus.Counter,
+	metrics *proxyStoreMetrics,
 
 ) respSet {
 	bufferedResponses := []*storepb.SeriesResponse{}
@@ -395,7 +395,7 @@ func newLazyRespSet(
 		numResponses := 0
 		defer func() {
 			if numResponses == 0 {
-				emptyStreamResponses.Inc()
+				metrics.emptyStreamResponses.Inc()
 			}
 		}()
 
@@ -408,6 +408,7 @@ func newLazyRespSet(
 			case <-l.ctx.Done():
 				err := errors.Wrapf(l.ctx.Err(), "failed to receive any data from %s", st.String())
 				l.span.SetTag("err", err.Error())
+				metrics.storeResponseFailure.Inc()
 
 				l.bufferedResponsesMtx.Lock()
 				l.bufferedResponses = append(l.bufferedResponses, storepb.NewWarnSeriesResponse(err))
@@ -418,6 +419,7 @@ func newLazyRespSet(
 			default:
 				resp, err := cl.Recv()
 				if err == io.EOF {
+					metrics.storeResponseSuccess.Inc()
 					l.bufferedResponsesMtx.Lock()
 					l.noMoreData = true
 					l.dataOrFinishEvent.Signal()
@@ -435,7 +437,7 @@ func newLazyRespSet(
 					} else {
 						rerr = errors.Wrapf(err, "receive series from %s", st.String())
 					}
-
+					metrics.storeResponseFailure.Inc()
 					l.span.SetTag("err", rerr.Error())
 
 					l.bufferedResponsesMtx.Lock()
@@ -502,7 +504,7 @@ func newAsyncRespSet(ctx context.Context,
 	buffers *sync.Pool,
 	shardInfo *storepb.ShardInfo,
 	logger log.Logger,
-	emptyStreamResponses prometheus.Counter) (respSet, error) {
+	metrics *proxyStoreMetrics) (respSet, error) {
 
 	var span opentracing.Span
 	var closeSeries context.CancelFunc
@@ -554,7 +556,7 @@ func newAsyncRespSet(ctx context.Context,
 			cl,
 			shardMatcher,
 			applySharding,
-			emptyStreamResponses,
+			metrics,
 		), nil
 	case EagerRetrieval:
 		return newEagerRespSet(
@@ -566,7 +568,7 @@ func newAsyncRespSet(ctx context.Context,
 			cl,
 			shardMatcher,
 			applySharding,
-			emptyStreamResponses,
+			metrics,
 		), nil
 	default:
 		panic(fmt.Sprintf("unsupported retrieval strategy %s", retrievalStrategy))
@@ -613,7 +615,7 @@ func newEagerRespSet(
 	cl storepb.Store_SeriesClient,
 	shardMatcher *storepb.ShardMatcher,
 	applySharding bool,
-	emptyStreamResponses prometheus.Counter,
+	metrics *proxyStoreMetrics,
 ) respSet {
 	ret := &eagerRespSet{
 		span:              span,
@@ -646,7 +648,7 @@ func newEagerRespSet(
 		numResponses := 0
 		defer func() {
 			if numResponses == 0 {
-				emptyStreamResponses.Inc()
+				metrics.emptyStreamResponses.Inc()
 			}
 		}()
 
@@ -660,10 +662,12 @@ func newEagerRespSet(
 				err := errors.Wrapf(l.ctx.Err(), "failed to receive any data from %s", st.String())
 				l.bufferedResponses = append(l.bufferedResponses, storepb.NewWarnSeriesResponse(err))
 				l.span.SetTag("err", err.Error())
+				metrics.storeResponseFailure.Inc()
 				return false
 			default:
 				resp, err := cl.Recv()
 				if err == io.EOF {
+					metrics.storeResponseSuccess.Inc()
 					return false
 				}
 				if err != nil {
@@ -676,6 +680,7 @@ func newEagerRespSet(
 					} else {
 						rerr = errors.Wrapf(err, "receive series from %s", st.String())
 					}
+					metrics.storeResponseFailure.Inc()
 					l.bufferedResponses = append(l.bufferedResponses, storepb.NewWarnSeriesResponse(rerr))
 					l.span.SetTag("err", rerr.Error())
 					return false
