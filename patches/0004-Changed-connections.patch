@@ -1,0 +1,30 @@
+From 6124d8fa8f7b70b926bad48c1b65e89fc1b564f2 Mon Sep 17 00:00:00 2001
+From: Objectstor Dev <objectstor@gmail.com>
+Date: Wed, 4 Jan 2023 13:59:01 +0000
+Subject: [PATCH 4/4] Changed connections
+
+Signed-off-by: Objectstor Dev <objectstor@gmail.com>
+---
+ providers/s3/s3.go | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/providers/s3/s3.go b/providers/s3/s3.go
+index 0e94ec8..832d973 100644
+--- a/providers/s3/s3.go
++++ b/providers/s3/s3.go
+@@ -115,9 +115,9 @@ var DefaultConfig = Config{
+ 		ResponseHeaderTimeout: model.Duration(2 * time.Minute),
+ 		TLSHandshakeTimeout:   model.Duration(10 * time.Second),
+ 		ExpectContinueTimeout: model.Duration(1 * time.Second),
+-		MaxIdleConns:          100,
+-		MaxIdleConnsPerHost:   100,
+-		MaxConnsPerHost:       0,
++		MaxIdleConns:          6000,
++		MaxIdleConnsPerHost:   200,
++		MaxConnsPerHost:       210,
+ 	},
+ 	PartSize:         1024 * 1024 * 64, // 64MB.
+ 	BucketLookupType: AutoLookup,
+-- 
+2.37.2
+
