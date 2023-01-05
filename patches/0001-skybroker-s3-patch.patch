@@ -1,0 +1,97 @@
+From 0d266216a7bcd89831783b5ebfdea000572892fe Mon Sep 17 00:00:00 2001
+From: Objectstor Dev <objectstor@gmail.com>
+Date: Wed, 4 Jan 2023 12:57:14 +0000
+Subject: [PATCH 1/4] skybroker s3 patch
+
+---
+ providers/s3/s3.go | 60 +++++++++++++++++++++++++++++++++++++++++++---
+ 1 file changed, 57 insertions(+), 3 deletions(-)
+
+diff --git a/providers/s3/s3.go b/providers/s3/s3.go
+index 3ce8af9..0a7369c 100644
+--- a/providers/s3/s3.go
++++ b/providers/s3/s3.go
+@@ -26,6 +26,11 @@ import (
+ 	"github.com/pkg/errors"
+ 	"github.com/prometheus/common/model"
+ 	"github.com/prometheus/common/version"
++	"gitlab.gs.com/sre/g/crypto/krb"
++	"gitlab.gs.com/sre/g/net/aws/miniocreds"
++	ghttp "gitlab.gs.com/sre/g/net/http"
++	"gitlab.gs.com/sre/g/process/refresh"
++
+ 	"gopkg.in/yaml.v2"
+ 
+ 	"github.com/thanos-io/objstore"
+@@ -138,9 +143,29 @@ type Config struct {
+ 	BucketLookupType   BucketLookupType   `yaml:"bucket_lookup_type"`
+ 	// PartSize used for multipart upload. Only used if uploaded object size is known and larger than configured PartSize.
+ 	// NOTE we need to make sure this number does not produce more parts than 10 000.
+-	PartSize    uint64    `yaml:"part_size"`
+-	SSEConfig   SSEConfig `yaml:"sse_config"`
+-	STSEndpoint string    `yaml:"sts_endpoint"`
++	PartSize    uint64       `yaml:"part_size"`
++	SSEConfig   SSEConfig    `yaml:"sse_config"`
++	STSEndpoint string       `yaml:"sts_endpoint"`
++	SkyConfig   *GsSkyConfig `yaml:"sky_config"`
++}
++
++type GsSkyConfig struct {
++	Keytab                 string          `yaml:"keytab"`
++	Principal              string          `yaml:"principal"`
++	RoleARN                string          `yaml:"role_arn"`
++	GsssoTokenLifetime     model.Duration  `yaml:"gssso_token_lifetime"`
++	GsssoRefresh           GsRefreshConfig `yaml:"gssso_refresh"`
++	SkyBrokerRefresh       GsRefreshConfig `yaml:"isky_broker_refresh"`
++	SkyBrokerTokenWaitTime model.Duration  `yaml:"sky_broker_token_wait_timeout"`
++}
++
++type GsRefreshConfig struct {
++	EarlyRefresh        model.Duration `yaml:"early_refresh"`
++	RetryInterval       model.Duration `yaml:"retry_interval"`
++	RetryIntervalGrowth float64        `yaml:"retry_interval_growth"`
++	RetryMaxGrowSteps   int            `yaml:"retry_max_grow_steps"`
++	FetchTimeout        model.Duration `yaml:"fetch_timeout"`
++	TokenExpiryGap      model.Duration `yaml:"token_expiry_gap"`
+ }
+ 
+ // SSEConfig deals with the configuration of SSE for Minio. The following options are valid:
+@@ -224,6 +249,35 @@ func NewBucketWithConfig(logger log.Logger, config Config, component string) (*B
+ 		chain = []credentials.Provider{
+ 			wrapCredentialsProvider(&AWSSDKAuth{Region: config.Region}),
+ 		}
++	} else if config.SkyConfig != nil {
++		krbc, err := krb.New(config.SkyConfig.Principal, config.SkyConfig.Keytab)
++		if err != nil {
++			return nil, errors.Wrap(err, "loading kerberos keytab for Skybroker S3 authentication")
++		}
++		transport, err := ghttp.NewRefreshingGSSSOTransport(http.DefaultTransport, krbc, time.Duration(config.SkyConfig.GsssoTokenLifetime), refresh.Option{
++			EarlyRefresh:        time.Duration(config.SkyConfig.GsssoRefresh.EarlyRefresh),
++			RetryInterval:       time.Duration(config.SkyConfig.GsssoRefresh.RetryInterval),
++			RetryIntervalGrowth: config.SkyConfig.GsssoRefresh.RetryIntervalGrowth,
++			RetryMaxGrowSteps:   config.SkyConfig.GsssoRefresh.RetryMaxGrowSteps,
++			FetchTimeout:        time.Duration(config.SkyConfig.GsssoRefresh.FetchTimeout),
++			TokenExpiryGap:      time.Duration(config.SkyConfig.GsssoRefresh.TokenExpiryGap),
++		})
++		if err != nil {
++			return nil, errors.Wrap(err, "constructing refreshing GSSSO transport SkyBroker S3 authentication")
++		}
++		client := &http.Client{Transport: transport}
++		provider, err := miniocreds.NewSkyBrokerCredentialsProvider(client, config.SkyConfig.RoleARN, timer.Duration(config.SkyConfig.SkyBrokerTokenWaitTimeout), refrsh.Option{
++			EarlyRefresh:        time.Duration(config.SkyConfig.SkyBrokerRefresh.EarlyRefresh),
++			RetryInterval:       time.Duration(config.SkyConfig.SkyBrokerRefresh.RetryInterval),
++			RetryIntervalGrowth: config.SkyConfig.SkyBrokerRefresh.RetryIntervalGrowth,
++			RetryMaxGrowSteps:   config.SkyConfig.SkyBrokerRefresh.RetryMaxGrowSteps,
++			FetchTimeout:        time.Duration(config.SkyConfig.SkyBrokerRefresh.FetchTimeout),
++			TokenExpiryGap:      time.Duration(config.SkyConfig.SkyBrokerRefresh.TokenExpiryGap),
++		})
++		if err != nil {
++			return nil, errors.Wrap(err, "constructing refreshing credentials provider for SkyBroker S3 authentication")
++		}
++		chain = []credential.Provider{provider}
+ 	} else if config.AccessKey != "" {
+ 		chain = []credentials.Provider{wrapCredentialsProvider(&credentials.Static{
+ 			Value: credentials.Value{
+-- 
+2.37.2
+
