@@ -10,11 +10,11 @@ def go_dependencies():
         version = "v1.11.0",
     )
     go_repository(
-        name = "com_github_elastic_apm_agent_go",
-        build_file_proto_mode = "disable",
-        importpath = "go.elastic.co/apm",
-        sum = "h1:uJyt6nCW9880sZhfl1tB//Jy/5TadNoAd8edRUtgb3w=",
-        version = "v1.11.0",
+        name = "com_github_elastic_apm_agent_go",                 # keep
+        build_file_proto_mode = "disable",			  # keep
+        importpath = "go.elastic.co/apm",                         # keep
+        sum = "h1:uJyt6nCW9880sZhfl1tB//Jy/5TadNoAd8edRUtgb3w=",  # keep
+        version = "v1.11.0",                                      # keep
     )
     go_repository(
         name = "co_elastic_go_apm_module_apmhttp",
@@ -38,11 +38,11 @@ def go_dependencies():
         version = "v1.1.0",
     )
     go_repository(
-        name = "com_github_elastic_go_fast_json",
-        build_file_proto_mode = "disable",
-        importpath = "go.elastic.co/fastjson",
-        sum = "h1:3MrGBWWVIxe/xvsbpghtkFoPciPhOCmjsR/HfwEeQR4=",
-        version = "v1.1.0",
+        name = "com_github_elastic_go_fast_json",                 # keep
+        build_file_proto_mode = "disable",                        # keep
+        importpath = "go.elastic.co/fastjson",                    # keep
+        sum = "h1:3MrGBWWVIxe/xvsbpghtkFoPciPhOCmjsR/HfwEeQR4=",  # keep
+        version = "v1.1.0",                                       # keep
     )
     go_repository(
         name = "co_honnef_go_tools",
@@ -1481,11 +1481,11 @@ def go_dependencies():
         version = "v1.16.0",
     )
     go_repository(
-        name = "grpc_ecosystem_grpc_gateway",
-        build_file_generation = "on",
-        importpath = "github.com/grpc-ecosystem/grpc-gateway/v2",
-        sum = "h1:/sDbPb60SusIXjiJGYLUoS/rAQurQmvGWmwn2bBPM9c=",
-        version = "v2.11.1",
+        name = "grpc_ecosystem_grpc_gateway",                        # keep
+        build_file_generation = "on",                                # keep 
+        importpath = "github.com/grpc-ecosystem/grpc-gateway/v2",    # keep
+        sum = "h1:/sDbPb60SusIXjiJGYLUoS/rAQurQmvGWmwn2bBPM9c=",     # keep
+        version = "v2.11.1",                                         # keep
     )
     go_repository(
         name = "com_github_grpc_ecosystem_grpc_gateway_v2",
@@ -2816,10 +2816,10 @@ def go_dependencies():
         importpath = "github.com/thanos-io/objstore",
         patch_args = ["-p1"],
         patches = [
-            "@com_github_thanos_io_thanos//patches:0001-skybroker-s3-patch.patch",
-            "@com_github_thanos_io_thanos//patches:0002-SkyBroker-AWS-S3-patch.patch",
-            "@com_github_thanos_io_thanos//patches:0003-Limit-pool-and-randomize-selection.patch",
-            "@com_github_thanos_io_thanos//patches:0004-Changed-connections.patch",
+            "//patches:0001-skybroker-s3-patch.patch",
+            "//patches:0002-SkyBroker-AWS-S3-patch.patch",
+            "//patches:0003-Limit-pool-and-randomize-selection.patch",
+            "//patches:0004-Changed-connections.patch",
         ],
         sum = "h1:9dceDSKKsLWNHjrMpyzK1t7eVcAZv9Dp3FX+uokUS2Y=",
         version = "v0.0.0-20221006135717-79dcec7fe604",
