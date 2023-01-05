@@ -157,7 +157,8 @@ func (rc *reloaderConfig) registerFlag(cmd extkingpin.FlagClause) *reloaderConfi
 	cmd.Flag("reloader.process-name",
 		"Executable name used to match the process being reloaded when using the signal method.").
 		Default("prometheus").StringVar(&rc.processName)
-
+	cmd.Flag("shipper.meta-filename", "The state file").Default("thanos.shipper.json").StringVar(&sc.metaFilename)
+	cmd.Flag("shipper.upload-dir", "The directory for for linked blocks.").Default("upload").StringVar(&sc.uploadDir)
 	return rc
 }
 

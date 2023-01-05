@@ -79,9 +79,10 @@ type Shipper struct {
 	uploadCompactedFunc    func() bool
 	allowOutOfOrderUploads bool
 	hashFunc               metadata.HashFunc
-
 	labels func() labels.Labels
 	mtx    sync.RWMutex
+	metaFilename           string
+	uploadDir              string
 }
 
 // New creates a new shipper that detects new TSDB blocks in dir and uploads them to
@@ -97,7 +98,8 @@ func New(
 	uploadCompactedFunc func() bool,
 	allowOutOfOrderUploads bool,
 	hashFunc metadata.HashFunc,
-	metaFileName string,
+	metaFilename string,
+	uploadDir string,
 ) *Shipper {
 	if logger == nil {
 		logger = log.NewNopLogger()
@@ -125,7 +127,8 @@ func New(
 		allowOutOfOrderUploads: allowOutOfOrderUploads,
 		uploadCompactedFunc:    uploadCompactedFunc,
 		hashFunc:               hashFunc,
-		metadataFilePath:       filepath.Join(dir, filepath.Clean(metaFileName)),
+		metaFilename:           metaFilename,
+		uploadDir:              uploadDir,
 	}
 }
 
@@ -139,7 +142,7 @@ func (s *Shipper) SetLabels(lbls labels.Labels) {
 // Timestamps returns the minimum timestamp for which data is available and the highest timestamp
 // of blocks that were successfully uploaded.
 func (s *Shipper) Timestamps() (minTime, maxSyncTime int64, err error) {
-	meta, err := ReadMetaFile(s.metadataFilePath)
+	meta, err := ReadMetaFile(s.dir, s.metaFilename)
 	if err != nil {
 		return 0, 0, errors.Wrap(err, "read shipper meta file")
 	}
@@ -250,7 +253,7 @@ func (s *Shipper) Sync(ctx context.Context) (uploaded int, err error) {
 	s.mtx.Lock()
 	defer s.mtx.Unlock()
 
-	meta, err := ReadMetaFile(s.metadataFilePath)
+	meta, err := ReadMetaFile(s.dir, s.metaFilename)
 	if err != nil {
 		// If we encounter any error, proceed with an empty meta file and overwrite it later.
 		// The meta file is only used to avoid unnecessary bucket.Exists call,
@@ -333,7 +336,7 @@ func (s *Shipper) Sync(ctx context.Context) (uploaded int, err error) {
 		uploaded++
 		s.metrics.uploads.Inc()
 	}
-	if err := WriteMetaFile(s.logger, s.metadataFilePath, meta); err != nil {
+	if err := WriteMetaFile(s.logger, s.dir, s.metaFilename, meta); err != nil {
 		level.Warn(s.logger).Log("msg", "updating meta file failed", "err", err)
 	}
 
@@ -352,7 +355,7 @@ func (s *Shipper) Sync(ctx context.Context) (uploaded int, err error) {
 }
 
 func (s *Shipper) UploadedBlocks() map[ulid.ULID]struct{} {
-	meta, err := ReadMetaFile(s.metadataFilePath)
+	meta, err := ReadMetaFile(s.dir, s.metaFilename)
 	if err != nil {
 		// NOTE(GiedriusS): Sync() will inform users about any problems.
 		return nil
@@ -373,7 +376,7 @@ func (s *Shipper) upload(ctx context.Context, meta *metadata.Meta) error {
 
 	// We hard-link the files into a temporary upload directory so we are not affected
 	// by other operations happening against the TSDB directory.
-	updir := filepath.Join(s.dir, "thanos", "upload", meta.ULID.String())
+	updir := filepath.Join(s.dir, "thanos", s.uploadDir, meta.ULID.String())
 
 	// Remove updir just in case.
 	if err := os.RemoveAll(updir); err != nil {
@@ -482,11 +485,15 @@ const (
 
 	// MetaVersion1 represents 1 version of meta.
 	MetaVersion1 = 1
+
+	//UploadDir is the default directory name for uploads
+	UploadDir = "upload"
 )
 
 // WriteMetaFile writes the given meta into <dir>/thanos.shipper.json.
-func WriteMetaFile(logger log.Logger, path string, meta *Meta) error {
+func WriteMetaFile(logger log.Logger, dir string, metaFilename string, meta *Meta) error {
 	// Make any changes to the file appear atomic.
+	path := filepath.Join(dir, metaFilename)
 	tmp := path + ".tmp"
 
 	f, err := os.Create(tmp)
@@ -508,8 +515,9 @@ func WriteMetaFile(logger log.Logger, path string, meta *Meta) error {
 }
 
 // ReadMetaFile reads the given meta from <dir>/thanos.shipper.json.
-func ReadMetaFile(path string) (*Meta, error) {
-	b, err := os.ReadFile(path)
+func ReadMetaFile(dir string, metaFilename string) (*Meta, error) {
+	fpath := filepath.Join(dir, filepath.Clean(metaFilename))
+	b, err := os.ReadFile(fpath)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to read %s", path)
 	}
