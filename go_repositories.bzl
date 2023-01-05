@@ -1,4 +1,5 @@
-load("@bazel_gazelle//:deps.bzl", "go_repository")
+load("@bazel_rules//area:def.bzl", "go_repository")
+#load("@bazel_gazelle//:deps.bzl", "go_repository")
 
 def go_dependencies():
     go_repository(
@@ -2792,15 +2793,15 @@ def go_dependencies():
         name = "com_github_thanos_io_objstore",
         build_file_proto_mode = "disable",
         importpath = "github.com/thanos-io/objstore",
+        patch_args = ["-p1"],
+        patches = [
+            "//patches/0001-skybroker-s3-patch.patch",
+            "//patches/0002-SkyBroker-AWS-S3-patch.patch",
+            "//patches/0003-Limit-pool-and-randomize-selection.patch",
+            "//patches/0004-Changed-connections.patch",
+        ],
         sum = "h1:9dceDSKKsLWNHjrMpyzK1t7eVcAZv9Dp3FX+uokUS2Y=",
         version = "v0.0.0-20221006135717-79dcec7fe604",
-	patch_args = ["-p1"],
-	patches = [
-		"//patches/0001-skybroker-s3-patch.patch",
-		"//patches/0002-SkyBroker-AWS-S3-patch.patch",
-		"//patches/0003-Limit-pool-and-randomize-selection.patch",
-		"//patches/0004-Changed-connections.patch",
-	],
     )
     go_repository(
         name = "com_github_tidwall_pretty",
