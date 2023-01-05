@@ -2794,7 +2794,7 @@ def go_dependencies():
         importpath = "github.com/thanos-io/objstore",
         sum = "h1:9dceDSKKsLWNHjrMpyzK1t7eVcAZv9Dp3FX+uokUS2Y=",
         version = "v0.0.0-20221006135717-79dcec7fe604",
-	patch_args = "[-p1]",
+	patch_args = ["-p1"],
 	patches = [
 		"//patches/0001-skybroker-s3-patch.patch",
 		"//patches/0002-SkyBroker-AWS-S3-patch.patch",
