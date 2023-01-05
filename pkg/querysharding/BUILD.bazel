@@ -6,7 +6,7 @@ go_library(
         "analysis.go",
         "analyzer.go",
     ],
-    importpath = "github.com/prometheus/common/pkg/querysharding",
+    importpath = "github.com/thanos-io/thanos/pkg/querysharding",
     visibility = ["//visibility:public"],
     deps = [
         "@com_github_hashicorp_golang_lru//:golang-lru",

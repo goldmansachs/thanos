@@ -6,7 +6,7 @@ go_library(
         "bridge.go",
         "sampler.go",
     ],
-    importpath = "github.com/prometheus/common/pkg/tracing/migration",
+    importpath = "github.com/thanos-io/thanos/pkg/tracing/migration",
     visibility = ["//visibility:public"],
     deps = [
         "@com_github_go_kit_log//:log",

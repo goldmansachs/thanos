@@ -7,9 +7,10 @@ go_library(
         "testing.go",
         "tx_gauge.go",
     ],
-    importpath = "github.com/prometheus/common/pkg/extprom",
+    importpath = "github.com/thanos-io/thanos/pkg/extprom",
     visibility = ["//visibility:public"],
     deps = [
+        "//pkg/testutil",
         "@com_github_prometheus_client_golang//prometheus",
         "@com_github_prometheus_client_golang//prometheus/promauto",
     ],
@@ -26,6 +27,7 @@ go_test(
     srcs = ["tx_gauge_test.go"],
     embed = [":extprom"],
     deps = [
+        "//pkg/testutil",
         "@com_github_pkg_errors//:errors",
         "@com_github_prometheus_client_golang//prometheus",
         "@com_github_prometheus_client_model//go",

@@ -3,12 +3,13 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 go_library(
     name = "testutil",
     srcs = ["series.go"],
-    importpath = "github.com/prometheus/common/pkg/store/storepb/testutil",
+    importpath = "github.com/thanos-io/thanos/pkg/store/storepb/testutil",
     visibility = ["//visibility:public"],
     deps = [
-        "//pkg/store/hintspb:go_default_library",
-        "//pkg/store/labelpb:go_default_library",
-        "//pkg/store/storepb:go_default_library",
+        "//pkg/store/hintspb",
+        "//pkg/store/labelpb",
+        "//pkg/store/storepb",
+        "//pkg/testutil",
         "@com_github_gogo_protobuf//types",
         "@com_github_prometheus_prometheus//model/labels",
         "@com_github_prometheus_prometheus//tsdb",

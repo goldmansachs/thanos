@@ -3,7 +3,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 go_library(
     name = "testpromcompatibility",
     srcs = ["api_compatibility.go"],
-    importpath = "github.com/prometheus/common/pkg/testutil/testpromcompatibility",
+    importpath = "github.com/thanos-io/thanos/pkg/testutil/testpromcompatibility",
     visibility = ["//visibility:public"],
     deps = [
         "@com_github_prometheus_prometheus//model/labels",

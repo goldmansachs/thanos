@@ -9,10 +9,10 @@ go_library(
         "options.go",
         "yaml_parser.go",
     ],
-    importpath = "github.com/prometheus/common/pkg/logging",
+    importpath = "github.com/thanos-io/thanos/pkg/logging",
     visibility = ["//visibility:public"],
     deps = [
-        "//pkg/server/http:go_default_library",
+        "//pkg/server/http",
         "@com_github_efficientgo_tools_extkingpin//:extkingpin",
         "@com_github_go_kit_log//:log",
         "@com_github_go_kit_log//level",
@@ -36,5 +36,8 @@ go_test(
     name = "logging_test",
     srcs = ["http_test.go"],
     embed = [":logging"],
-    deps = ["@com_github_go_kit_log//:log"],
+    deps = [
+        "//pkg/testutil",
+        "@com_github_go_kit_log//:log",
+    ],
 )

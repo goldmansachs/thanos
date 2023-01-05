@@ -3,7 +3,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 go_library(
     name = "schedulerpb",
     srcs = ["scheduler.pb.go"],
-    importpath = "github.com/prometheus/common/internal/cortex/scheduler/schedulerpb",
+    importpath = "github.com/thanos-io/thanos/internal/cortex/scheduler/schedulerpb",
     visibility = ["//:__subpackages__"],
     deps = [
         "@com_github_gogo_protobuf//gogoproto",

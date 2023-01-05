@@ -9,10 +9,10 @@ go_library(
         "shard_summer.go",
         "subtree_folder.go",
     ],
-    importpath = "github.com/prometheus/common/internal/cortex/querier/astmapper",
+    importpath = "github.com/thanos-io/thanos/internal/cortex/querier/astmapper",
     visibility = ["//:__subpackages__"],
     deps = [
-        "//internal/cortex/util/log:go_default_library",
+        "//internal/cortex/util/log",
         "@com_github_go_kit_log//level",
         "@com_github_pkg_errors//:errors",
         "@com_github_prometheus_client_golang//prometheus",

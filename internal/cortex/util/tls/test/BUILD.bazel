@@ -4,9 +4,9 @@ go_test(
     name = "test_test",
     srcs = ["tls_integration_test.go"],
     deps = [
-        "//internal/cortex/integration/ca:go_default_library",
-        "//internal/cortex/util/grpcclient:go_default_library",
-        "//internal/cortex/util/tls:go_default_library",
+        "//internal/cortex/integration/ca",
+        "//internal/cortex/util/grpcclient",
+        "//internal/cortex/util/tls",
         "@com_github_gogo_status//:status",
         "@com_github_prometheus_client_golang//prometheus",
         "@com_github_stretchr_testify//assert",

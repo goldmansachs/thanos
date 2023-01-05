@@ -6,10 +6,10 @@ go_library(
         "custom.go",
         "hints.pb.go",
     ],
-    importpath = "github.com/prometheus/common/pkg/store/hintspb",
+    importpath = "github.com/thanos-io/thanos/pkg/store/hintspb",
     visibility = ["//visibility:public"],
     deps = [
-        "//pkg/store/storepb:go_default_library",
+        "//pkg/store/storepb",
         "@com_github_gogo_protobuf//gogoproto",
         "@com_github_gogo_protobuf//proto",
         "@com_github_oklog_ulid//:ulid",

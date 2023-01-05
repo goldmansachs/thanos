@@ -3,10 +3,10 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 go_library(
     name = "extract",
     srcs = ["extract.go"],
-    importpath = "github.com/prometheus/common/internal/cortex/util/extract",
+    importpath = "github.com/thanos-io/thanos/internal/cortex/util/extract",
     visibility = ["//:__subpackages__"],
     deps = [
-        "//internal/cortex/cortexpb:go_default_library",
+        "//internal/cortex/cortexpb",
         "@com_github_prometheus_common//model",
         "@com_github_prometheus_prometheus//model/labels",
     ],

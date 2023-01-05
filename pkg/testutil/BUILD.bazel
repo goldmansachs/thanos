@@ -6,7 +6,7 @@ go_library(
         "testorbench.go",
         "testutil.go",
     ],
-    importpath = "github.com/prometheus/common/pkg/testutil",
+    importpath = "github.com/thanos-io/thanos/pkg/testutil",
     visibility = ["//visibility:public"],
     deps = [
         "@com_github_davecgh_go_spew//spew",

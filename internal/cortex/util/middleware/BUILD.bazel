@@ -3,7 +3,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 go_library(
     name = "middleware",
     srcs = ["grpc.go"],
-    importpath = "github.com/prometheus/common/internal/cortex/util/middleware",
+    importpath = "github.com/thanos-io/thanos/internal/cortex/util/middleware",
     visibility = ["//:__subpackages__"],
     deps = [
         "@com_github_prometheus_client_golang//prometheus",

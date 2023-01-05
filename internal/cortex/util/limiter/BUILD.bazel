@@ -6,11 +6,11 @@ go_library(
         "query_limiter.go",
         "rate_limiter.go",
     ],
-    importpath = "github.com/prometheus/common/internal/cortex/util/limiter",
+    importpath = "github.com/thanos-io/thanos/internal/cortex/util/limiter",
     visibility = ["//:__subpackages__"],
     deps = [
-        "//internal/cortex/cortexpb:go_default_library",
-        "//internal/cortex/ingester/client:go_default_library",
+        "//internal/cortex/cortexpb",
+        "//internal/cortex/ingester/client",
         "@com_github_prometheus_common//model",
         "@org_golang_x_time//rate",
         "@org_uber_go_atomic//:atomic",
@@ -31,7 +31,7 @@ go_test(
     ],
     embed = [":limiter"],
     deps = [
-        "//internal/cortex/cortexpb:go_default_library",
+        "//internal/cortex/cortexpb",
         "@com_github_prometheus_prometheus//model/labels",
         "@com_github_stretchr_testify//assert",
         "@com_github_stretchr_testify//require",

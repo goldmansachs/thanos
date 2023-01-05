@@ -7,10 +7,10 @@ go_library(
         "markers.go",
         "meta.go",
     ],
-    importpath = "github.com/prometheus/common/pkg/block/metadata",
+    importpath = "github.com/thanos-io/thanos/pkg/block/metadata",
     visibility = ["//visibility:public"],
     deps = [
-        "//pkg/runutil:go_default_library",
+        "//pkg/runutil",
         "@com_github_go_kit_log//:log",
         "@com_github_minio_sha256_simd//:sha256-simd",
         "@com_github_oklog_ulid//:ulid",
@@ -41,6 +41,7 @@ go_test(
     ],
     embed = [":metadata"],
     deps = [
+        "//pkg/testutil",
         "@com_github_go_kit_log//:log",
         "@com_github_oklog_ulid//:ulid",
         "@com_github_pkg_errors//:errors",

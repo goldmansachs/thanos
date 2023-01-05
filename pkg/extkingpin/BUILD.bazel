@@ -7,7 +7,7 @@ go_library(
         "flags.go",
         "path_content_reloader.go",
     ],
-    importpath = "github.com/prometheus/common/pkg/extkingpin",
+    importpath = "github.com/thanos-io/thanos/pkg/extkingpin",
     visibility = ["//visibility:public"],
     deps = [
         "@com_github_efficientgo_tools_extkingpin//:extkingpin",
@@ -33,5 +33,8 @@ go_test(
     name = "extkingpin_test",
     srcs = ["path_content_reloader_test.go"],
     embed = [":extkingpin"],
-    deps = ["@com_github_go_kit_log//:log"],
+    deps = [
+        "//pkg/testutil",
+        "@com_github_go_kit_log//:log",
+    ],
 )

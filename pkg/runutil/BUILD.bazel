@@ -3,10 +3,10 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 go_library(
     name = "runutil",
     srcs = ["runutil.go"],
-    importpath = "github.com/prometheus/common/pkg/runutil",
+    importpath = "github.com/thanos-io/thanos/pkg/runutil",
     visibility = ["//visibility:public"],
     deps = [
-        "//pkg/errutil:go_default_library",
+        "//pkg/errutil",
         "@com_github_go_kit_log//:log",
         "@com_github_go_kit_log//level",
         "@com_github_pkg_errors//:errors",
@@ -27,7 +27,7 @@ go_test(
     ],
     embed = [":runutil"],
     deps = [
-        ":go_default_library",
+        "//pkg/testutil",
         "@com_github_pkg_errors//:errors",
     ],
 )

@@ -3,10 +3,10 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 go_library(
     name = "reloader",
     srcs = ["reloader.go"],
-    importpath = "github.com/prometheus/common/pkg/reloader",
+    importpath = "github.com/thanos-io/thanos/pkg/reloader",
     visibility = ["//visibility:public"],
     deps = [
-        "//pkg/runutil:go_default_library",
+        "//pkg/runutil",
         "@com_github_fsnotify_fsnotify//:fsnotify",
         "@com_github_go_kit_log//:log",
         "@com_github_go_kit_log//level",
@@ -31,7 +31,7 @@ go_test(
     ],
     embed = [":reloader"],
     deps = [
-        ":go_default_library",
+        "//pkg/testutil",
         "@com_github_go_kit_log//:log",
         "@com_github_prometheus_client_golang//prometheus",
         "@com_github_prometheus_client_golang//prometheus/testutil",

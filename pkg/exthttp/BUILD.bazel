@@ -6,7 +6,7 @@ go_library(
         "tlsconfig.go",
         "transport.go",
     ],
-    importpath = "github.com/prometheus/common/pkg/exthttp",
+    importpath = "github.com/thanos-io/thanos/pkg/exthttp",
     visibility = ["//visibility:public"],
     deps = ["@com_github_prometheus_common//model"],
 )

@@ -3,11 +3,11 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 go_library(
     name = "series",
     srcs = ["series_set.go"],
-    importpath = "github.com/prometheus/common/internal/cortex/querier/series",
+    importpath = "github.com/thanos-io/thanos/internal/cortex/querier/series",
     visibility = ["//:__subpackages__"],
     deps = [
-        "//internal/cortex/chunk/purger:go_default_library",
-        "//internal/cortex/prom1/storage/metric:go_default_library",
+        "//internal/cortex/chunk/purger",
+        "//internal/cortex/prom1/storage/metric",
         "@com_github_prometheus_common//model",
         "@com_github_prometheus_prometheus//model/labels",
         "@com_github_prometheus_prometheus//storage",

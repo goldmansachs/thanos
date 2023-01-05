@@ -8,7 +8,7 @@ go_library(
         "instrument_tenant_server.go",
         "metrics.go",
     ],
-    importpath = "github.com/prometheus/common/pkg/extprom/http",
+    importpath = "github.com/thanos-io/thanos/pkg/extprom/http",
     visibility = ["//visibility:public"],
     deps = [
         "@com_github_opentracing_opentracing_go//:opentracing-go",

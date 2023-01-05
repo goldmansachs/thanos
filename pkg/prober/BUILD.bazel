@@ -9,10 +9,10 @@ go_library(
         "intrumentation.go",
         "prober.go",
     ],
-    importpath = "github.com/prometheus/common/pkg/prober",
+    importpath = "github.com/thanos-io/thanos/pkg/prober",
     visibility = ["//visibility:public"],
     deps = [
-        "//pkg/component:go_default_library",
+        "//pkg/component",
         "@com_github_go_kit_log//:log",
         "@com_github_go_kit_log//level",
         "@com_github_prometheus_client_golang//prometheus",
@@ -34,6 +34,7 @@ go_test(
     srcs = ["http_test.go"],
     embed = [":prober"],
     deps = [
+        "//pkg/testutil",
         "@com_github_go_kit_log//:log",
         "@com_github_oklog_run//:run",
         "@com_github_pkg_errors//:errors",

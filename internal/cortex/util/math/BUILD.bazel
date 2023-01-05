@@ -6,7 +6,7 @@ go_library(
         "math.go",
         "rate.go",
     ],
-    importpath = "github.com/prometheus/common/internal/cortex/util/math",
+    importpath = "github.com/thanos-io/thanos/internal/cortex/util/math",
     visibility = ["//:__subpackages__"],
     deps = ["@org_uber_go_atomic//:atomic"],
 )
