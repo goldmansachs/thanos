@@ -1,0 +1,31 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "http",
+    srcs = [
+        "http.go",
+        "option.go",
+        "utils.go",
+    ],
+    importpath = "github.com/prometheus/common/pkg/server/http",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/component:go_default_library",
+        "//pkg/prober:go_default_library",
+        "@com_github_felixge_fgprof//:fgprof",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_client_golang//prometheus/promhttp",
+        "@com_github_prometheus_exporter_toolkit//web",
+        "@org_golang_x_net//http2",
+        "@org_golang_x_net//http2/h2c",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":http",
+    visibility = ["//visibility:public"],
+)

@@ -1,0 +1,15 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "extflag",
+    srcs = ["hidden.go"],
+    importpath = "github.com/prometheus/common/pkg/extflag",
+    visibility = ["//visibility:public"],
+    deps = ["@in_gopkg_alecthomas_kingpin_v2//:kingpin_v2"],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":extflag",
+    visibility = ["//visibility:public"],
+)

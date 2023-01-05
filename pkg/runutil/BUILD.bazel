@@ -1,0 +1,33 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "runutil",
+    srcs = ["runutil.go"],
+    importpath = "github.com/prometheus/common/pkg/runutil",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/errutil:go_default_library",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_pkg_errors//:errors",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":runutil",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "runutil_test",
+    srcs = [
+        "example_test.go",
+        "runutil_test.go",
+    ],
+    embed = [":runutil"],
+    deps = [
+        ":go_default_library",
+        "@com_github_pkg_errors//:errors",
+    ],
+)

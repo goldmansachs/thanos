@@ -1,0 +1,57 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "bucket",
+    srcs = [
+        "bucket_util.go",
+        "client.go",
+        "client_mock.go",
+        "prefixed_bucket_client.go",
+        "sse_bucket_client.go",
+        "user_bucket_client.go",
+    ],
+    importpath = "github.com/prometheus/common/internal/cortex/storage/bucket",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/cortex/storage/bucket/azure:go_default_library",
+        "//internal/cortex/storage/bucket/filesystem:go_default_library",
+        "//internal/cortex/storage/bucket/gcs:go_default_library",
+        "//internal/cortex/storage/bucket/s3:go_default_library",
+        "//internal/cortex/storage/bucket/swift:go_default_library",
+        "//internal/cortex/util:go_default_library",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_minio_minio_go_v7//pkg/encrypt",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_stretchr_testify//mock",
+        "@com_github_thanos_io_objstore//:objstore",
+        "@com_github_thanos_io_objstore//providers/s3",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":bucket",
+    visibility = ["//:__subpackages__"],
+)
+
+go_test(
+    name = "bucket_test",
+    srcs = [
+        "bucket_util_test.go",
+        "client_test.go",
+        "sse_bucket_client_test.go",
+    ],
+    embed = [":bucket"],
+    deps = [
+        "//internal/cortex/storage/bucket/s3:go_default_library",
+        "//internal/cortex/util/flagext:go_default_library",
+        "//internal/cortex/util/log:go_default_library",
+        "@com_github_go_kit_log//:log",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+        "@com_github_thanos_io_objstore//:objstore",
+        "@in_gopkg_yaml_v2//:yaml_v2",
+    ],
+)

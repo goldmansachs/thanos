@@ -1,0 +1,58 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "replicate",
+    srcs = [
+        "replicator.go",
+        "scheme.go",
+    ],
+    importpath = "github.com/prometheus/common/pkg/replicate",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/block:go_default_library",
+        "//pkg/block/metadata:go_default_library",
+        "//pkg/compact:go_default_library",
+        "//pkg/component:go_default_library",
+        "//pkg/extprom:go_default_library",
+        "//pkg/model:go_default_library",
+        "//pkg/prober:go_default_library",
+        "//pkg/runutil:go_default_library",
+        "//pkg/server/http:go_default_library",
+        "@com_github_efficientgo_tools_extkingpin//:extkingpin",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_oklog_run//:run",
+        "@com_github_oklog_ulid//:ulid",
+        "@com_github_opentracing_opentracing_go//:opentracing-go",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_client_golang//prometheus/promauto",
+        "@com_github_prometheus_common//model",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_thanos_io_objstore//:objstore",
+        "@com_github_thanos_io_objstore//client",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":replicate",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "replicate_test",
+    srcs = ["scheme_test.go"],
+    embed = [":replicate"],
+    deps = [
+        "//pkg/block/metadata:go_default_library",
+        "//pkg/compact:go_default_library",
+        "//pkg/model:go_default_library",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_oklog_ulid//:ulid",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//tsdb",
+        "@com_github_thanos_io_objstore//:objstore",
+    ],
+)

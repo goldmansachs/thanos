@@ -1,0 +1,74 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "purger",
+    srcs = [
+        "delete_plan.pb.go",
+        "delete_requests_store.go",
+        "purger.go",
+        "request_handler.go",
+        "table_provisioning.go",
+        "tenant_deletion_api.go",
+        "tombstones.go",
+    ],
+    importpath = "github.com/prometheus/common/internal/cortex/chunk/purger",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/cortex/chunk:go_default_library",
+        "//internal/cortex/cortexpb:go_default_library",
+        "//internal/cortex/storage/bucket:go_default_library",
+        "//internal/cortex/storage/tsdb:go_default_library",
+        "//internal/cortex/tenant:go_default_library",
+        "//internal/cortex/util:go_default_library",
+        "//internal/cortex/util/log:go_default_library",
+        "//internal/cortex/util/services:go_default_library",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_gogo_protobuf//gogoproto",
+        "@com_github_gogo_protobuf//proto",
+        "@com_github_oklog_ulid//:ulid",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_client_golang//prometheus/promauto",
+        "@com_github_prometheus_common//model",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//promql",
+        "@com_github_prometheus_prometheus//promql/parser",
+        "@com_github_thanos_io_objstore//:objstore",
+        "@com_github_weaveworks_common//user",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":purger",
+    visibility = ["//:__subpackages__"],
+)
+
+go_test(
+    name = "purger_test",
+    srcs = [
+        "purger_test.go",
+        "tenant_deletion_api_test.go",
+        "tombstones_test.go",
+    ],
+    embed = [":purger"],
+    deps = [
+        "//internal/cortex/chunk:go_default_library",
+        "//internal/cortex/chunk/testutils:go_default_library",
+        "//internal/cortex/storage/tsdb:go_default_library",
+        "//internal/cortex/util/flagext:go_default_library",
+        "//internal/cortex/util/log:go_default_library",
+        "//internal/cortex/util/services:go_default_library",
+        "//internal/cortex/util/test:go_default_library",
+        "@com_github_go_kit_log//:log",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_client_golang//prometheus/testutil",
+        "@com_github_prometheus_common//model",
+        "@com_github_prometheus_prometheus//promql/parser",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+        "@com_github_thanos_io_objstore//:objstore",
+        "@com_github_weaveworks_common//user",
+    ],
+)

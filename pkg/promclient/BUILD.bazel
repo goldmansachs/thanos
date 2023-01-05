@@ -1,0 +1,52 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "promclient",
+    srcs = ["promclient.go"],
+    importpath = "github.com/prometheus/common/pkg/promclient",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/exemplars/exemplarspb:go_default_library",
+        "//pkg/httpconfig:go_default_library",
+        "//pkg/metadata/metadatapb:go_default_library",
+        "//pkg/rules/rulespb:go_default_library",
+        "//pkg/runutil:go_default_library",
+        "//pkg/store/storepb:go_default_library",
+        "//pkg/targets/targetspb:go_default_library",
+        "//pkg/tracing:go_default_library",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_gogo_status//:status",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_common//model",
+        "@com_github_prometheus_prometheus//config",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//model/timestamp",
+        "@com_github_prometheus_prometheus//promql",
+        "@com_github_prometheus_prometheus//promql/parser",
+        "@in_gopkg_yaml_v2//:yaml_v2",
+        "@org_golang_google_grpc//codes",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":promclient",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "promclient_test",
+    srcs = ["promclient_e2e_test.go"],
+    embed = [":promclient"],
+    deps = [
+        "//pkg/block/metadata:go_default_library",
+        "//pkg/runutil:go_default_library",
+        "@com_github_oklog_ulid//:ulid",
+        "@com_github_prometheus_common//model",
+        "@com_github_prometheus_prometheus//config",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//model/timestamp",
+        "@in_gopkg_yaml_v3//:yaml_v3",
+    ],
+)

@@ -1,0 +1,30 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "tracing",
+    srcs = [
+        "grpc.go",
+        "http.go",
+        "testutil.go",
+        "tracing.go",
+    ],
+    importpath = "github.com/prometheus/common/pkg/tracing",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/tracing/migration:go_default_library",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_grpc_ecosystem_go_grpc_middleware_v2//:go-grpc-middleware",
+        "@com_github_grpc_ecosystem_go_grpc_middleware_v2//interceptors/tracing",
+        "@com_github_opentracing_opentracing_go//:opentracing-go",
+        "@com_github_opentracing_opentracing_go//ext",
+        "@io_opentelemetry_go_otel_sdk//trace/tracetest",
+        "@org_golang_google_grpc//:go_default_library",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":tracing",
+    visibility = ["//visibility:public"],
+)

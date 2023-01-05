@@ -1,0 +1,27 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "http",
+    srcs = [
+        "instrument_client.go",
+        "instrument_server.go",
+        "instrument_tenant_server.go",
+        "metrics.go",
+    ],
+    importpath = "github.com/prometheus/common/pkg/extprom/http",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_opentracing_opentracing_go//:opentracing-go",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_client_golang//prometheus/promauto",
+        "@com_github_prometheus_client_golang//prometheus/promhttp",
+        "@com_github_uber_jaeger_client_go//:jaeger-client-go",
+        "@io_opentelemetry_go_otel_trace//:trace",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":http",
+    visibility = ["//visibility:public"],
+)

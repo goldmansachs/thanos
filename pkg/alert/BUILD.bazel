@@ -1,0 +1,55 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "alert",
+    srcs = [
+        "alert.go",
+        "config.go",
+    ],
+    importpath = "github.com/prometheus/common/pkg/alert",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/discovery/dns:go_default_library",
+        "//pkg/httpconfig:go_default_library",
+        "//pkg/runutil:go_default_library",
+        "//pkg/tracing:go_default_library",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_go_openapi_strfmt//:strfmt",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_alertmanager//api/v2/models",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_client_golang//prometheus/promauto",
+        "@com_github_prometheus_common//model",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//model/relabel",
+        "@com_github_prometheus_prometheus//notifier",
+        "@in_gopkg_yaml_v2//:yaml_v2",
+        "@org_uber_go_atomic//:atomic",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":alert",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "alert_test",
+    srcs = [
+        "alert_test.go",
+        "config_test.go",
+    ],
+    embed = [":alert"],
+    deps = [
+        "//pkg/httpconfig:go_default_library",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_client_golang//prometheus/testutil",
+        "@com_github_prometheus_common//model",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//model/relabel",
+        "@com_github_prometheus_prometheus//notifier",
+        "@in_gopkg_yaml_v2//:yaml_v2",
+    ],
+)

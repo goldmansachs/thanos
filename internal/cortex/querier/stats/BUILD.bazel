@@ -1,0 +1,32 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "stats",
+    srcs = [
+        "stats.go",
+        "stats.pb.go",
+        "time_middleware.go",
+    ],
+    importpath = "github.com/prometheus/common/internal/cortex/querier/stats",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "@com_github_gogo_protobuf//gogoproto",
+        "@com_github_gogo_protobuf//proto",
+        "@com_github_gogo_protobuf//types",
+        "@com_github_weaveworks_common//httpgrpc",
+        "@io_bazel_rules_go//proto/wkt:duration_go_proto",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":stats",
+    visibility = ["//:__subpackages__"],
+)
+
+go_test(
+    name = "stats_test",
+    srcs = ["stats_test.go"],
+    embed = [":stats"],
+    deps = ["@com_github_stretchr_testify//assert"],
+)

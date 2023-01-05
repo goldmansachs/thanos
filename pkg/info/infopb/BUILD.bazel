@@ -1,0 +1,22 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "infopb",
+    srcs = ["rpc.pb.go"],
+    importpath = "github.com/prometheus/common/pkg/info/infopb",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/store/labelpb:go_default_library",
+        "@com_github_gogo_protobuf//gogoproto",
+        "@com_github_gogo_protobuf//proto",
+        "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_google_grpc//codes",
+        "@org_golang_google_grpc//status",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":infopb",
+    visibility = ["//visibility:public"],
+)

@@ -1,0 +1,37 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "extkingpin",
+    srcs = [
+        "app.go",
+        "flags.go",
+        "path_content_reloader.go",
+    ],
+    importpath = "github.com/prometheus/common/pkg/extkingpin",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_efficientgo_tools_extkingpin//:extkingpin",
+        "@com_github_fsnotify_fsnotify//:fsnotify",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_oklog_run//:run",
+        "@com_github_opentracing_opentracing_go//:opentracing-go",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_common//model",
+        "@in_gopkg_alecthomas_kingpin_v2//:kingpin_v2",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":extkingpin",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "extkingpin_test",
+    srcs = ["path_content_reloader_test.go"],
+    embed = [":extkingpin"],
+    deps = ["@com_github_go_kit_log//:log"],
+)

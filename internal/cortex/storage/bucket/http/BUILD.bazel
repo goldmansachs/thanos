@@ -1,0 +1,25 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "http",
+    srcs = ["config.go"],
+    importpath = "github.com/prometheus/common/internal/cortex/storage/bucket/http",
+    visibility = ["//:__subpackages__"],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":http",
+    visibility = ["//:__subpackages__"],
+)
+
+go_test(
+    name = "http_test",
+    srcs = ["config_test.go"],
+    embed = [":http"],
+    deps = [
+        "//internal/cortex/util/flagext:go_default_library",
+        "@com_github_stretchr_testify//require",
+        "@in_gopkg_yaml_v2//:yaml_v2",
+    ],
+)

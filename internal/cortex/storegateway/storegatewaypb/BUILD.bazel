@@ -1,0 +1,21 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "storegatewaypb",
+    srcs = ["gateway.pb.go"],
+    importpath = "github.com/prometheus/common/internal/cortex/storegateway/storegatewaypb",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//pkg/store/storepb:go_default_library",
+        "@com_github_gogo_protobuf//proto",
+        "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_google_grpc//codes",
+        "@org_golang_google_grpc//status",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":storegatewaypb",
+    visibility = ["//:__subpackages__"],
+)

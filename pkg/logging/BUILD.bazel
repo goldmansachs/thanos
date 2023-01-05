@@ -1,0 +1,40 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "logging",
+    srcs = [
+        "grpc.go",
+        "http.go",
+        "logger.go",
+        "options.go",
+        "yaml_parser.go",
+    ],
+    importpath = "github.com/prometheus/common/pkg/logging",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/server/http:go_default_library",
+        "@com_github_efficientgo_tools_extkingpin//:extkingpin",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_grpc_ecosystem_go_grpc_middleware_v2//interceptors",
+        "@com_github_grpc_ecosystem_go_grpc_middleware_v2//interceptors/logging",
+        "@com_github_grpc_ecosystem_go_grpc_middleware_v2//interceptors/tags",
+        "@com_github_oklog_ulid//:ulid",
+        "@in_gopkg_yaml_v2//:yaml_v2",
+        "@org_golang_google_grpc//codes",
+        "@org_golang_google_grpc//status",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":logging",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "logging_test",
+    srcs = ["http_test.go"],
+    embed = [":logging"],
+    deps = ["@com_github_go_kit_log//:log"],
+)

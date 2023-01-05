@@ -1,0 +1,28 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "client",
+    srcs = ["factory.go"],
+    importpath = "github.com/prometheus/common/pkg/tracing/client",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/tracing/elasticapm:go_default_library",
+        "//pkg/tracing/google_cloud:go_default_library",
+        "//pkg/tracing/jaeger:go_default_library",
+        "//pkg/tracing/lightstep:go_default_library",
+        "//pkg/tracing/migration:go_default_library",
+        "//pkg/tracing/otlp:go_default_library",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_opentracing_opentracing_go//:opentracing-go",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@in_gopkg_yaml_v2//:yaml_v2",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":client",
+    visibility = ["//visibility:public"],
+)

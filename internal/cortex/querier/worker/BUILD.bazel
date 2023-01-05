@@ -1,0 +1,65 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "worker",
+    srcs = [
+        "frontend_processor.go",
+        "processor_manager.go",
+        "scheduler_processor.go",
+        "worker.go",
+    ],
+    importpath = "github.com/prometheus/common/internal/cortex/querier/worker",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/cortex/frontend/v1/frontendv1pb:go_default_library",
+        "//internal/cortex/frontend/v2/frontendv2pb:go_default_library",
+        "//internal/cortex/querier/stats:go_default_library",
+        "//internal/cortex/ring/client:go_default_library",
+        "//internal/cortex/scheduler/schedulerpb:go_default_library",
+        "//internal/cortex/util:go_default_library",
+        "//internal/cortex/util/backoff:go_default_library",
+        "//internal/cortex/util/grpcclient:go_default_library",
+        "//internal/cortex/util/httpgrpcutil:go_default_library",
+        "//internal/cortex/util/log:go_default_library",
+        "//internal/cortex/util/middleware:go_default_library",
+        "//internal/cortex/util/services:go_default_library",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_opentracing_contrib_go_grpc//:go-grpc",
+        "@com_github_opentracing_opentracing_go//:opentracing-go",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_client_golang//prometheus/promauto",
+        "@com_github_weaveworks_common//httpgrpc",
+        "@com_github_weaveworks_common//middleware",
+        "@com_github_weaveworks_common//user",
+        "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_google_grpc//health/grpc_health_v1",
+        "@org_uber_go_atomic//:atomic",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":worker",
+    visibility = ["//:__subpackages__"],
+)
+
+go_test(
+    name = "worker_test",
+    srcs = [
+        "frontend_processor_test.go",
+        "worker_test.go",
+    ],
+    embed = [":worker"],
+    deps = [
+        "//internal/cortex/util/services:go_default_library",
+        "//internal/cortex/util/test:go_default_library",
+        "@com_github_go_kit_log//:log",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+        "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_google_grpc//credentials/insecure",
+        "@org_uber_go_atomic//:atomic",
+    ],
+)
