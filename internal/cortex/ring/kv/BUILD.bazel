@@ -1,0 +1,53 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "kv",
+    srcs = [
+        "client.go",
+        "metrics.go",
+        "mock.go",
+        "multi.go",
+        "prefix.go",
+    ],
+    importpath = "github.com/prometheus/common/internal/cortex/ring/kv",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/cortex/ring/kv/codec:go_default_library",
+        "//internal/cortex/ring/kv/consul:go_default_library",
+        "//internal/cortex/ring/kv/etcd:go_default_library",
+        "//internal/cortex/ring/kv/memberlist:go_default_library",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_client_golang//prometheus/promauto",
+        "@com_github_weaveworks_common//httpgrpc",
+        "@com_github_weaveworks_common//instrument",
+        "@org_uber_go_atomic//:atomic",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":kv",
+    visibility = ["//:__subpackages__"],
+)
+
+go_test(
+    name = "kv_test",
+    srcs = [
+        "client_test.go",
+        "kv_test.go",
+        "multi_test.go",
+    ],
+    embed = [":kv"],
+    deps = [
+        "//internal/cortex/ring/kv/codec:go_default_library",
+        "//internal/cortex/ring/kv/consul:go_default_library",
+        "//internal/cortex/ring/kv/etcd:go_default_library",
+        "@com_github_gogo_protobuf//proto",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+        "@in_gopkg_yaml_v2//:yaml_v2",
+    ],
+)

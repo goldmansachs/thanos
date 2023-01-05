@@ -1,0 +1,46 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "astmapper",
+    srcs = [
+        "astmapper.go",
+        "embedded.go",
+        "parallel.go",
+        "shard_summer.go",
+        "subtree_folder.go",
+    ],
+    importpath = "github.com/prometheus/common/internal/cortex/querier/astmapper",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/cortex/util/log:go_default_library",
+        "@com_github_go_kit_log//level",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//promql/parser",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":astmapper",
+    visibility = ["//:__subpackages__"],
+)
+
+go_test(
+    name = "astmapper_test",
+    srcs = [
+        "astmapper_test.go",
+        "parallel_test.go",
+        "shard_summer_test.go",
+        "subtree_folder_test.go",
+    ],
+    embed = [":astmapper"],
+    deps = [
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_common//model",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//promql/parser",
+        "@com_github_stretchr_testify//require",
+    ],
+)

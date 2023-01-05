@@ -1,0 +1,52 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "metadata",
+    srcs = [
+        "metadata.go",
+        "prometheus.go",
+        "proxy.go",
+    ],
+    importpath = "github.com/prometheus/common/pkg/metadata",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/metadata/metadatapb:go_default_library",
+        "//pkg/promclient:go_default_library",
+        "//pkg/store/storepb:go_default_library",
+        "//pkg/tracing:go_default_library",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_prometheus//storage",
+        "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_google_grpc//codes",
+        "@org_golang_google_grpc//status",
+        "@org_golang_x_sync//errgroup",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":metadata",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "metadata_test",
+    srcs = [
+        "prometheus_test.go",
+        "proxy_test.go",
+    ],
+    embed = [":metadata"],
+    deps = [
+        "//pkg/metadata/metadatapb:go_default_library",
+        "//pkg/promclient:go_default_library",
+        "//pkg/runutil:go_default_library",
+        "//pkg/store/storepb:go_default_library",
+        "@com_github_go_kit_log//:log",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_prometheus//storage",
+        "@org_golang_google_grpc//:go_default_library",
+        "@org_uber_go_atomic//:atomic",
+    ],
+)

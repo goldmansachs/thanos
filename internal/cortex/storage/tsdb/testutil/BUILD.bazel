@@ -1,0 +1,25 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "testutil",
+    srcs = [
+        "block_mock.go",
+        "objstore.go",
+    ],
+    importpath = "github.com/prometheus/common/internal/cortex/storage/tsdb/testutil",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/cortex/storage/bucket/filesystem:go_default_library",
+        "//pkg/block/metadata:go_default_library",
+        "@com_github_oklog_ulid//:ulid",
+        "@com_github_prometheus_prometheus//tsdb",
+        "@com_github_stretchr_testify//require",
+        "@com_github_thanos_io_objstore//:objstore",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":testutil",
+    visibility = ["//:__subpackages__"],
+)

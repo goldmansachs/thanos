@@ -1,0 +1,39 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "queue",
+    srcs = [
+        "queue.go",
+        "user_queues.go",
+    ],
+    importpath = "github.com/prometheus/common/internal/cortex/scheduler/queue",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/cortex/util:go_default_library",
+        "//internal/cortex/util/services:go_default_library",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@org_uber_go_atomic//:atomic",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":queue",
+    visibility = ["//:__subpackages__"],
+)
+
+go_test(
+    name = "queue_test",
+    srcs = [
+        "queue_test.go",
+        "user_queues_test.go",
+    ],
+    embed = [":queue"],
+    deps = [
+        "//internal/cortex/util/services:go_default_library",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+    ],
+)

@@ -1,0 +1,33 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "concurrency",
+    srcs = [
+        "buffer.go",
+        "runner.go",
+    ],
+    importpath = "github.com/prometheus/common/internal/cortex/util/concurrency",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/cortex/util/math:go_default_library",
+        "//internal/cortex/util/multierror:go_default_library",
+        "@org_golang_x_sync//errgroup",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":concurrency",
+    visibility = ["//:__subpackages__"],
+)
+
+go_test(
+    name = "concurrency_test",
+    srcs = ["runner_test.go"],
+    embed = [":concurrency"],
+    deps = [
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+        "@org_uber_go_atomic//:atomic",
+    ],
+)

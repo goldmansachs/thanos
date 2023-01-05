@@ -1,0 +1,21 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "lazyquery",
+    srcs = ["lazyquery.go"],
+    importpath = "github.com/prometheus/common/internal/cortex/querier/lazyquery",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/cortex/chunk:go_default_library",
+        "//internal/cortex/querier/chunkstore:go_default_library",
+        "@com_github_prometheus_common//model",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//storage",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":lazyquery",
+    visibility = ["//:__subpackages__"],
+)

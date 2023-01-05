@@ -1,0 +1,51 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "flagext",
+    srcs = [
+        "cidr.go",
+        "day.go",
+        "deprecated.go",
+        "ignored.go",
+        "register.go",
+        "secret.go",
+        "stringslice.go",
+        "stringslicecsv.go",
+        "time.go",
+        "url.go",
+    ],
+    importpath = "github.com/prometheus/common/internal/cortex/util/flagext",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_client_golang//prometheus/promauto",
+        "@com_github_prometheus_common//model",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":flagext",
+    visibility = ["//:__subpackages__"],
+)
+
+go_test(
+    name = "flagext_test",
+    srcs = [
+        "cidr_test.go",
+        "day_test.go",
+        "secret_test.go",
+        "stringslicecsv_test.go",
+        "time_test.go",
+        "url_test.go",
+    ],
+    embed = [":flagext"],
+    deps = [
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+        "@in_gopkg_yaml_v2//:yaml_v2",
+    ],
+)

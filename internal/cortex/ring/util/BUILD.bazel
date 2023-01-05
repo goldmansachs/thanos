@@ -1,0 +1,14 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "util",
+    srcs = ["string_utils.go"],
+    importpath = "github.com/prometheus/common/internal/cortex/ring/util",
+    visibility = ["//:__subpackages__"],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":util",
+    visibility = ["//:__subpackages__"],
+)

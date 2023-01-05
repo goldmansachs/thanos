@@ -1,0 +1,63 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "downsample",
+    srcs = [
+        "aggr.go",
+        "downsample.go",
+        "pool.go",
+        "streamed_block_writer.go",
+    ],
+    importpath = "github.com/prometheus/common/pkg/compact/downsample",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/block:go_default_library",
+        "//pkg/block/metadata:go_default_library",
+        "//pkg/errutil:go_default_library",
+        "//pkg/runutil:go_default_library",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_oklog_ulid//:ulid",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//model/value",
+        "@com_github_prometheus_prometheus//storage",
+        "@com_github_prometheus_prometheus//tsdb",
+        "@com_github_prometheus_prometheus//tsdb/chunkenc",
+        "@com_github_prometheus_prometheus//tsdb/chunks",
+        "@com_github_prometheus_prometheus//tsdb/fileutil",
+        "@com_github_prometheus_prometheus//tsdb/index",
+        "@com_github_prometheus_prometheus//tsdb/tsdbutil",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":downsample",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "downsample_test",
+    srcs = [
+        "aggr_test.go",
+        "downsample_test.go",
+    ],
+    embed = [":downsample"],
+    deps = [
+        "//pkg/block:go_default_library",
+        "//pkg/block/metadata:go_default_library",
+        "@com_github_go_kit_log//:log",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//model/value",
+        "@com_github_prometheus_prometheus//storage",
+        "@com_github_prometheus_prometheus//tsdb",
+        "@com_github_prometheus_prometheus//tsdb/chunkenc",
+        "@com_github_prometheus_prometheus//tsdb/chunks",
+        "@com_github_prometheus_prometheus//tsdb/index",
+        "@com_github_prometheus_prometheus//tsdb/tombstones",
+        "@com_github_prometheus_prometheus//tsdb/tsdbutil",
+        "@org_uber_go_goleak//:goleak",
+    ],
+)

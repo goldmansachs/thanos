@@ -1,0 +1,42 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "dns",
+    srcs = [
+        "provider.go",
+        "resolver.go",
+    ],
+    importpath = "github.com/prometheus/common/pkg/discovery/dns",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/discovery/dns/godns:go_default_library",
+        "//pkg/discovery/dns/miekgdns:go_default_library",
+        "//pkg/errutil:go_default_library",
+        "//pkg/extprom:go_default_library",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_client_golang//prometheus/promauto",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":dns",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "dns_test",
+    srcs = [
+        "provider_test.go",
+        "resolver_test.go",
+    ],
+    embed = [":dns"],
+    deps = [
+        "@com_github_go_kit_log//:log",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_client_golang//prometheus/testutil",
+    ],
+)

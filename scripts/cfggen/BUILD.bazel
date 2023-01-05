@@ -1,0 +1,43 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "cfggen_lib",
+    srcs = ["main.go"],
+    importpath = "github.com/prometheus/common/scripts/cfggen",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//pkg/alert:go_default_library",
+        "//pkg/cacheutil:go_default_library",
+        "//pkg/httpconfig:go_default_library",
+        "//pkg/logging:go_default_library",
+        "//pkg/queryfrontend:go_default_library",
+        "//pkg/store/cache:go_default_library",
+        "//pkg/tracing/client:go_default_library",
+        "//pkg/tracing/elasticapm:go_default_library",
+        "//pkg/tracing/google_cloud:go_default_library",
+        "//pkg/tracing/jaeger:go_default_library",
+        "//pkg/tracing/lightstep:go_default_library",
+        "//pkg/tracing/otlp:go_default_library",
+        "@com_github_fatih_structtag//:structtag",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_thanos_io_objstore//client",
+        "@com_github_thanos_io_objstore//providers/azure",
+        "@com_github_thanos_io_objstore//providers/bos",
+        "@com_github_thanos_io_objstore//providers/cos",
+        "@com_github_thanos_io_objstore//providers/filesystem",
+        "@com_github_thanos_io_objstore//providers/gcs",
+        "@com_github_thanos_io_objstore//providers/oss",
+        "@com_github_thanos_io_objstore//providers/s3",
+        "@com_github_thanos_io_objstore//providers/swift",
+        "@in_gopkg_alecthomas_kingpin_v2//:kingpin_v2",
+        "@in_gopkg_yaml_v2//:yaml_v2",
+    ],
+)
+
+go_binary(
+    name = "cfggen",
+    embed = [":cfggen_lib"],
+    visibility = ["//visibility:public"],
+)

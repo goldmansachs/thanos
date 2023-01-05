@@ -1,0 +1,41 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "reloader",
+    srcs = ["reloader.go"],
+    importpath = "github.com/prometheus/common/pkg/reloader",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/runutil:go_default_library",
+        "@com_github_fsnotify_fsnotify//:fsnotify",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_minio_sha256_simd//:sha256-simd",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_client_golang//prometheus/promauto",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":reloader",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "reloader_test",
+    srcs = [
+        "example_test.go",
+        "reloader_test.go",
+    ],
+    embed = [":reloader"],
+    deps = [
+        ":go_default_library",
+        "@com_github_go_kit_log//:log",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_client_golang//prometheus/testutil",
+        "@org_uber_go_atomic//:atomic",
+        "@org_uber_go_goleak//:goleak",
+    ],
+)

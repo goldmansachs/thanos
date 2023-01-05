@@ -1,0 +1,26 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "status",
+    srcs = ["v1.go"],
+    importpath = "github.com/prometheus/common/pkg/api/status",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/api:go_default_library",
+        "//pkg/extprom/http:go_default_library",
+        "//pkg/logging:go_default_library",
+        "@com_github_go_kit_log//:log",
+        "@com_github_opentracing_opentracing_go//:opentracing-go",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_common//route",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//tsdb",
+        "@com_github_prometheus_prometheus//web/api/v1:api",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":status",
+    visibility = ["//visibility:public"],
+)

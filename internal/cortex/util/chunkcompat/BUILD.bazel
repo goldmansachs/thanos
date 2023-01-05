@@ -1,0 +1,23 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "chunkcompat",
+    srcs = ["compat.go"],
+    importpath = "github.com/prometheus/common/internal/cortex/util/chunkcompat",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/cortex/chunk:go_default_library",
+        "//internal/cortex/chunk/encoding:go_default_library",
+        "//internal/cortex/cortexpb:go_default_library",
+        "//internal/cortex/ingester/client:go_default_library",
+        "//internal/cortex/util:go_default_library",
+        "@com_github_prometheus_common//model",
+        "@com_github_prometheus_prometheus//model/labels",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":chunkcompat",
+    visibility = ["//:__subpackages__"],
+)

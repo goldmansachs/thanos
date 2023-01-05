@@ -1,0 +1,28 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "querypb",
+    srcs = [
+        "query.pb.go",
+        "responses.go",
+        "store_matchers.go",
+    ],
+    importpath = "github.com/prometheus/common/pkg/api/query/querypb",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/store/storepb:go_default_library",
+        "//pkg/store/storepb/prompb:go_default_library",
+        "@com_github_gogo_protobuf//gogoproto",
+        "@com_github_gogo_protobuf//proto",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_google_grpc//codes",
+        "@org_golang_google_grpc//status",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":querypb",
+    visibility = ["//visibility:public"],
+)

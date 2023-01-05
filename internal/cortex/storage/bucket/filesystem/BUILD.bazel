@@ -1,0 +1,21 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "filesystem",
+    srcs = [
+        "bucket_client.go",
+        "config.go",
+    ],
+    importpath = "github.com/prometheus/common/internal/cortex/storage/bucket/filesystem",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "@com_github_thanos_io_objstore//:objstore",
+        "@com_github_thanos_io_objstore//providers/filesystem",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":filesystem",
+    visibility = ["//:__subpackages__"],
+)
