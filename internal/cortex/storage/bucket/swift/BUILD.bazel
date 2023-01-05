@@ -6,7 +6,7 @@ go_library(
         "bucket_client.go",
         "config.go",
     ],
-    importpath = "github.com/prometheus/common/internal/cortex/storage/bucket/swift",
+    importpath = "github.com/thanos-io/thanos/internal/cortex/storage/bucket/swift",
     visibility = ["//:__subpackages__"],
     deps = [
         "@com_github_go_kit_log//:log",

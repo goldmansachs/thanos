@@ -6,11 +6,11 @@ go_library(
         "config.go",
         "http.go",
     ],
-    importpath = "github.com/prometheus/common/pkg/httpconfig",
+    importpath = "github.com/thanos-io/thanos/pkg/httpconfig",
     visibility = ["//visibility:public"],
     deps = [
-        "//pkg/discovery/cache:go_default_library",
-        "//pkg/extprom/http:go_default_library",
+        "//pkg/discovery/cache",
+        "//pkg/extprom/http",
         "@com_github_go_kit_log//:log",
         "@com_github_mwitkow_go_conntrack//:go-conntrack",
         "@com_github_pkg_errors//:errors",
@@ -34,4 +34,5 @@ go_test(
     name = "httpconfig_test",
     srcs = ["config_test.go"],
     embed = [":httpconfig"],
+    deps = ["//pkg/testutil"],
 )

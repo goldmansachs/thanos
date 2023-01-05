@@ -8,10 +8,10 @@ go_library(
         "naming.go",
         "util.go",
     ],
-    importpath = "github.com/prometheus/common/internal/cortex/util/grpcutil",
+    importpath = "github.com/thanos-io/thanos/internal/cortex/util/grpcutil",
     visibility = ["//:__subpackages__"],
     deps = [
-        "//internal/cortex/util/services:go_default_library",
+        "//internal/cortex/util/services",
         "@com_github_go_kit_log//:log",
         "@com_github_go_kit_log//level",
         "@com_github_gogo_status//:status",
@@ -31,7 +31,7 @@ go_test(
     srcs = ["health_check_test.go"],
     embed = [":grpcutil"],
     deps = [
-        "//internal/cortex/util/services:go_default_library",
+        "//internal/cortex/util/services",
         "@com_github_pkg_errors//:errors",
         "@com_github_stretchr_testify//assert",
         "@com_github_stretchr_testify//require",

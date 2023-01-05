@@ -17,3 +17,16 @@ gazelle(
     ],
     command = "update-repos",
 )
+
+go_library(
+    name = "thanos",
+    srcs = ["doc.go"],
+    importpath = "github.com/thanos-io/thanos",
+    visibility = ["//visibility:public"],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":thanos",
+    visibility = ["//visibility:public"],
+)

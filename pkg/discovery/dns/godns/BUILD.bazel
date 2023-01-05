@@ -3,7 +3,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 go_library(
     name = "godns",
     srcs = ["resolver.go"],
-    importpath = "github.com/prometheus/common/pkg/discovery/dns/godns",
+    importpath = "github.com/thanos-io/thanos/pkg/discovery/dns/godns",
     visibility = ["//visibility:public"],
     deps = ["@com_github_pkg_errors//:errors"],
 )

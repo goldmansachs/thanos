@@ -3,10 +3,10 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 go_library(
     name = "google_cloud",
     srcs = ["google_cloud.go"],
-    importpath = "github.com/prometheus/common/pkg/tracing/google_cloud",
+    importpath = "github.com/thanos-io/thanos/pkg/tracing/google_cloud",
     visibility = ["//visibility:public"],
     deps = [
-        "//pkg/tracing/migration:go_default_library",
+        "//pkg/tracing/migration",
         "@com_github_go_kit_log//:log",
         "@com_github_go_kit_log//level",
         "@com_github_googlecloudplatform_opentelemetry_operations_go_exporter_trace//:trace",
@@ -30,8 +30,9 @@ go_test(
     srcs = ["google_cloud_test.go"],
     embed = [":google_cloud"],
     deps = [
-        "//pkg/tracing:go_default_library",
-        "//pkg/tracing/migration:go_default_library",
+        "//pkg/testutil",
+        "//pkg/tracing",
+        "//pkg/tracing/migration",
         "@com_github_go_kit_log//:log",
         "@com_github_opentracing_opentracing_go//:opentracing-go",
         "@io_opentelemetry_go_otel_sdk//trace",

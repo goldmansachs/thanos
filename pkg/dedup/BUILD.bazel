@@ -7,10 +7,10 @@ go_library(
         "iter.go",
         "pushdown_iter.go",
     ],
-    importpath = "github.com/prometheus/common/pkg/dedup",
+    importpath = "github.com/thanos-io/thanos/pkg/dedup",
     visibility = ["//visibility:public"],
     deps = [
-        "//pkg/compact/downsample:go_default_library",
+        "//pkg/compact/downsample",
         "@com_github_prometheus_prometheus//model/labels",
         "@com_github_prometheus_prometheus//storage",
         "@com_github_prometheus_prometheus//tsdb/chunkenc",
@@ -32,7 +32,8 @@ go_test(
     ],
     embed = [":dedup"],
     deps = [
-        "//pkg/compact/downsample:go_default_library",
+        "//pkg/compact/downsample",
+        "//pkg/testutil",
         "@com_github_prometheus_prometheus//model/labels",
         "@com_github_prometheus_prometheus//storage",
         "@com_github_prometheus_prometheus//tsdb/chunkenc",

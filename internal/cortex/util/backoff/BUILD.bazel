@@ -3,7 +3,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 go_library(
     name = "backoff",
     srcs = ["backoff.go"],
-    importpath = "github.com/prometheus/common/internal/cortex/util/backoff",
+    importpath = "github.com/thanos-io/thanos/internal/cortex/util/backoff",
     visibility = ["//:__subpackages__"],
 )
 

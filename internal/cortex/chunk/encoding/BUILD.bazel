@@ -13,10 +13,10 @@ go_library(
         "varbit.go",
         "varbit_helpers.go",
     ],
-    importpath = "github.com/prometheus/common/internal/cortex/chunk/encoding",
+    importpath = "github.com/thanos-io/thanos/internal/cortex/chunk/encoding",
     visibility = ["//:__subpackages__"],
     deps = [
-        "//internal/cortex/prom1/storage/metric:go_default_library",
+        "//internal/cortex/prom1/storage/metric",
         "@com_github_pkg_errors//:errors",
         "@com_github_prometheus_client_golang//prometheus",
         "@com_github_prometheus_common//model",

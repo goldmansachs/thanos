@@ -3,7 +3,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 go_library(
     name = "lightstep",
     srcs = ["lightstep.go"],
-    importpath = "github.com/prometheus/common/pkg/tracing/lightstep",
+    importpath = "github.com/thanos-io/thanos/pkg/tracing/lightstep",
     visibility = ["//visibility:public"],
     deps = [
         "@com_github_lightstep_lightstep_tracer_go//:lightstep-tracer-go",
@@ -22,5 +22,8 @@ go_test(
     name = "lightstep_test",
     srcs = ["lightstep_test.go"],
     embed = [":lightstep"],
-    deps = ["@com_github_opentracing_opentracing_go//:opentracing-go"],
+    deps = [
+        "//pkg/testutil",
+        "@com_github_opentracing_opentracing_go//:opentracing-go",
+    ],
 )

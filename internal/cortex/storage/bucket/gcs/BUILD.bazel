@@ -6,10 +6,10 @@ go_library(
         "bucket_client.go",
         "config.go",
     ],
-    importpath = "github.com/prometheus/common/internal/cortex/storage/bucket/gcs",
+    importpath = "github.com/thanos-io/thanos/internal/cortex/storage/bucket/gcs",
     visibility = ["//:__subpackages__"],
     deps = [
-        "//internal/cortex/util/flagext:go_default_library",
+        "//internal/cortex/util/flagext",
         "@com_github_go_kit_log//:log",
         "@com_github_thanos_io_objstore//:objstore",
         "@com_github_thanos_io_objstore//providers/gcs",

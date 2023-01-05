@@ -6,7 +6,7 @@ go_library(
         "lookup.go",
         "resolver.go",
     ],
-    importpath = "github.com/prometheus/common/pkg/discovery/dns/miekgdns",
+    importpath = "github.com/thanos-io/thanos/pkg/discovery/dns/miekgdns",
     visibility = ["//visibility:public"],
     deps = [
         "@com_github_miekg_dns//:dns",

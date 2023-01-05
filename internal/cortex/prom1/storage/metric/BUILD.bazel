@@ -6,7 +6,7 @@ go_library(
         "metric.go",
         "sample.go",
     ],
-    importpath = "github.com/prometheus/common/internal/cortex/prom1/storage/metric",
+    importpath = "github.com/thanos-io/thanos/internal/cortex/prom1/storage/metric",
     visibility = ["//:__subpackages__"],
     deps = ["@com_github_prometheus_common//model"],
 )

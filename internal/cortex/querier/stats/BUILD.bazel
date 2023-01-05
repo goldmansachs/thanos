@@ -7,7 +7,7 @@ go_library(
         "stats.pb.go",
         "time_middleware.go",
     ],
-    importpath = "github.com/prometheus/common/internal/cortex/querier/stats",
+    importpath = "github.com/thanos-io/thanos/internal/cortex/querier/stats",
     visibility = ["//:__subpackages__"],
     deps = [
         "@com_github_gogo_protobuf//gogoproto",

@@ -3,10 +3,10 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 go_library(
     name = "runutil",
     srcs = ["runutil.go"],
-    importpath = "github.com/prometheus/common/internal/cortex/util/runutil",
+    importpath = "github.com/thanos-io/thanos/internal/cortex/util/runutil",
     visibility = ["//:__subpackages__"],
     deps = [
-        "//internal/cortex/util/multierror:go_default_library",
+        "//internal/cortex/util/multierror",
         "@com_github_go_kit_log//:log",
         "@com_github_go_kit_log//level",
         "@com_github_pkg_errors//:errors",

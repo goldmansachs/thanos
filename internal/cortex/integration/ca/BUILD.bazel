@@ -3,9 +3,9 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 go_library(
     name = "ca",
     srcs = ["ca.go"],
-    importpath = "github.com/prometheus/common/internal/cortex/integration/ca",
+    importpath = "github.com/thanos-io/thanos/internal/cortex/integration/ca",
     visibility = ["//:__subpackages__"],
-    deps = ["//internal/cortex/util/runutil:go_default_library"],
+    deps = ["//internal/cortex/util/runutil"],
 )
 
 alias(

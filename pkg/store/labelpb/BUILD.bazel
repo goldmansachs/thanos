@@ -6,7 +6,7 @@ go_library(
         "label.go",
         "types.pb.go",
     ],
-    importpath = "github.com/prometheus/common/pkg/store/labelpb",
+    importpath = "github.com/thanos-io/thanos/pkg/store/labelpb",
     visibility = ["//visibility:public"],
     deps = [
         "@com_github_cespare_xxhash_v2//:xxhash",
@@ -27,5 +27,8 @@ go_test(
     name = "labelpb_test",
     srcs = ["label_test.go"],
     embed = [":labelpb"],
-    deps = ["@com_github_prometheus_prometheus//model/labels"],
+    deps = [
+        "//pkg/testutil",
+        "@com_github_prometheus_prometheus//model/labels",
+    ],
 )

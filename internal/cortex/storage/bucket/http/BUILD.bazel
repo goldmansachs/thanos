@@ -3,7 +3,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 go_library(
     name = "http",
     srcs = ["config.go"],
-    importpath = "github.com/prometheus/common/internal/cortex/storage/bucket/http",
+    importpath = "github.com/thanos-io/thanos/internal/cortex/storage/bucket/http",
     visibility = ["//:__subpackages__"],
 )
 
@@ -18,7 +18,7 @@ go_test(
     srcs = ["config_test.go"],
     embed = [":http"],
     deps = [
-        "//internal/cortex/util/flagext:go_default_library",
+        "//internal/cortex/util/flagext",
         "@com_github_stretchr_testify//require",
         "@in_gopkg_yaml_v2//:yaml_v2",
     ],

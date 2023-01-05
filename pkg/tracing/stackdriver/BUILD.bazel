@@ -6,10 +6,10 @@ go_library(
         "stackdriver.go",
         "tracer.go",
     ],
-    importpath = "github.com/prometheus/common/pkg/tracing/stackdriver",
+    importpath = "github.com/thanos-io/thanos/pkg/tracing/stackdriver",
     visibility = ["//visibility:public"],
     deps = [
-        "//pkg/tracing:go_default_library",
+        "//pkg/tracing",
         "@com_github_go_kit_log//:log",
         "@com_github_go_kit_log//level",
         "@com_github_googleapis_gax_go//:gax-go",

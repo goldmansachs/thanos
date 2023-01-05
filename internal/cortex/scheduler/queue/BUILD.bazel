@@ -6,11 +6,11 @@ go_library(
         "queue.go",
         "user_queues.go",
     ],
-    importpath = "github.com/prometheus/common/internal/cortex/scheduler/queue",
+    importpath = "github.com/thanos-io/thanos/internal/cortex/scheduler/queue",
     visibility = ["//:__subpackages__"],
     deps = [
-        "//internal/cortex/util:go_default_library",
-        "//internal/cortex/util/services:go_default_library",
+        "//internal/cortex/util",
+        "//internal/cortex/util/services",
         "@com_github_pkg_errors//:errors",
         "@com_github_prometheus_client_golang//prometheus",
         "@org_uber_go_atomic//:atomic",
@@ -31,7 +31,7 @@ go_test(
     ],
     embed = [":queue"],
     deps = [
-        "//internal/cortex/util/services:go_default_library",
+        "//internal/cortex/util/services",
         "@com_github_prometheus_client_golang//prometheus",
         "@com_github_stretchr_testify//assert",
         "@com_github_stretchr_testify//require",

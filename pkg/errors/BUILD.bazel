@@ -6,7 +6,7 @@ go_library(
         "errors.go",
         "stacktrace.go",
     ],
-    importpath = "github.com/prometheus/common/pkg/errors",
+    importpath = "github.com/thanos-io/thanos/pkg/errors",
     visibility = ["//visibility:public"],
 )
 
@@ -23,4 +23,5 @@ go_test(
         "stacktrace_test.go",
     ],
     embed = [":errors"],
+    deps = ["//pkg/testutil"],
 )

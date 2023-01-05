@@ -14,7 +14,7 @@ go_library(
         "time.go",
         "url.go",
     ],
-    importpath = "github.com/prometheus/common/internal/cortex/util/flagext",
+    importpath = "github.com/thanos-io/thanos/internal/cortex/util/flagext",
     visibility = ["//:__subpackages__"],
     deps = [
         "@com_github_go_kit_log//:log",

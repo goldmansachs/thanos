@@ -6,11 +6,11 @@ go_library(
         "buffer.go",
         "runner.go",
     ],
-    importpath = "github.com/prometheus/common/internal/cortex/util/concurrency",
+    importpath = "github.com/thanos-io/thanos/internal/cortex/util/concurrency",
     visibility = ["//:__subpackages__"],
     deps = [
-        "//internal/cortex/util/math:go_default_library",
-        "//internal/cortex/util/multierror:go_default_library",
+        "//internal/cortex/util/math",
+        "//internal/cortex/util/multierror",
         "@org_golang_x_sync//errgroup",
     ],
 )

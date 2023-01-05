@@ -3,7 +3,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 go_library(
     name = "cachekey",
     srcs = ["cachekey.go"],
-    importpath = "github.com/prometheus/common/pkg/store/cache/cachekey",
+    importpath = "github.com/thanos-io/thanos/pkg/store/cache/cachekey",
     visibility = ["//visibility:public"],
     deps = ["@com_github_pkg_errors//:errors"],
 )
@@ -18,4 +18,5 @@ go_test(
     name = "cachekey_test",
     srcs = ["cachekey_test.go"],
     embed = [":cachekey"],
+    deps = ["//pkg/testutil"],
 )

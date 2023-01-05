@@ -3,7 +3,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 go_library(
     name = "httpgrpcutil",
     srcs = ["carrier.go"],
-    importpath = "github.com/prometheus/common/internal/cortex/util/httpgrpcutil",
+    importpath = "github.com/thanos-io/thanos/internal/cortex/util/httpgrpcutil",
     visibility = ["//:__subpackages__"],
     deps = [
         "@com_github_opentracing_opentracing_go//:opentracing-go",

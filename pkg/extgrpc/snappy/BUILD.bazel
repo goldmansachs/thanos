@@ -3,7 +3,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 go_library(
     name = "snappy",
     srcs = ["snappy.go"],
-    importpath = "github.com/prometheus/common/pkg/extgrpc/snappy",
+    importpath = "github.com/thanos-io/thanos/pkg/extgrpc/snappy",
     visibility = ["//visibility:public"],
     deps = [
         "@com_github_klauspost_compress//snappy",

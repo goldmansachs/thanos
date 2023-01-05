@@ -3,7 +3,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 go_library(
     name = "cache",
     srcs = ["cache.go"],
-    importpath = "github.com/prometheus/common/pkg/discovery/cache",
+    importpath = "github.com/thanos-io/thanos/pkg/discovery/cache",
     visibility = ["//visibility:public"],
     deps = [
         "@com_github_prometheus_common//model",

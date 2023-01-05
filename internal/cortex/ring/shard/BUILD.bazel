@@ -3,7 +3,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 go_library(
     name = "shard",
     srcs = ["shard.go"],
-    importpath = "github.com/prometheus/common/internal/cortex/ring/shard",
+    importpath = "github.com/thanos-io/thanos/internal/cortex/ring/shard",
     visibility = ["//:__subpackages__"],
 )
 
