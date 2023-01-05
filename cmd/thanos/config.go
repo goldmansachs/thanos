@@ -126,6 +126,8 @@ func (rc *reloaderConfig) registerFlag(cmd extkingpin.FlagClause) *reloaderConfi
 	cmd.Flag("reloader.retry-interval",
 		"Controls how often reloader retries config reload in case of error.").
 		Default("5s").DurationVar(&rc.retryInterval)
+	cmd.Flag("shipper.meta-filename", "The state file").Default("thanos.shipper.json").StringVar(&sc.metaFilename)
+	cmd.Flag("shipper.upload-dir", "The directory for for linked blocks.").Default("upload").StringVar(&sc.uploadDir)
 
 	return rc
 }
@@ -135,6 +137,7 @@ type shipperConfig struct {
 	ignoreBlockSize       bool
 	allowOutOfOrderUpload bool
 	hashFunc              string
+	metaFilename          string
 }
 
 func (sc *shipperConfig) registerFlag(cmd extkingpin.FlagClause) *shipperConfig {
