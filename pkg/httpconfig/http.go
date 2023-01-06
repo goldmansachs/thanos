@@ -151,7 +151,7 @@ func NewRoundTripperFromConfig(cfg config_util.HTTPClientConfig, transportConfig
 		// Backwards compatibility, be nice with importers who would not have
 		// called Validate().
 		if len(cfg.BearerToken) > 0 {
-			rt = config_util.NewAuthorizationCredentialsRoundTripper("Bearer", cfg.BearerToken, rt)
+			rt = config_util.NewAuthorizationCredentialsRoundTripper("Bearer", config_util.Secret(cfg.BearerToken), rt)
 		} else if len(cfg.BearerTokenFile) > 0 {
 			rt = config_util.NewAuthorizationCredentialsFileRoundTripper("Bearer", cfg.BearerTokenFile, rt)
 		}
