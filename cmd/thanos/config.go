@@ -126,9 +126,6 @@ func (rc *reloaderConfig) registerFlag(cmd extkingpin.FlagClause) *reloaderConfi
 	cmd.Flag("reloader.retry-interval",
 		"Controls how often reloader retries config reload in case of error.").
 		Default("5s").DurationVar(&rc.retryInterval)
-	cmd.Flag("shipper.meta-filename", "The state file").Default("thanos.shipper.json").StringVar(&sc.metaFilename)
-	cmd.Flag("shipper.upload-dir", "The directory for for linked blocks.").Default("upload").StringVar(&sc.uploadDir)
-
 	return rc
 }
 
@@ -138,6 +135,7 @@ type shipperConfig struct {
 	allowOutOfOrderUpload bool
 	hashFunc              string
 	metaFilename          string
+	uploadDir             string
 }
 
 func (sc *shipperConfig) registerFlag(cmd extkingpin.FlagClause) *shipperConfig {
@@ -154,6 +152,8 @@ func (sc *shipperConfig) registerFlag(cmd extkingpin.FlagClause) *shipperConfig 
 		Default("false").Hidden().BoolVar(&sc.allowOutOfOrderUpload)
 	cmd.Flag("hash-func", "Specify which hash function to use when calculating the hashes of produced files. If no function has been specified, it does not happen. This permits avoiding downloading some files twice albeit at some performance cost. Possible values are: \"\", \"SHA256\".").
 		Default("").EnumVar(&sc.hashFunc, "SHA256", "")
+	cmd.Flag("shipper.meta-filename", "The state file").Default("thanos.shipper.json").StringVar(&sc.metaFilename)
+	cmd.Flag("shipper.upload-dir", "The directory for for linked blocks.").Default("upload").StringVar(&sc.uploadDir)
 	return sc
 }
 
