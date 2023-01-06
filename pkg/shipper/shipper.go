@@ -120,7 +120,7 @@ func New(
 		allowOutOfOrderUploads: allowOutOfOrderUploads,
 		uploadCompacted:        uploadCompacted,
 		hashFunc:               hashFunc,
-		metaFilename:           metaFilenamem,
+		metaFilename:           metaFilename,
 		uploadDir:              uploadDir,
 	}
 }
