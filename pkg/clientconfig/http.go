@@ -216,7 +216,7 @@ func NewRoundTripperFromConfig(cfg config_util.HTTPClientConfig, transportConfig
 // NewHTTPClient returns a new HTTP client.
 func NewHTTPClient(cfg HTTPClientConfig, name string) (*http.Client, error) {
 	httpClientConfig := config_util.HTTPClientConfig{
-		BearerToken:     config_util.Secret(cfg.BearerToken),
+		BearerToken:     cfg.BearerToken,
 		BearerTokenFile: cfg.BearerTokenFile,
 		TLSConfig: config_util.TLSConfig{
 			CAFile:             cfg.TLSConfig.CAFile,
@@ -243,7 +243,7 @@ func NewHTTPClient(cfg HTTPClientConfig, name string) (*http.Client, error) {
 	}
 
 	if cfg.BearerToken != "" {
-		httpClientConfig.BearerToken = config_util.Secret(cfg.BearerToken)
+		httpClientConfig.BearerToken = cfg.BearerToken
 	}
 
 	if cfg.BearerTokenFile != "" {
