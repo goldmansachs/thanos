@@ -1012,7 +1012,7 @@ func (cg *Group) compact(ctx context.Context, dir string, planner Planner, comp 
 	groupCompactionBegin := time.Now()
 	begin := groupCompactionBegin
 	g, errCtx := errgroup.WithContext(ctx)
-	g.SetLimit(cg.compactBlocksFetchConcurrency)
+	//g.SetLimit(cg.compactBlocksFetchConcurrency) - temp fix for old errgroup
 
 	toCompactDirs := make([]string, 0, len(toCompact))
 	for _, m := range toCompact {
