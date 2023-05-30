@@ -16,6 +16,7 @@ go_library(
         "@com_github_go_kit_log//:log",
         "@com_github_go_kit_log//level",
         "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_prometheus//model/histogram",
         "@com_github_prometheus_prometheus//model/labels",
         "@com_github_prometheus_prometheus//model/relabel",
         "@com_github_prometheus_prometheus//storage",
@@ -41,7 +42,7 @@ go_test(
     deps = [
         "//pkg/block",
         "//pkg/block/metadata",
-        "//pkg/testutil",
+        "@com_github_efficientgo_core//testutil",
         "@com_github_go_kit_log//:log",
         "@com_github_oklog_ulid//:ulid",
         "@com_github_pkg_errors//:errors",

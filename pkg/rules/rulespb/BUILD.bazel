@@ -35,8 +35,8 @@ go_test(
     deps = [
         "//pkg/store/labelpb",
         "//pkg/store/storepb",
-        "//pkg/testutil",
         "//pkg/testutil/testpromcompatibility",
+        "@com_github_efficientgo_core//testutil",
         "@com_github_pkg_errors//:errors",
         "@com_github_prometheus_prometheus//model/labels",
     ],

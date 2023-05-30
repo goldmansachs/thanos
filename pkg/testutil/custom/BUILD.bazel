@@ -1,0 +1,15 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "custom",
+    srcs = ["custom.go"],
+    importpath = "github.com/thanos-io/thanos/pkg/testutil/custom",
+    visibility = ["//visibility:public"],
+    deps = ["@org_uber_go_goleak//:goleak"],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":custom",
+    visibility = ["//visibility:public"],
+)

@@ -14,6 +14,7 @@ go_library(
         "@com_github_gogo_protobuf//proto",
         "@com_github_pkg_errors//:errors",
         "@com_github_prometheus_prometheus//model/labels",
+        "@org_go4_intern//:go_default_library",
     ],
 )
 
@@ -28,7 +29,7 @@ go_test(
     srcs = ["label_test.go"],
     embed = [":labelpb"],
     deps = [
-        "//pkg/testutil",
+        "@com_github_efficientgo_core//testutil",
         "@com_github_prometheus_prometheus//model/labels",
     ],
 )

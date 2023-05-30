@@ -23,7 +23,7 @@ go_test(
     srcs = ["lightstep_test.go"],
     embed = [":lightstep"],
     deps = [
-        "//pkg/testutil",
+        "@com_github_efficientgo_core//testutil",
         "@com_github_opentracing_opentracing_go//:opentracing-go",
     ],
 )

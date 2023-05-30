@@ -32,7 +32,7 @@ go_test(
     deps = [
         "//pkg/extprom/http",
         "//pkg/logging",
-        "//pkg/testutil",
+        "@com_github_efficientgo_core//testutil",
         "@com_github_go_kit_log//:log",
         "@com_github_opentracing_opentracing_go//:opentracing-go",
         "@com_github_pkg_errors//:errors",

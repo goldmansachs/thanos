@@ -4,10 +4,10 @@ go_test(
     name = "interactive_test",
     srcs = ["interactive_test.go"],
     deps = [
-        "//pkg/testutil",
         "//pkg/tracing/client",
         "//pkg/tracing/jaeger",
         "//test/e2e/e2ethanos",
+        "@com_github_efficientgo_core//testutil",
         "@com_github_efficientgo_e2e//:e2e",
         "@com_github_efficientgo_e2e//db",
         "@com_github_efficientgo_e2e//interactive",

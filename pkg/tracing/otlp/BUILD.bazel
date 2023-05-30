@@ -35,9 +35,9 @@ go_test(
     srcs = ["otlp_test.go"],
     embed = [":otlp"],
     deps = [
-        "//pkg/testutil",
         "//pkg/tracing",
         "//pkg/tracing/migration",
+        "@com_github_efficientgo_core//testutil",
         "@com_github_go_kit_log//:log",
         "@io_opentelemetry_go_otel_sdk//trace",
         "@io_opentelemetry_go_otel_sdk//trace/tracetest",

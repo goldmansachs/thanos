@@ -44,7 +44,7 @@ go_test(
     embed = [":alert"],
     deps = [
         "//pkg/httpconfig",
-        "//pkg/testutil",
+        "@com_github_efficientgo_core//testutil",
         "@com_github_pkg_errors//:errors",
         "@com_github_prometheus_client_golang//prometheus/testutil",
         "@com_github_prometheus_common//model",

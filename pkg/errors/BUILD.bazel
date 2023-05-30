@@ -23,5 +23,5 @@ go_test(
         "stacktrace_test.go",
     ],
     embed = [":errors"],
-    deps = ["//pkg/testutil"],
+    deps = ["@com_github_efficientgo_core//testutil"],
 )

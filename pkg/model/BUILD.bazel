@@ -30,7 +30,7 @@ go_test(
     ],
     embed = [":model"],
     deps = [
-        "//pkg/testutil",
+        "@com_github_efficientgo_core//testutil",
         "@com_github_prometheus_prometheus//model/timestamp",
         "@in_gopkg_alecthomas_kingpin_v2//:kingpin_v2",
         "@in_gopkg_yaml_v2//:yaml_v2",

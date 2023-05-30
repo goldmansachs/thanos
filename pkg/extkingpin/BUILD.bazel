@@ -34,7 +34,7 @@ go_test(
     srcs = ["path_content_reloader_test.go"],
     embed = [":extkingpin"],
     deps = [
-        "//pkg/testutil",
+        "@com_github_efficientgo_core//testutil",
         "@com_github_go_kit_log//:log",
     ],
 )

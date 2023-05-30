@@ -1,44 +1,5 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
-
-go_library(
-    name = "consul",
-    srcs = [
-        "client.go",
-        "metrics.go",
-        "mock.go",
-    ],
-    importpath = "github.com/thanos-io/thanos/internal/cortex/ring/kv/consul",
-    visibility = ["//:__subpackages__"],
-    deps = [
-        "//internal/cortex/ring/kv/codec",
-        "//internal/cortex/util/backoff",
-        "//internal/cortex/util/flagext",
-        "@com_github_go_kit_log//:log",
-        "@com_github_go_kit_log//level",
-        "@com_github_hashicorp_consul_api//:api",
-        "@com_github_hashicorp_go_cleanhttp//:go-cleanhttp",
-        "@com_github_prometheus_client_golang//prometheus",
-        "@com_github_prometheus_client_golang//prometheus/promauto",
-        "@com_github_weaveworks_common//instrument",
-        "@org_golang_x_time//rate",
-    ],
-)
-
 alias(
     name = "go_default_library",
     actual = ":consul",
     visibility = ["//:__subpackages__"],
-)
-
-go_test(
-    name = "consul_test",
-    srcs = ["client_test.go"],
-    embed = [":consul"],
-    deps = [
-        "//internal/cortex/ring/kv/codec",
-        "@com_github_hashicorp_consul_api//:api",
-        "@com_github_prometheus_client_golang//prometheus",
-        "@com_github_stretchr_testify//assert",
-        "@com_github_stretchr_testify//require",
-    ],
 )

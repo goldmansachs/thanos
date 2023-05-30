@@ -14,16 +14,20 @@ go_library(
     deps = [
         "//pkg/block/metadata",
         "//pkg/runutil",
-        "//pkg/testutil",
+        "@com_github_efficientgo_core//testutil",
         "@com_github_go_kit_log//:log",
         "@com_github_oklog_ulid//:ulid",
         "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_prometheus//model/histogram",
         "@com_github_prometheus_prometheus//model/labels",
         "@com_github_prometheus_prometheus//model/timestamp",
         "@com_github_prometheus_prometheus//storage",
         "@com_github_prometheus_prometheus//tsdb",
+        "@com_github_prometheus_prometheus//tsdb/chunkenc",
+        "@com_github_prometheus_prometheus//tsdb/chunks",
         "@com_github_prometheus_prometheus//tsdb/index",
         "@org_golang_x_sync//errgroup",
+        "@org_uber_go_atomic//:atomic",
     ],
 )
 

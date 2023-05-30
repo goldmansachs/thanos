@@ -23,7 +23,6 @@ go_library(
         "@com_github_facette_natsort//:natsort",
         "@com_github_go_kit_log//:log",
         "@com_github_go_kit_log//level",
-        "@com_github_go_redis_redis_v8//:redis",
         "@com_github_pkg_errors//:errors",
         "@com_github_prometheus_client_golang//prometheus",
         "@com_github_prometheus_client_golang//prometheus/promauto",
@@ -51,9 +50,9 @@ go_test(
     deps = [
         "//pkg/gate",
         "//pkg/model",
-        "//pkg/testutil",
         "@com_github_alicebob_miniredis_v2//:miniredis",
         "@com_github_bradfitz_gomemcache//memcache",
+        "@com_github_efficientgo_core//testutil",
         "@com_github_facette_natsort//:natsort",
         "@com_github_go_kit_log//:log",
         "@com_github_pkg_errors//:errors",

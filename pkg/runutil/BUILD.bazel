@@ -27,7 +27,7 @@ go_test(
     ],
     embed = [":runutil"],
     deps = [
-        "//pkg/testutil",
+        "@com_github_efficientgo_core//testutil",
         "@com_github_pkg_errors//:errors",
     ],
 )

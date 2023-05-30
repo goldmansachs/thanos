@@ -31,7 +31,7 @@ go_test(
     ],
     embed = [":reloader"],
     deps = [
-        "//pkg/testutil",
+        "@com_github_efficientgo_core//testutil",
         "@com_github_go_kit_log//:log",
         "@com_github_prometheus_client_golang//prometheus",
         "@com_github_prometheus_client_golang//prometheus/testutil",

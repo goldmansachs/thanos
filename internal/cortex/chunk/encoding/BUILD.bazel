@@ -1,46 +1,5 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
-
-go_library(
-    name = "encoding",
-    srcs = [
-        "bigchunk.go",
-        "chunk.go",
-        "delta_helpers.go",
-        "doubledelta.go",
-        "factory.go",
-        "instrumentation.go",
-        "prometheus_chunk.go",
-        "varbit.go",
-        "varbit_helpers.go",
-    ],
-    importpath = "github.com/thanos-io/thanos/internal/cortex/chunk/encoding",
-    visibility = ["//:__subpackages__"],
-    deps = [
-        "//internal/cortex/prom1/storage/metric",
-        "@com_github_pkg_errors//:errors",
-        "@com_github_prometheus_client_golang//prometheus",
-        "@com_github_prometheus_common//model",
-        "@com_github_prometheus_prometheus//tsdb/chunkenc",
-        "@com_github_weaveworks_common//errors",
-    ],
-)
-
 alias(
     name = "go_default_library",
     actual = ":encoding",
     visibility = ["//:__subpackages__"],
-)
-
-go_test(
-    name = "encoding_test",
-    srcs = [
-        "bigchunk_test.go",
-        "chunk_test.go",
-        "varbit_test.go",
-    ],
-    embed = [":encoding"],
-    deps = [
-        "@com_github_prometheus_common//model",
-        "@com_github_stretchr_testify//require",
-    ],
 )

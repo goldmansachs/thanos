@@ -33,7 +33,7 @@ go_test(
     ],
     embed = [":memcache"],
     deps = [
-        "//pkg/testutil",
+        "@com_github_efficientgo_core//testutil",
         "@com_github_go_kit_log//:log",
         "@com_github_pkg_errors//:errors",
     ],

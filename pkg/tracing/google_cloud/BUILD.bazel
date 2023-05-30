@@ -30,7 +30,7 @@ go_test(
     srcs = ["google_cloud_test.go"],
     embed = [":google_cloud"],
     deps = [
-        "//pkg/testutil",
+        "//pkg/testutil/custom",
         "//pkg/tracing",
         "//pkg/tracing/migration",
         "@com_github_go_kit_log//:log",

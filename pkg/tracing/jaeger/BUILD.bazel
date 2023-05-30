@@ -35,9 +35,9 @@ go_test(
     srcs = ["jaeger_test.go"],
     embed = [":jaeger"],
     deps = [
-        "//pkg/testutil",
         "//pkg/tracing",
         "//pkg/tracing/migration",
+        "@com_github_efficientgo_core//testutil",
         "@com_github_go_kit_log//:log",
         "@com_github_opentracing_opentracing_go//:opentracing-go",
         "@io_opentelemetry_go_otel//attribute",

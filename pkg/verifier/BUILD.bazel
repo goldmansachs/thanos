@@ -36,7 +36,7 @@ go_test(
     srcs = ["duplicated_compaction_test.go"],
     embed = [":verifier"],
     deps = [
-        "//pkg/testutil",
+        "@com_github_efficientgo_core//testutil",
         "@com_github_oklog_ulid//:ulid",
         "@com_github_prometheus_prometheus//tsdb",
     ],
