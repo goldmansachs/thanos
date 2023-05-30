@@ -3,8 +3,6 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 go_library(
     name = "validation",
     srcs = [
-        "errors.go",
-        "exporter.go",
         "limits.go",
         "notifications_limit_flag.go",
         "validate.go",
@@ -12,17 +10,11 @@ go_library(
     importpath = "github.com/thanos-io/thanos/internal/cortex/util/validation",
     visibility = ["//:__subpackages__"],
     deps = [
-        "//internal/cortex/cortexpb",
-        "//internal/cortex/util",
-        "//internal/cortex/util/extract",
         "//internal/cortex/util/flagext",
-        "@com_github_go_kit_log//:log",
-        "@com_github_go_kit_log//level",
         "@com_github_pkg_errors//:errors",
-        "@com_github_prometheus_client_golang//prometheus",
         "@com_github_prometheus_common//model",
         "@com_github_prometheus_prometheus//model/relabel",
-        "@com_github_weaveworks_common//httpgrpc",
+        "@org_golang_x_exp//slices",
         "@org_golang_x_time//rate",
     ],
 )
@@ -36,23 +28,16 @@ alias(
 go_test(
     name = "validation_test",
     srcs = [
-        "exporter_test.go",
         "limits_test.go",
         "notifications_limit_flag_test.go",
-        "validate_test.go",
     ],
     embed = [":validation"],
     deps = [
-        "//internal/cortex/cortexpb",
         "//internal/cortex/util/flagext",
-        "//internal/cortex/util/log",
-        "@com_github_prometheus_client_golang//prometheus",
-        "@com_github_prometheus_client_golang//prometheus/testutil",
         "@com_github_prometheus_common//model",
         "@com_github_prometheus_prometheus//model/relabel",
         "@com_github_stretchr_testify//assert",
         "@com_github_stretchr_testify//require",
-        "@com_github_weaveworks_common//httpgrpc",
         "@in_gopkg_yaml_v2//:yaml_v2",
         "@org_golang_x_time//rate",
     ],

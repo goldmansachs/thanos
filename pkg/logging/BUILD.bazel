@@ -37,7 +37,7 @@ go_test(
     srcs = ["http_test.go"],
     embed = [":logging"],
     deps = [
-        "//pkg/testutil",
+        "@com_github_efficientgo_core//testutil",
         "@com_github_go_kit_log//:log",
     ],
 )

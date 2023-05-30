@@ -34,5 +34,5 @@ go_test(
     name = "httpconfig_test",
     srcs = ["config_test.go"],
     embed = [":httpconfig"],
-    deps = ["//pkg/testutil"],
+    deps = ["@com_github_efficientgo_core//testutil"],
 )

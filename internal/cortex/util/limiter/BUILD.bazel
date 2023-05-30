@@ -1,40 +1,5 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
-
-go_library(
-    name = "limiter",
-    srcs = [
-        "query_limiter.go",
-        "rate_limiter.go",
-    ],
-    importpath = "github.com/thanos-io/thanos/internal/cortex/util/limiter",
-    visibility = ["//:__subpackages__"],
-    deps = [
-        "//internal/cortex/cortexpb",
-        "//internal/cortex/ingester/client",
-        "@com_github_prometheus_common//model",
-        "@org_golang_x_time//rate",
-        "@org_uber_go_atomic//:atomic",
-    ],
-)
-
 alias(
     name = "go_default_library",
     actual = ":limiter",
     visibility = ["//:__subpackages__"],
-)
-
-go_test(
-    name = "limiter_test",
-    srcs = [
-        "query_limiter_test.go",
-        "rate_limiter_test.go",
-    ],
-    embed = [":limiter"],
-    deps = [
-        "//internal/cortex/cortexpb",
-        "@com_github_prometheus_prometheus//model/labels",
-        "@com_github_stretchr_testify//assert",
-        "@com_github_stretchr_testify//require",
-        "@org_golang_x_time//rate",
-    ],
 )

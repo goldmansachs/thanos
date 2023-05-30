@@ -1,11 +1,8 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 go_library(
     name = "transport",
-    srcs = [
-        "handler.go",
-        "roundtripper.go",
-    ],
+    srcs = ["handler.go"],
     importpath = "github.com/thanos-io/thanos/internal/cortex/frontend/transport",
     visibility = ["//:__subpackages__"],
     deps = [
@@ -26,20 +23,4 @@ alias(
     name = "go_default_library",
     actual = ":transport",
     visibility = ["//:__subpackages__"],
-)
-
-go_test(
-    name = "transport_test",
-    srcs = ["handler_test.go"],
-    embed = [":transport"],
-    deps = [
-        "@com_github_go_kit_log//:log",
-        "@com_github_pkg_errors//:errors",
-        "@com_github_prometheus_client_golang//prometheus",
-        "@com_github_prometheus_client_golang//prometheus/testutil",
-        "@com_github_stretchr_testify//assert",
-        "@com_github_stretchr_testify//require",
-        "@com_github_weaveworks_common//httpgrpc",
-        "@com_github_weaveworks_common//user",
-    ],
 )

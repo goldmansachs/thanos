@@ -1,58 +1,5 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
-
-go_library(
-    name = "frontend",
-    srcs = [
-        "frontend.go",
-        "frontend_scheduler_worker.go",
-    ],
-    importpath = "github.com/thanos-io/thanos/internal/cortex/frontend/v2",
-    visibility = ["//:__subpackages__"],
-    deps = [
-        "//internal/cortex/frontend/v2/frontendv2pb",
-        "//internal/cortex/querier/stats",
-        "//internal/cortex/scheduler/schedulerpb",
-        "//internal/cortex/tenant",
-        "//internal/cortex/util",
-        "//internal/cortex/util/backoff",
-        "//internal/cortex/util/flagext",
-        "//internal/cortex/util/grpcclient",
-        "//internal/cortex/util/httpgrpcutil",
-        "//internal/cortex/util/services",
-        "@com_github_go_kit_log//:log",
-        "@com_github_go_kit_log//level",
-        "@com_github_opentracing_opentracing_go//:opentracing-go",
-        "@com_github_pkg_errors//:errors",
-        "@com_github_prometheus_client_golang//prometheus",
-        "@com_github_prometheus_client_golang//prometheus/promauto",
-        "@com_github_weaveworks_common//httpgrpc",
-        "@org_golang_google_grpc//:go_default_library",
-        "@org_uber_go_atomic//:atomic",
-    ],
-)
-
 alias(
     name = "go_default_library",
     actual = ":frontend",
     visibility = ["//:__subpackages__"],
-)
-
-go_test(
-    name = "frontend_test",
-    srcs = ["frontend_test.go"],
-    embed = [":frontend"],
-    deps = [
-        "//internal/cortex/frontend/v2/frontendv2pb",
-        "//internal/cortex/querier/stats",
-        "//internal/cortex/scheduler/schedulerpb",
-        "//internal/cortex/util/flagext",
-        "//internal/cortex/util/services",
-        "//internal/cortex/util/test",
-        "@com_github_go_kit_log//:log",
-        "@com_github_stretchr_testify//require",
-        "@com_github_weaveworks_common//httpgrpc",
-        "@com_github_weaveworks_common//user",
-        "@org_golang_google_grpc//:go_default_library",
-        "@org_uber_go_atomic//:atomic",
-    ],
 )

@@ -1,47 +1,5 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
-
-go_library(
-    name = "client",
-    srcs = [
-        "pool.go",
-        "ring_service_discovery.go",
-    ],
-    importpath = "github.com/thanos-io/thanos/internal/cortex/ring/client",
-    visibility = ["//:__subpackages__"],
-    deps = [
-        "//internal/cortex/ring",
-        "//internal/cortex/ring/util",
-        "//internal/cortex/util/services",
-        "@com_github_go_kit_log//:log",
-        "@com_github_go_kit_log//level",
-        "@com_github_prometheus_client_golang//prometheus",
-        "@com_github_weaveworks_common//user",
-        "@org_golang_google_grpc//health/grpc_health_v1",
-    ],
-)
-
 alias(
     name = "go_default_library",
     actual = ":client",
     visibility = ["//:__subpackages__"],
-)
-
-go_test(
-    name = "client_test",
-    srcs = [
-        "pool_test.go",
-        "ring_service_discovery_test.go",
-    ],
-    embed = [":client"],
-    deps = [
-        "//internal/cortex/ring",
-        "//internal/cortex/util/services",
-        "@com_github_go_kit_log//:log",
-        "@com_github_gogo_status//:status",
-        "@com_github_stretchr_testify//assert",
-        "@com_github_stretchr_testify//require",
-        "@org_golang_google_grpc//:go_default_library",
-        "@org_golang_google_grpc//codes",
-        "@org_golang_google_grpc//health/grpc_health_v1",
-    ],
 )

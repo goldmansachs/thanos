@@ -1,52 +1,15 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 go_library(
     name = "frontend",
-    srcs = [
-        "config.go",
-        "downstream_roundtripper.go",
-    ],
+    srcs = ["downstream_roundtripper.go"],
     importpath = "github.com/thanos-io/thanos/internal/cortex/frontend",
     visibility = ["//:__subpackages__"],
-    deps = [
-        "//internal/cortex/frontend/transport",
-        "//internal/cortex/frontend/v1:frontend",
-        "//internal/cortex/frontend/v2:frontend",
-        "//internal/cortex/util",
-        "@com_github_go_kit_log//:log",
-        "@com_github_opentracing_opentracing_go//:opentracing-go",
-        "@com_github_pkg_errors//:errors",
-        "@com_github_prometheus_client_golang//prometheus",
-    ],
+    deps = ["@com_github_opentracing_opentracing_go//:opentracing-go"],
 )
 
 alias(
     name = "go_default_library",
     actual = ":frontend",
     visibility = ["//:__subpackages__"],
-)
-
-go_test(
-    name = "frontend_test",
-    srcs = ["frontend_test.go"],
-    embed = [":frontend"],
-    deps = [
-        "//internal/cortex/frontend/transport",
-        "//internal/cortex/frontend/v1/frontendv1pb",
-        "//internal/cortex/querier/worker",
-        "//internal/cortex/util/concurrency",
-        "//internal/cortex/util/flagext",
-        "//internal/cortex/util/services",
-        "@com_github_go_kit_log//:log",
-        "@com_github_gorilla_mux//:mux",
-        "@com_github_opentracing_contrib_go_grpc//:go-grpc",
-        "@com_github_opentracing_contrib_go_stdlib//nethttp",
-        "@com_github_opentracing_opentracing_go//:opentracing-go",
-        "@com_github_stretchr_testify//assert",
-        "@com_github_stretchr_testify//require",
-        "@com_github_weaveworks_common//httpgrpc/server",
-        "@com_github_weaveworks_common//middleware",
-        "@com_github_weaveworks_common//user",
-        "@org_golang_google_grpc//:go_default_library",
-    ],
 )

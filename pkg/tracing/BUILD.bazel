@@ -11,8 +11,8 @@ go_library(
     importpath = "github.com/thanos-io/thanos/pkg/tracing",
     visibility = ["//visibility:public"],
     deps = [
-        "//pkg/testutil",
         "//pkg/tracing/migration",
+        "@com_github_efficientgo_core//testutil",
         "@com_github_go_kit_log//:log",
         "@com_github_go_kit_log//level",
         "@com_github_grpc_ecosystem_go_grpc_middleware_v2//:go-grpc-middleware",

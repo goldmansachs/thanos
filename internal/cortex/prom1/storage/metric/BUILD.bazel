@@ -1,25 +1,5 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
-
-go_library(
-    name = "metric",
-    srcs = [
-        "metric.go",
-        "sample.go",
-    ],
-    importpath = "github.com/thanos-io/thanos/internal/cortex/prom1/storage/metric",
-    visibility = ["//:__subpackages__"],
-    deps = ["@com_github_prometheus_common//model"],
-)
-
 alias(
     name = "go_default_library",
     actual = ":metric",
     visibility = ["//:__subpackages__"],
-)
-
-go_test(
-    name = "metric_test",
-    srcs = ["metric_test.go"],
-    embed = [":metric"],
-    deps = ["@com_github_prometheus_common//model"],
 )

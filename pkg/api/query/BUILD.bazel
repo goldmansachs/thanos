@@ -44,6 +44,8 @@ go_library(
         "@com_github_prometheus_prometheus//util/stats",
         "@com_github_prometheus_prometheus//web/api/v1:api",
         "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_google_grpc//codes",
+        "@org_golang_google_grpc//status",
     ],
 )
 
@@ -55,10 +57,14 @@ alias(
 
 go_test(
     name = "query_test",
-    srcs = ["v1_test.go"],
+    srcs = [
+        "grpc_test.go",
+        "v1_test.go",
+    ],
     embed = [":query"],
     deps = [
         "//pkg/api",
+        "//pkg/api/query/querypb",
         "//pkg/compact",
         "//pkg/component",
         "//pkg/gate",
@@ -67,13 +73,17 @@ go_test(
         "//pkg/store",
         "//pkg/store/labelpb",
         "//pkg/store/storepb",
-        "//pkg/testutil",
+        "//pkg/store/storepb/testutil",
+        "//pkg/testutil/custom",
         "//pkg/testutil/e2eutil",
         "//pkg/testutil/testpromcompatibility",
+        "@com_github_efficientgo_core//errors",
+        "@com_github_efficientgo_core//testutil",
         "@com_github_go_kit_log//:log",
         "@com_github_prometheus_client_golang//prometheus",
         "@com_github_prometheus_client_golang//prometheus/promauto",
         "@com_github_prometheus_common//route",
+        "@com_github_prometheus_prometheus//model/histogram",
         "@com_github_prometheus_prometheus//model/labels",
         "@com_github_prometheus_prometheus//model/timestamp",
         "@com_github_prometheus_prometheus//promql",
@@ -81,8 +91,10 @@ go_test(
         "@com_github_prometheus_prometheus//rules",
         "@com_github_prometheus_prometheus//storage",
         "@com_github_prometheus_prometheus//tsdb",
+        "@com_github_prometheus_prometheus//tsdb/chunkenc",
         "@com_github_prometheus_prometheus//tsdb/tsdbutil",
         "@com_github_prometheus_prometheus//util/gate",
         "@com_github_prometheus_prometheus//util/stats",
+        "@com_github_prometheus_prometheus//web/api/v1:api",
     ],
 )

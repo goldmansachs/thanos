@@ -38,8 +38,8 @@ go_test(
     deps = [
         "//pkg/block",
         "//pkg/block/metadata",
-        "//pkg/testutil",
         "//pkg/testutil/e2eutil",
+        "@com_github_efficientgo_core//testutil",
         "@com_github_go_kit_log//:log",
         "@com_github_oklog_ulid//:ulid",
         "@com_github_prometheus_client_golang//prometheus",

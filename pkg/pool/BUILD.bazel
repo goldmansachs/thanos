@@ -19,7 +19,7 @@ go_test(
     srcs = ["pool_test.go"],
     embed = [":pool"],
     deps = [
-        "//pkg/testutil",
+        "@com_github_efficientgo_core//testutil",
         "@com_github_pkg_errors//:errors",
         "@org_uber_go_goleak//:goleak",
     ],
