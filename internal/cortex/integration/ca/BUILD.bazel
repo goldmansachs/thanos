@@ -1,0 +1,15 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "ca",
+    srcs = ["ca.go"],
+    importpath = "github.com/thanos-io/thanos/internal/cortex/integration/ca",
+    visibility = ["//:__subpackages__"],
+    deps = ["//internal/cortex/util/runutil"],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":ca",
+    visibility = ["//:__subpackages__"],
+)

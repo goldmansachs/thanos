@@ -1,0 +1,40 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "spanlogger",
+    srcs = [
+        "noop.go",
+        "spanlogger.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/internal/cortex/util/spanlogger",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/cortex/tenant",
+        "//internal/cortex/util/log",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_opentracing_opentracing_go//:opentracing-go",
+        "@com_github_opentracing_opentracing_go//ext",
+        "@com_github_opentracing_opentracing_go//log",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":spanlogger",
+    visibility = ["//:__subpackages__"],
+)
+
+go_test(
+    name = "spanlogger_test",
+    srcs = ["spanlogger_test.go"],
+    embed = [":spanlogger"],
+    deps = [
+        "@com_github_go_kit_log//:log",
+        "@com_github_opentracing_opentracing_go//:opentracing-go",
+        "@com_github_opentracing_opentracing_go//mocktracer",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_stretchr_testify//require",
+        "@com_github_weaveworks_common//user",
+    ],
+)

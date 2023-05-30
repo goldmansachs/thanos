@@ -1,0 +1,14 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "multierror",
+    srcs = ["multierror.go"],
+    importpath = "github.com/thanos-io/thanos/internal/cortex/util/multierror",
+    visibility = ["//:__subpackages__"],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":multierror",
+    visibility = ["//:__subpackages__"],
+)

@@ -1,0 +1,58 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "targets",
+    srcs = [
+        "prometheus.go",
+        "proxy.go",
+        "targets.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/pkg/targets",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/promclient",
+        "//pkg/store/labelpb",
+        "//pkg/store/storepb",
+        "//pkg/targets/targetspb",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//storage",
+        "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_google_grpc//codes",
+        "@org_golang_google_grpc//status",
+        "@org_golang_x_sync//errgroup",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":targets",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "targets_test",
+    srcs = [
+        "prometheus_test.go",
+        "proxy_test.go",
+        "targets_test.go",
+    ],
+    embed = [":targets"],
+    deps = [
+        "//pkg/promclient",
+        "//pkg/runutil",
+        "//pkg/store/labelpb",
+        "//pkg/store/storepb",
+        "//pkg/targets/targetspb",
+        "//pkg/testutil",
+        "//pkg/testutil/e2eutil",
+        "@com_github_go_kit_log//:log",
+        "@com_github_gogo_protobuf//proto",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//storage",
+        "@org_golang_google_grpc//:go_default_library",
+    ],
+)

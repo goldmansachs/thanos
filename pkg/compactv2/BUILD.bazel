@@ -1,0 +1,58 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "compactv2",
+    srcs = [
+        "changelog.go",
+        "chunk_series_set.go",
+        "compactor.go",
+        "modifiers.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/pkg/compactv2",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/block",
+        "//pkg/block/metadata",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//model/relabel",
+        "@com_github_prometheus_prometheus//storage",
+        "@com_github_prometheus_prometheus//tsdb",
+        "@com_github_prometheus_prometheus//tsdb/chunkenc",
+        "@com_github_prometheus_prometheus//tsdb/chunks",
+        "@com_github_prometheus_prometheus//tsdb/errors",
+        "@com_github_prometheus_prometheus//tsdb/index",
+        "@com_github_prometheus_prometheus//tsdb/tombstones",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":compactv2",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "compactv2_test",
+    srcs = ["compactor_test.go"],
+    embed = [":compactv2"],
+    deps = [
+        "//pkg/block",
+        "//pkg/block/metadata",
+        "//pkg/testutil",
+        "@com_github_go_kit_log//:log",
+        "@com_github_oklog_ulid//:ulid",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_common//model",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//model/relabel",
+        "@com_github_prometheus_prometheus//storage",
+        "@com_github_prometheus_prometheus//tsdb",
+        "@com_github_prometheus_prometheus//tsdb/chunkenc",
+        "@com_github_prometheus_prometheus//tsdb/chunks",
+        "@com_github_prometheus_prometheus//tsdb/index",
+        "@com_github_prometheus_prometheus//tsdb/tombstones",
+    ],
+)

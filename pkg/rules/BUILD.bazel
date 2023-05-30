@@ -1,0 +1,76 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "rules",
+    srcs = [
+        "manager.go",
+        "prometheus.go",
+        "proxy.go",
+        "rules.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/pkg/rules",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/errutil",
+        "//pkg/extprom",
+        "//pkg/promclient",
+        "//pkg/rules/rulespb",
+        "//pkg/store/labelpb",
+        "//pkg/store/storepb",
+        "//pkg/tracing",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_gogo_protobuf//proto",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//model/rulefmt",
+        "@com_github_prometheus_prometheus//promql/parser",
+        "@com_github_prometheus_prometheus//rules",
+        "@com_github_prometheus_prometheus//storage",
+        "@in_gopkg_yaml_v3//:yaml_v3",
+        "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_google_grpc//codes",
+        "@org_golang_google_grpc//status",
+        "@org_golang_x_sync//errgroup",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":rules",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "rules_test",
+    srcs = [
+        "manager_test.go",
+        "prometheus_test.go",
+        "proxy_test.go",
+        "rules_test.go",
+    ],
+    embed = [":rules"],
+    deps = [
+        "//pkg/extprom",
+        "//pkg/promclient",
+        "//pkg/rules/rulespb",
+        "//pkg/runutil",
+        "//pkg/store/labelpb",
+        "//pkg/store/storepb",
+        "//pkg/testutil",
+        "//pkg/testutil/e2eutil",
+        "@com_github_go_kit_log//:log",
+        "@com_github_gogo_protobuf//proto",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_prometheus//model/exemplar",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//model/metadata",
+        "@com_github_prometheus_prometheus//promql",
+        "@com_github_prometheus_prometheus//rules",
+        "@com_github_prometheus_prometheus//storage",
+        "@in_gopkg_yaml_v3//:yaml_v3",
+        "@org_golang_google_grpc//:go_default_library",
+    ],
+)

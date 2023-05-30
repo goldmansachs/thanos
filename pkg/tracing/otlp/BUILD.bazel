@@ -1,0 +1,45 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "otlp",
+    srcs = [
+        "config_yaml.go",
+        "otlp.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/pkg/tracing/otlp",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/exthttp",
+        "//pkg/tracing/migration",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_pkg_errors//:errors",
+        "@in_gopkg_yaml_v2//:yaml_v2",
+        "@io_opentelemetry_go_otel_exporters_otlp_otlptrace//:otlptrace",
+        "@io_opentelemetry_go_otel_exporters_otlp_otlptrace_otlptracegrpc//:otlptracegrpc",
+        "@io_opentelemetry_go_otel_exporters_otlp_otlptrace_otlptracehttp//:otlptracehttp",
+        "@io_opentelemetry_go_otel_sdk//resource",
+        "@io_opentelemetry_go_otel_sdk//trace",
+        "@org_golang_google_grpc//encoding/gzip",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":otlp",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "otlp_test",
+    srcs = ["otlp_test.go"],
+    embed = [":otlp"],
+    deps = [
+        "//pkg/testutil",
+        "//pkg/tracing",
+        "//pkg/tracing/migration",
+        "@com_github_go_kit_log//:log",
+        "@io_opentelemetry_go_otel_sdk//trace",
+        "@io_opentelemetry_go_otel_sdk//trace/tracetest",
+    ],
+)

@@ -1,0 +1,34 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "series",
+    srcs = ["series_set.go"],
+    importpath = "github.com/thanos-io/thanos/internal/cortex/querier/series",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/cortex/chunk/purger",
+        "//internal/cortex/prom1/storage/metric",
+        "@com_github_prometheus_common//model",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//storage",
+        "@com_github_prometheus_prometheus//tsdb/chunkenc",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":series",
+    visibility = ["//:__subpackages__"],
+)
+
+go_test(
+    name = "series_test",
+    srcs = ["series_set_test.go"],
+    embed = [":series"],
+    deps = [
+        "@com_github_prometheus_common//model",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//storage",
+        "@com_github_stretchr_testify//require",
+    ],
+)

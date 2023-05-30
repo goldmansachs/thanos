@@ -1,0 +1,25 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "math",
+    srcs = [
+        "math.go",
+        "rate.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/internal/cortex/util/math",
+    visibility = ["//:__subpackages__"],
+    deps = ["@org_uber_go_atomic//:atomic"],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":math",
+    visibility = ["//:__subpackages__"],
+)
+
+go_test(
+    name = "math_test",
+    srcs = ["rate_test.go"],
+    embed = [":math"],
+    deps = ["@com_github_stretchr_testify//require"],
+)

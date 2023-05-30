@@ -1,0 +1,20 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "backoff",
+    srcs = ["backoff.go"],
+    importpath = "github.com/thanos-io/thanos/internal/cortex/util/backoff",
+    visibility = ["//:__subpackages__"],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":backoff",
+    visibility = ["//:__subpackages__"],
+)
+
+go_test(
+    name = "backoff_test",
+    srcs = ["backoff_test.go"],
+    embed = [":backoff"],
+)

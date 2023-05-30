@@ -1,0 +1,40 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "testutil",
+    srcs = [
+        "testorbench.go",
+        "testutil.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/pkg/testutil",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_davecgh_go_spew//spew",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_pmezard_go_difflib//difflib",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_client_model//go",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//storage",
+        "@com_github_prometheus_prometheus//tsdb/chunkenc",
+        "@com_github_prometheus_prometheus//tsdb/chunks",
+        "@com_github_prometheus_prometheus//tsdb/index",
+        "@org_uber_go_goleak//:goleak",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":testutil",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "testutil_test",
+    srcs = [
+        "testorbench_test.go",
+        "testutil_test.go",
+    ],
+    data = glob(["testdata/**"]),
+    embed = [":testutil"],
+)

@@ -1,0 +1,34 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "labelpb",
+    srcs = [
+        "label.go",
+        "types.pb.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/pkg/store/labelpb",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_cespare_xxhash_v2//:xxhash",
+        "@com_github_gogo_protobuf//gogoproto",
+        "@com_github_gogo_protobuf//proto",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_prometheus//model/labels",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":labelpb",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "labelpb_test",
+    srcs = ["label_test.go"],
+    embed = [":labelpb"],
+    deps = [
+        "//pkg/testutil",
+        "@com_github_prometheus_prometheus//model/labels",
+    ],
+)

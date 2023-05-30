@@ -1,0 +1,37 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "iterators",
+    srcs = [
+        "chunk_iterator.go",
+        "chunk_merge_iterator.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/internal/cortex/querier/iterators",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/cortex/chunk",
+        "//internal/cortex/chunk/encoding",
+        "@com_github_prometheus_common//model",
+        "@com_github_prometheus_prometheus//tsdb/chunkenc",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":iterators",
+    visibility = ["//:__subpackages__"],
+)
+
+go_test(
+    name = "iterators_test",
+    srcs = ["chunk_merge_iterator_test.go"],
+    embed = [":iterators"],
+    deps = [
+        "//internal/cortex/chunk",
+        "//internal/cortex/chunk/encoding",
+        "@com_github_prometheus_common//model",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+    ],
+)

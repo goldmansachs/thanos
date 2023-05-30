@@ -1,0 +1,23 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "frontendv2pb",
+    srcs = ["frontend.pb.go"],
+    importpath = "github.com/thanos-io/thanos/internal/cortex/frontend/v2/frontendv2pb",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/cortex/querier/stats",
+        "@com_github_gogo_protobuf//gogoproto",
+        "@com_github_gogo_protobuf//proto",
+        "@com_github_weaveworks_common//httpgrpc",
+        "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_google_grpc//codes",
+        "@org_golang_google_grpc//status",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":frontendv2pb",
+    visibility = ["//:__subpackages__"],
+)

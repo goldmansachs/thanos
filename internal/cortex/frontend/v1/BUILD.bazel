@@ -1,0 +1,67 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "frontend",
+    srcs = ["frontend.go"],
+    importpath = "github.com/thanos-io/thanos/internal/cortex/frontend/v1",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/cortex/frontend/v1/frontendv1pb",
+        "//internal/cortex/querier/stats",
+        "//internal/cortex/scheduler/queue",
+        "//internal/cortex/tenant",
+        "//internal/cortex/util",
+        "//internal/cortex/util/httpgrpcutil",
+        "//internal/cortex/util/services",
+        "//internal/cortex/util/validation",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_opentracing_opentracing_go//:opentracing-go",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_client_golang//prometheus/promauto",
+        "@com_github_weaveworks_common//httpgrpc",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":frontend",
+    visibility = ["//:__subpackages__"],
+)
+
+go_test(
+    name = "frontend_test",
+    srcs = [
+        "frontend_test.go",
+        "queue_test.go",
+    ],
+    embed = [":frontend"],
+    deps = [
+        "//internal/cortex/frontend/transport",
+        "//internal/cortex/frontend/v1/frontendv1pb",
+        "//internal/cortex/querier/worker",
+        "//internal/cortex/scheduler/queue",
+        "//internal/cortex/util/flagext",
+        "//internal/cortex/util/services",
+        "@com_github_go_kit_log//:log",
+        "@com_github_gorilla_mux//:mux",
+        "@com_github_opentracing_contrib_go_grpc//:go-grpc",
+        "@com_github_opentracing_contrib_go_stdlib//nethttp",
+        "@com_github_opentracing_opentracing_go//:opentracing-go",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_client_golang//prometheus/testutil",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+        "@com_github_uber_jaeger_client_go//:jaeger-client-go",
+        "@com_github_uber_jaeger_client_go//config",
+        "@com_github_weaveworks_common//httpgrpc",
+        "@com_github_weaveworks_common//httpgrpc/server",
+        "@com_github_weaveworks_common//middleware",
+        "@com_github_weaveworks_common//user",
+        "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_google_grpc//metadata",
+        "@org_uber_go_atomic//:atomic",
+    ],
+)

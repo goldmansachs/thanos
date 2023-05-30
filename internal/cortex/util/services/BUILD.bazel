@@ -1,0 +1,38 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "services",
+    srcs = [
+        "basic_service.go",
+        "failure_watcher.go",
+        "manager.go",
+        "service.go",
+        "services.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/internal/cortex/util/services",
+    visibility = ["//:__subpackages__"],
+    deps = ["@com_github_pkg_errors//:errors"],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":services",
+    visibility = ["//:__subpackages__"],
+)
+
+go_test(
+    name = "services_test",
+    srcs = [
+        "basic_service_test.go",
+        "example_test.go",
+        "failure_watch_test.go",
+        "manager_test.go",
+        "services_test.go",
+    ],
+    embed = [":services"],
+    deps = [
+        "@com_github_pkg_errors//:errors",
+        "@com_github_stretchr_testify//require",
+        "@org_uber_go_atomic//:atomic",
+    ],
+)

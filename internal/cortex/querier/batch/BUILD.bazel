@@ -1,0 +1,46 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "batch",
+    srcs = [
+        "batch.go",
+        "chunk.go",
+        "merge.go",
+        "non_overlapping.go",
+        "stream.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/internal/cortex/querier/batch",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/cortex/chunk",
+        "//internal/cortex/chunk/encoding",
+        "@com_github_prometheus_common//model",
+        "@com_github_prometheus_prometheus//tsdb/chunkenc",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":batch",
+    visibility = ["//:__subpackages__"],
+)
+
+go_test(
+    name = "batch_test",
+    srcs = [
+        "batch_test.go",
+        "chunk_test.go",
+        "merge_test.go",
+        "non_overlapping_test.go",
+        "stream_test.go",
+    ],
+    embed = [":batch"],
+    deps = [
+        "//internal/cortex/chunk",
+        "//internal/cortex/chunk/encoding",
+        "@com_github_prometheus_common//model",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//tsdb/chunkenc",
+        "@com_github_stretchr_testify//require",
+    ],
+)

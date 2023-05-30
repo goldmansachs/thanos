@@ -1,0 +1,14 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "copyright_lib",
+    srcs = ["copyright.go"],
+    importpath = "github.com/thanos-io/thanos/scripts/copyright",
+    visibility = ["//visibility:private"],
+)
+
+go_binary(
+    name = "copyright",
+    embed = [":copyright_lib"],
+    visibility = ["//visibility:public"],
+)

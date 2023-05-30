@@ -1,0 +1,68 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "tsdb",
+    srcs = [
+        "caching_bucket.go",
+        "config.go",
+        "index_cache.go",
+        "memcache_client_config.go",
+        "tenant_deletion_mark.go",
+        "users_scanner.go",
+        "util.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/internal/cortex/storage/tsdb",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/cortex/ingester/client",
+        "//internal/cortex/storage/bucket",
+        "//internal/cortex/util",
+        "//internal/cortex/util/log",
+        "//pkg/block",
+        "//pkg/block/metadata",
+        "//pkg/cache",
+        "//pkg/cacheutil",
+        "//pkg/model",
+        "//pkg/store",
+        "//pkg/store/cache",
+        "@com_github_alecthomas_units//:units",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_golang_snappy//:snappy",
+        "@com_github_oklog_ulid//:ulid",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_prometheus//tsdb/chunks",
+        "@com_github_prometheus_prometheus//tsdb/wal",
+        "@com_github_thanos_io_objstore//:objstore",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":tsdb",
+    visibility = ["//:__subpackages__"],
+)
+
+go_test(
+    name = "tsdb_test",
+    srcs = [
+        "caching_bucket_test.go",
+        "config_test.go",
+        "index_cache_test.go",
+        "memcache_client_config_test.go",
+        "tenant_deletion_mark_test.go",
+        "users_scanner_test.go",
+        "util_test.go",
+    ],
+    embed = [":tsdb"],
+    deps = [
+        "//internal/cortex/storage/bucket",
+        "//internal/cortex/util/flagext",
+        "@com_github_go_kit_log//:log",
+        "@com_github_oklog_ulid//:ulid",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+        "@com_github_thanos_io_objstore//:objstore",
+    ],
+)

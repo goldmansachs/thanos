@@ -1,0 +1,35 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "extprom",
+    srcs = [
+        "extprom.go",
+        "testing.go",
+        "tx_gauge.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/pkg/extprom",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/testutil",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_client_golang//prometheus/promauto",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":extprom",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "extprom_test",
+    srcs = ["tx_gauge_test.go"],
+    embed = [":extprom"],
+    deps = [
+        "//pkg/testutil",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_client_model//go",
+    ],
+)

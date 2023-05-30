@@ -1,0 +1,41 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "api",
+    srcs = ["api.go"],
+    importpath = "github.com/thanos-io/thanos/pkg/api",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/extprom/http",
+        "//pkg/logging",
+        "//pkg/server/http/middleware",
+        "//pkg/tracing",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_nytimes_gziphandler//:gziphandler",
+        "@com_github_opentracing_opentracing_go//:opentracing-go",
+        "@com_github_prometheus_common//route",
+        "@com_github_prometheus_common//version",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":api",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "api_test",
+    srcs = ["api_test.go"],
+    embed = [":api"],
+    deps = [
+        "//pkg/extprom/http",
+        "//pkg/logging",
+        "//pkg/testutil",
+        "@com_github_go_kit_log//:log",
+        "@com_github_opentracing_opentracing_go//:opentracing-go",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_common//route",
+    ],
+)

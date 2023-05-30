@@ -42,7 +42,7 @@ func TestShipper_SyncBlocks_e2e(t *testing.T) {
 		dir := t.TempDir()
 
 		extLset := labels.FromStrings("prometheus", "prom-1")
-		shipper := New(log.NewLogfmtLogger(os.Stderr), nil, dir, metricsBucket, func() labels.Labels { return extLset }, metadata.TestSource, false, false, metadata.NoneFunc)
+		shipper := New(log.NewLogfmtLogger(os.Stderr), nil, dir, metricsBucket, func() labels.Labels { return extLset }, metadata.TestSource, false, false, metadata.NoneFunc, MetaFilename, UploadDir)
 
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
@@ -99,7 +99,7 @@ func TestShipper_SyncBlocks_e2e(t *testing.T) {
 			testutil.Ok(t, err)
 			testutil.Equals(t, 0, b)
 
-			shipMeta, err := ReadMetaFile(dir)
+			shipMeta, err := ReadMetaFile(dir, MetaFilename)
 			testutil.Ok(t, err)
 			if len(shipMeta.Uploaded) == 0 {
 				shipMeta.Uploaded = []ulid.ULID{}
@@ -162,7 +162,7 @@ func TestShipper_SyncBlocks_e2e(t *testing.T) {
 				testutil.Ok(t, block.Delete(ctx, log.NewNopLogger(), bkt, ids[4]))
 			}
 			// The shipper meta file should show all blocks as uploaded except the compacted one.
-			shipMeta, err = ReadMetaFile(dir)
+			shipMeta, err = ReadMetaFile(dir, MetaFilename)
 			testutil.Ok(t, err)
 			testutil.Equals(t, &Meta{Version: MetaVersion1, Uploaded: ids}, shipMeta)
 
@@ -270,7 +270,7 @@ func TestShipper_SyncBlocksWithMigrating_e2e(t *testing.T) {
 			testutil.Ok(t, err)
 			testutil.Equals(t, 0, b)
 
-			shipMeta, err := ReadMetaFile(dir)
+			shipMeta, err := ReadMetaFile(dir, MetaFilename)
 			testutil.Ok(t, err)
 			if len(shipMeta.Uploaded) == 0 {
 				shipMeta.Uploaded = []ulid.ULID{}
@@ -315,7 +315,7 @@ func TestShipper_SyncBlocksWithMigrating_e2e(t *testing.T) {
 				testutil.Ok(t, block.Delete(ctx, log.NewNopLogger(), bkt, ids[4]))
 			}
 			// The shipper meta file should show all blocks as uploaded except the compacted one.
-			shipMeta, err = ReadMetaFile(dir)
+			shipMeta, err = ReadMetaFile(dir, MetaFilename)
 			testutil.Ok(t, err)
 			testutil.Equals(t, &Meta{Version: MetaVersion1, Uploaded: ids}, shipMeta)
 
@@ -433,7 +433,7 @@ func TestShipper_SyncOverlapBlocks_e2e(t *testing.T) {
 		testutil.Ok(t, err)
 		testutil.Equals(t, 0, b)
 
-		shipMeta, err := ReadMetaFile(dir)
+		shipMeta, err := ReadMetaFile(dir, MetaFilename)
 		testutil.Ok(t, err)
 		if len(shipMeta.Uploaded) == 0 {
 			shipMeta.Uploaded = []ulid.ULID{}
@@ -472,7 +472,7 @@ func TestShipper_SyncOverlapBlocks_e2e(t *testing.T) {
 		expFiles[id[i].String()+"/chunks/0002"] = []byte("chunkcontents2")
 
 		// The shipper meta file should show all blocks as uploaded except the compacted one.
-		shipMeta, err = ReadMetaFile(dir)
+		shipMeta, err = ReadMetaFile(dir, MetaFilename)
 		testutil.Ok(t, err)
 		testutil.Equals(t, &Meta{Version: MetaVersion1, Uploaded: ids}, shipMeta)
 	}

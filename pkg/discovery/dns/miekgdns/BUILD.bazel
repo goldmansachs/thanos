@@ -1,0 +1,21 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "miekgdns",
+    srcs = [
+        "lookup.go",
+        "resolver.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/pkg/discovery/dns/miekgdns",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_miekg_dns//:dns",
+        "@com_github_pkg_errors//:errors",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":miekgdns",
+    visibility = ["//visibility:public"],
+)

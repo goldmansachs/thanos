@@ -1,0 +1,20 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "elasticapm",
+    srcs = ["elastic_apm.go"],
+    importpath = "github.com/thanos-io/thanos/pkg/tracing/elasticapm",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@co_elastic_go_apm_module_apmot//:apmot",
+        "@com_github_elastic_apm_agent_go//:apm",
+        "@com_github_opentracing_opentracing_go//:opentracing-go",
+        "@in_gopkg_yaml_v2//:yaml_v2",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":elasticapm",
+    visibility = ["//visibility:public"],
+)

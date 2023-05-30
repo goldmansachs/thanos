@@ -1,0 +1,32 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "querysharding",
+    srcs = [
+        "analysis.go",
+        "analyzer.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/pkg/querysharding",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_hashicorp_golang_lru//:golang-lru",
+        "@com_github_prometheus_common//model",
+        "@com_github_prometheus_prometheus//promql/parser",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":querysharding",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "querysharding_test",
+    srcs = ["analyzer_test.go"],
+    embed = [":querysharding"],
+    deps = [
+        "@com_github_prometheus_common//model",
+        "@com_github_stretchr_testify//require",
+    ],
+)

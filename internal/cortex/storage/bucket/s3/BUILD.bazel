@@ -1,0 +1,41 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "s3",
+    srcs = [
+        "bucket_client.go",
+        "config.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/internal/cortex/storage/bucket/s3",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/cortex/storage/bucket/http",
+        "//internal/cortex/util",
+        "//internal/cortex/util/flagext",
+        "@com_github_go_kit_log//:log",
+        "@com_github_minio_minio_go_v7//pkg/encrypt",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_common//model",
+        "@com_github_thanos_io_objstore//:objstore",
+        "@com_github_thanos_io_objstore//providers/s3",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":s3",
+    visibility = ["//:__subpackages__"],
+)
+
+go_test(
+    name = "s3_test",
+    srcs = ["config_test.go"],
+    embed = [":s3"],
+    deps = [
+        "//internal/cortex/storage/bucket/http",
+        "//internal/cortex/util/flagext",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+        "@in_gopkg_yaml_v2//:yaml_v2",
+    ],
+)

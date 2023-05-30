@@ -1,0 +1,38 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "azure",
+    srcs = [
+        "bucket_client.go",
+        "config.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/internal/cortex/storage/bucket/azure",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/cortex/storage/bucket/http",
+        "//internal/cortex/util/flagext",
+        "@com_github_go_kit_log//:log",
+        "@com_github_prometheus_common//model",
+        "@com_github_thanos_io_objstore//:objstore",
+        "@com_github_thanos_io_objstore//providers/azure",
+        "@in_gopkg_yaml_v2//:yaml_v2",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":azure",
+    visibility = ["//:__subpackages__"],
+)
+
+go_test(
+    name = "azure_test",
+    srcs = ["config_test.go"],
+    embed = [":azure"],
+    deps = [
+        "//internal/cortex/storage/bucket/http",
+        "//internal/cortex/util/flagext",
+        "@com_github_stretchr_testify//require",
+        "@in_gopkg_yaml_v2//:yaml_v2",
+    ],
+)

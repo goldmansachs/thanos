@@ -534,6 +534,8 @@ func (t *MultiTSDB) startTSDB(logger log.Logger, tenantID string, tenant *tenant
 			false,
 			t.allowOutOfOrderUpload,
 			t.hashFunc,
+			shipper.MetaFilename,
+			shipper.UploadDir,
 		)
 	}
 	tenant.set(store.NewTSDBStore(logger, s, component.Receive, lset), s, ship, exemplars.NewTSDB(s, lset))

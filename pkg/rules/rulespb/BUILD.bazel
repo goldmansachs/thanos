@@ -1,0 +1,43 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "rulespb",
+    srcs = [
+        "custom.go",
+        "rpc.pb.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/pkg/rules/rulespb",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/store/labelpb",
+        "//pkg/store/storepb",
+        "@com_github_gogo_protobuf//gogoproto",
+        "@com_github_gogo_protobuf//proto",
+        "@com_github_gogo_protobuf//types",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_google_grpc//codes",
+        "@org_golang_google_grpc//status",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":rulespb",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "rulespb_test",
+    srcs = ["custom_test.go"],
+    embed = [":rulespb"],
+    deps = [
+        "//pkg/store/labelpb",
+        "//pkg/store/storepb",
+        "//pkg/testutil",
+        "//pkg/testutil/testpromcompatibility",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_prometheus//model/labels",
+    ],
+)

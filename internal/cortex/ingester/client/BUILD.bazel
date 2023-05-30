@@ -1,0 +1,62 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "client",
+    srcs = [
+        "client.go",
+        "compat.go",
+        "cortex_util.go",
+        "custom.go",
+        "dep.go",
+        "fnv.go",
+        "ingester.pb.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/internal/cortex/ingester/client",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/cortex/cortexpb",
+        "//internal/cortex/util/grpcclient",
+        "@com_github_go_kit_log//:log",
+        "@com_github_gogo_protobuf//gogoproto",
+        "@com_github_gogo_protobuf//proto",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_client_golang//prometheus/promauto",
+        "@com_github_prometheus_common//model",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_google_grpc//codes",
+        "@org_golang_google_grpc//health/grpc_health_v1",
+        "@org_golang_google_grpc//status",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":client",
+    visibility = ["//:__subpackages__"],
+)
+
+go_test(
+    name = "client_test",
+    srcs = [
+        "client_test.go",
+        "compat_test.go",
+        "cortex_mock_test.go",
+        "cortex_util_test.go",
+    ],
+    embed = [":client"],
+    deps = [
+        "//internal/cortex/cortexpb",
+        "//internal/cortex/util",
+        "//internal/cortex/util/grpcutil",
+        "//internal/cortex/util/test",
+        "@com_github_prometheus_common//model",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//mock",
+        "@com_github_stretchr_testify//require",
+        "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_google_grpc//credentials/insecure",
+        "@org_golang_google_grpc//test/bufconn",
+    ],
+)

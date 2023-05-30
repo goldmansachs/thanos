@@ -1,0 +1,19 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "chunkstore",
+    srcs = ["chunkstore.go"],
+    importpath = "github.com/thanos-io/thanos/internal/cortex/querier/chunkstore",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/cortex/chunk",
+        "@com_github_prometheus_common//model",
+        "@com_github_prometheus_prometheus//model/labels",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":chunkstore",
+    visibility = ["//:__subpackages__"],
+)

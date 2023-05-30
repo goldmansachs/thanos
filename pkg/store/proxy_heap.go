@@ -18,7 +18,6 @@ import (
 	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/tracing"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/prometheus/model/labels"
 
 	"github.com/thanos-io/thanos/pkg/store/labelpb"
@@ -390,7 +389,7 @@ func newLazyRespSet(
 		numResponses := 0
 		defer func() {
 			if numResponses == 0 {
-				emptyStreamResponses.Inc()
+				metrics.emptyStreamResponses.Inc()
 			}
 		}()
 
@@ -403,6 +402,7 @@ func newLazyRespSet(
 			case <-l.ctx.Done():
 				err := errors.Wrapf(l.ctx.Err(), "failed to receive any data from %s", st)
 				l.span.SetTag("err", err.Error())
+				metrics.storeResponseFailure.Inc()
 
 				l.bufferedResponsesMtx.Lock()
 				l.bufferedResponses = append(l.bufferedResponses, storepb.NewWarnSeriesResponse(err))
@@ -413,6 +413,7 @@ func newLazyRespSet(
 			default:
 				resp, err := cl.Recv()
 				if err == io.EOF {
+					metrics.storeResponseSuccess.Inc()
 					l.bufferedResponsesMtx.Lock()
 					l.noMoreData = true
 					l.dataOrFinishEvent.Signal()
@@ -431,7 +432,7 @@ func newLazyRespSet(
 					} else {
 						rerr = errors.Wrapf(err, "receive series from %s", st)
 					}
-
+					metrics.storeResponseFailure.Inc()
 					l.span.SetTag("err", rerr.Error())
 
 					l.bufferedResponsesMtx.Lock()
@@ -501,7 +502,6 @@ func newAsyncRespSet(
 	logger log.Logger,
 	emptyStreamResponses prometheus.Counter,
 ) (respSet, error) {
-
 	var span opentracing.Span
 	var closeSeries context.CancelFunc
 
@@ -564,7 +564,7 @@ func newAsyncRespSet(
 			cl,
 			shardMatcher,
 			applySharding,
-			emptyStreamResponses,
+			metrics,
 		), nil
 	case EagerRetrieval:
 		return newEagerRespSet(
@@ -661,7 +661,7 @@ func newEagerRespSet(
 		numResponses := 0
 		defer func() {
 			if numResponses == 0 {
-				emptyStreamResponses.Inc()
+				metrics.emptyStreamResponses.Inc()
 			}
 		}()
 
@@ -677,10 +677,12 @@ func newEagerRespSet(
 				err := errors.Wrapf(l.ctx.Err(), "failed to receive any data from %s", st.String())
 				l.bufferedResponses = append(l.bufferedResponses, storepb.NewWarnSeriesResponse(err))
 				l.span.SetTag("err", err.Error())
+				metrics.storeResponseFailure.Inc()
 				return false
 			default:
 				resp, err := cl.Recv()
 				if err == io.EOF {
+					metrics.storeResponseSuccess.Inc()
 					return false
 				}
 				if err != nil {
@@ -694,6 +696,7 @@ func newEagerRespSet(
 					} else {
 						rerr = errors.Wrapf(err, "receive series from %s", st.String())
 					}
+					metrics.storeResponseFailure.Inc()
 					l.bufferedResponses = append(l.bufferedResponses, storepb.NewWarnSeriesResponse(rerr))
 					l.span.SetTag("err", rerr.Error())
 					return false

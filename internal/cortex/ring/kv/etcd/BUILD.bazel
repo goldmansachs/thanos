@@ -1,0 +1,42 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "etcd",
+    srcs = [
+        "etcd.go",
+        "mock.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/internal/cortex/ring/kv/etcd",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/cortex/ring/kv/codec",
+        "//internal/cortex/util/backoff",
+        "//internal/cortex/util/flagext",
+        "//internal/cortex/util/tls",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_pkg_errors//:errors",
+        "@io_etcd_go_etcd_api_v3//etcdserverpb",
+        "@io_etcd_go_etcd_api_v3//mvccpb",
+        "@io_etcd_go_etcd_client_pkg_v3//transport",
+        "@io_etcd_go_etcd_client_v3//:client",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":etcd",
+    visibility = ["//:__subpackages__"],
+)
+
+go_test(
+    name = "etcd_test",
+    srcs = ["mock_test.go"],
+    embed = [":etcd"],
+    deps = [
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+        "@io_etcd_go_etcd_api_v3//mvccpb",
+        "@io_etcd_go_etcd_client_v3//:client",
+    ],
+)

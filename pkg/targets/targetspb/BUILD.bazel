@@ -1,0 +1,29 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "targetspb",
+    srcs = [
+        "custom.go",
+        "rpc.pb.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/pkg/targets/targetspb",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/store/labelpb",
+        "//pkg/store/storepb",
+        "@com_github_gogo_protobuf//gogoproto",
+        "@com_github_gogo_protobuf//proto",
+        "@com_github_gogo_protobuf//types",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_google_grpc//codes",
+        "@org_golang_google_grpc//status",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":targetspb",
+    visibility = ["//visibility:public"],
+)

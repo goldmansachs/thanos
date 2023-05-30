@@ -1,0 +1,39 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "grpcutil",
+    srcs = [
+        "dns_resolver.go",
+        "health_check.go",
+        "naming.go",
+        "util.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/internal/cortex/util/grpcutil",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/cortex/util/services",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_gogo_status//:status",
+        "@org_golang_google_grpc//codes",
+        "@org_golang_google_grpc//health/grpc_health_v1",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":grpcutil",
+    visibility = ["//:__subpackages__"],
+)
+
+go_test(
+    name = "grpcutil_test",
+    srcs = ["health_check_test.go"],
+    embed = [":grpcutil"],
+    deps = [
+        "//internal/cortex/util/services",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+    ],
+)
