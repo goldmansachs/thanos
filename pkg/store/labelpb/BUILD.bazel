@@ -14,7 +14,7 @@ go_library(
         "@com_github_gogo_protobuf//proto",
         "@com_github_pkg_errors//:errors",
         "@com_github_prometheus_prometheus//model/labels",
-        "@org_go4_intern//:go_default_library",
+        "@org_go4_intern//:intern",
     ],
 )
 

@@ -1351,8 +1351,8 @@ def go_dependencies():
         name = "com_github_googlecloudplatform_opentelemetry_operations_go_exporter_trace",
         build_file_proto_mode = "disable",
         importpath = "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace",
-        sum = "h1:i84ZOPT35YCJROyuf97VP/VEdYhQce/8NTLOWq5tqJw=",
-        version = "v1.8.3",
+	sum = "h1:5uR5WqunMUqN5Z+USN/N25aM7zWd0JUCIfz1B/w0HtA=",
+        version = "v1.15.0",
     )
     go_repository(
         name = "com_github_googlecloudplatform_opentelemetry_operations_go_internal_resourcemapping",
