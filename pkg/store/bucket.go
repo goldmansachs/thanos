@@ -143,6 +143,7 @@ type bucketStoreMetrics struct {
 	seriesFetchDuration   prometheus.Histogram
 	postingsFetchDuration prometheus.Histogram
 	chunkFetchDuration    prometheus.Histogram
+	proxyMetrics          *proxyStoreMetrics
 }
 
 func newBucketStoreMetrics(reg prometheus.Registerer) *bucketStoreMetrics {
@@ -294,6 +295,7 @@ func newBucketStoreMetrics(reg prometheus.Registerer) *bucketStoreMetrics {
 		Help: "Total number of empty postings when fetching block series.",
 	})
 
+	m.proxyMetrics = newProxyStoreMetrics(reg)
 	return &m
 }
 
@@ -1292,7 +1294,7 @@ func (s *BucketStore) Series(req *storepb.SeriesRequest, srv storepb.Store_Serie
 					blockClient,
 					shardMatcher,
 					false,
-					s.metrics.emptyPostingCount,
+					s.metrics.proxyMetrics,
 				)
 
 				mtx.Lock()
