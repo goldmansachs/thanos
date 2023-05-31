@@ -169,6 +169,7 @@ type bucketStoreMetrics struct {
 	chunkFetchDuration *prometheus.HistogramVec
 	// Actual absolute total time for loading chunks.
 	chunkFetchDurationSum *prometheus.HistogramVec
+	proxyMetrics          *proxyStoreMetrics
 }
 
 func newBucketStoreMetrics(reg prometheus.Registerer) *bucketStoreMetrics {
@@ -355,6 +356,7 @@ func newBucketStoreMetrics(reg prometheus.Registerer) *bucketStoreMetrics {
 		Help: "Total number of series size in bytes overfetched due to posting lazy expansion.",
 	})
 
+	m.proxyMetrics = newProxyStoreMetrics(reg)
 	return &m
 }
 
@@ -1588,6 +1590,7 @@ func (s *BucketStore) Series(req *storepb.SeriesRequest, seriesSrv storepb.Store
 					stats = blockClient.MergeStats(stats)
 					mtx.Unlock()
 				}
+<<<<<<< HEAD
 
 				if err := blockClient.ExpandPostings(
 					sortedBlockMatchers,
@@ -1622,10 +1625,9 @@ func (s *BucketStore) Series(req *storepb.SeriesRequest, seriesSrv storepb.Store
 						blockClient,
 						shardMatcher,
 						false,
-						s.metrics.emptyPostingCount.WithLabelValues(tenant),
+						s.metrics.proxyMetrics,
 					)
 				}
-
 				mtx.Lock()
 				respSets = append(respSets, resp)
 				mtx.Unlock()
