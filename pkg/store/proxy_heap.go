@@ -18,7 +18,6 @@ import (
 	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/tracing"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/prometheus/model/labels"
 
 	"github.com/thanos-io/thanos/pkg/store/labelpb"
@@ -355,7 +354,7 @@ func newLazyRespSet(
 	cl storepb.Store_SeriesClient,
 	shardMatcher *storepb.ShardMatcher,
 	applySharding bool,
-	emptyStreamResponses prometheus.Counter,
+	metrics *proxyStoreMetrics,
 ) respSet {
 	bufferedResponses := []*storepb.SeriesResponse{}
 	bufferedResponsesMtx := &sync.Mutex{}
@@ -501,8 +500,7 @@ func newAsyncRespSet(
 	buffers *sync.Pool,
 	shardInfo *storepb.ShardInfo,
 	logger log.Logger,
-	emptyStreamResponses prometheus.Counter,
-) (respSet, error) {
+	metrics *proxyStoreMetrics) (respSet, error) {
 	var span opentracing.Span
 	var closeSeries context.CancelFunc
 
@@ -577,7 +575,7 @@ func newAsyncRespSet(
 			cl,
 			shardMatcher,
 			applySharding,
-			emptyStreamResponses,
+			metrics,
 			labelsToRemove,
 		), nil
 	default:
@@ -627,7 +625,7 @@ func newEagerRespSet(
 	cl storepb.Store_SeriesClient,
 	shardMatcher *storepb.ShardMatcher,
 	applySharding bool,
-	emptyStreamResponses prometheus.Counter,
+	metrics *proxyStoreMetrics,
 	removeLabels map[string]struct{},
 ) respSet {
 	ret := &eagerRespSet{
