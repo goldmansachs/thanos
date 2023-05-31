@@ -16,7 +16,6 @@ import (
 	"github.com/go-kit/log/level"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/prometheus/model/labels"
 	grpc_opentracing "github.com/thanos-io/thanos/pkg/tracing/tracing_middleware"
 
@@ -309,7 +308,7 @@ func newLazyRespSet(
 	cl storepb.Store_SeriesClient,
 	shardMatcher *storepb.ShardMatcher,
 	applySharding bool,
-	emptyStreamResponses prometheus.Counter,
+	metrics *proxyStoreMetrics,
 ) respSet {
 	bufferedResponses := []*storepb.SeriesResponse{}
 	bufferedResponsesMtx := &sync.Mutex{}
@@ -327,6 +326,7 @@ func newLazyRespSet(
 		bufferedResponses:    bufferedResponses,
 		shardMatcher:         shardMatcher,
 	}
+	emptyStreamResponses = metrics.emptyStreamResponses
 	respSet.storeLabels = make(map[string]struct{})
 	for _, ls := range storeLabelSets {
 		ls.Range(func(l labels.Label) {
@@ -445,14 +445,11 @@ func newAsyncRespSet(
 	buffers *sync.Pool,
 	shardInfo *storepb.ShardInfo,
 	logger log.Logger,
-	emptyStreamResponses prometheus.Counter,
-) (respSet, error) {
-
+	metrics *proxyStoreMetrics) (respSet, error) {
 	var (
 		span   opentracing.Span
 		cancel context.CancelFunc
 	)
-
 	storeID, storeAddr, isLocalStore := storeInfo(st)
 	seriesCtx := grpc_opentracing.ClientAddContextTags(ctx, opentracing.Tags{
 		"target": storeAddr,
@@ -505,7 +502,7 @@ func newAsyncRespSet(
 			cl,
 			shardMatcher,
 			applySharding,
-			emptyStreamResponses,
+			metrics,
 		), nil
 	case EagerRetrieval:
 		return newEagerRespSet(
@@ -517,7 +514,7 @@ func newAsyncRespSet(
 			cl,
 			shardMatcher,
 			applySharding,
-			emptyStreamResponses,
+			metrics,
 			labelsToRemove,
 		), nil
 	default:
@@ -570,7 +567,7 @@ func newEagerRespSet(
 	cl storepb.Store_SeriesClient,
 	shardMatcher *storepb.ShardMatcher,
 	applySharding bool,
-	emptyStreamResponses prometheus.Counter,
+	metrics *proxyStoreMetrics,
 	removeLabels map[string]struct{},
 ) respSet {
 	ret := &eagerRespSet{
