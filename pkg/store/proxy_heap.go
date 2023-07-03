@@ -541,8 +541,8 @@ func newAsyncRespSet(
 
 	var labelsToRemove map[string]struct{}
 	if !st.SupportsWithoutReplicaLabels() && len(req.WithoutReplicaLabels) > 0 {
-		level.Warn(logger).Log("msg", "detecting store that does not support without replica label setting. "+
-			"Falling back to eager retrieval with additional sort. Make sure your storeAPI supports it to speed up your queries", "store", st.String())
+		//level.Warn(logger).Log("msg", "detecting store that does not support without replica label setting. "+
+		//	"Falling back to eager retrieval with additional sort. Make sure your storeAPI supports it to speed up your queries", "store", st.String())
 		retrievalStrategy = EagerRetrieval
 
 		labelsToRemove = make(map[string]struct{})
