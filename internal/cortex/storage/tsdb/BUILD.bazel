@@ -1,0 +1,5 @@
+alias(
+    name = "go_default_library",
+    actual = ":tsdb",
+    visibility = ["//:__subpackages__"],
+)

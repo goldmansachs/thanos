@@ -157,7 +157,6 @@ func (rc *reloaderConfig) registerFlag(cmd extkingpin.FlagClause) *reloaderConfi
 	cmd.Flag("reloader.process-name",
 		"Executable name used to match the process being reloaded when using the signal method.").
 		Default("prometheus").StringVar(&rc.processName)
-
 	return rc
 }
 
@@ -167,6 +166,7 @@ type shipperConfig struct {
 	allowOutOfOrderUpload bool
 	hashFunc              string
 	metaFileName          string
+	uploadDir             string
 }
 
 func (sc *shipperConfig) registerFlag(cmd extkingpin.FlagClause) *shipperConfig {
@@ -183,7 +183,8 @@ func (sc *shipperConfig) registerFlag(cmd extkingpin.FlagClause) *shipperConfig 
 		Default("false").Hidden().BoolVar(&sc.allowOutOfOrderUpload)
 	cmd.Flag("hash-func", "Specify which hash function to use when calculating the hashes of produced files. If no function has been specified, it does not happen. This permits avoiding downloading some files twice albeit at some performance cost. Possible values are: \"\", \"SHA256\".").
 		Default("").EnumVar(&sc.hashFunc, "SHA256", "")
-	cmd.Flag("shipper.meta-file-name", "the file to store shipper metadata in").Default(shipper.DefaultMetaFilename).StringVar(&sc.metaFileName)
+	cmd.Flag("shipper.meta-filename", "The state file").Default("thanos.shipper.json").StringVar(&sc.metaFileName)
+	cmd.Flag("shipper.upload-dir", "The directory for for linked blocks.").Default("upload").StringVar(&sc.uploadDir)
 	return sc
 }
 

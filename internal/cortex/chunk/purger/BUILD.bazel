@@ -1,0 +1,5 @@
+alias(
+    name = "go_default_library",
+    actual = ":purger",
+    visibility = ["//:__subpackages__"],
+)

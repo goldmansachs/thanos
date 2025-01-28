@@ -1,0 +1,41 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "google_cloud",
+    srcs = ["google_cloud.go"],
+    importpath = "github.com/thanos-io/thanos/pkg/tracing/google_cloud",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/tracing/migration",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_googlecloudplatform_opentelemetry_operations_go_exporter_trace//:trace",
+        "@com_github_prometheus_common//version",
+        "@in_gopkg_yaml_v2//:yaml_v2",
+        "@io_opentelemetry_go_otel//attribute",
+        "@io_opentelemetry_go_otel//semconv/v1.10.0:v1_10_0",
+        "@io_opentelemetry_go_otel_sdk//resource",
+        "@io_opentelemetry_go_otel_sdk//trace",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":google_cloud",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "google_cloud_test",
+    srcs = ["google_cloud_test.go"],
+    embed = [":google_cloud"],
+    deps = [
+        "//pkg/testutil/custom",
+        "//pkg/tracing",
+        "//pkg/tracing/migration",
+        "@com_github_go_kit_log//:log",
+        "@com_github_opentracing_opentracing_go//:opentracing-go",
+        "@io_opentelemetry_go_otel_sdk//trace",
+        "@io_opentelemetry_go_otel_sdk//trace/tracetest",
+    ],
+)

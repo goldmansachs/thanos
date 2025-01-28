@@ -157,8 +157,9 @@ const PanelList: FC<RouteComponentProps & PathPrefixProps> = ({ pathPrefix = '' 
   const [enableAutocomplete, setEnableAutocomplete] = useLocalStorage('enable-autocomplete', true);
   const [enableHighlighting, setEnableHighlighting] = useLocalStorage('enable-syntax-highlighting', true);
   const [enableLinter, setEnableLinter] = useLocalStorage('enable-linter', true);
-
-  const { response: metricsRes, error: metricsErr } = useFetch<string[]>(`${pathPrefix}/api/v1/label/__name__/values`);
+  // hack to avoid timeouts for huge number of metrics > 1M
+  const { response: metricsRes, error: metricsErr } = useFetch<string[]>(`${pathPrefix}/api/v1/labels`);
+  const dummyMetricsData: string[] = [];
   const {
     response: storesRes,
     error: storesErr,
@@ -276,7 +277,7 @@ const PanelList: FC<RouteComponentProps & PathPrefixProps> = ({ pathPrefix = '' 
         panels={decodePanelOptionsFromQueryString(window.location.search)}
         pathPrefix={pathPrefix}
         useLocalTime={useLocalTime}
-        metrics={metricsRes.data}
+        metrics={dummyMetricsData}
         stores={enableStoreFiltering ? storesRes.data : {}}
         enableAutocomplete={enableAutocomplete}
         enableHighlighting={enableHighlighting}

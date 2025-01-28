@@ -1,0 +1,75 @@
+From 3b3231908b21ab849f4016a511720f1f02a531a0 Mon Sep 17 00:00:00 2001
+From: Objectstor Dev <objectstor@gmail.com>
+Date: Wed, 4 Jan 2023 13:26:30 +0000
+Subject: [PATCH 3/4] Limit pool and randomize selection
+
+---
+ exthttp/transport.go | 40 ++++++++++++++++++++++++++++++++--------
+ 1 file changed, 32 insertions(+), 8 deletions(-)
+
+diff --git a/exthttp/transport.go b/exthttp/transport.go
+index d9a807f..5e5c409 100644
+--- a/exthttp/transport.go
++++ b/exthttp/transport.go
+@@ -4,6 +4,8 @@
+ package exthttp
+ 
+ import (
++	"context"
++	"math/rand"
+ 	"net"
+ 	"net/http"
+ 	"time"
+@@ -42,15 +44,11 @@ func DefaultTransport(config HTTPConfig) (*http.Transport, error) {
+ 	tlsConfig.InsecureSkipVerify = config.InsecureSkipVerify
+ 
+ 	return &http.Transport{
+-		Proxy: http.ProxyFromEnvironment,
+-		DialContext: (&net.Dialer{
+-			Timeout:   30 * time.Second,
+-			KeepAlive: 30 * time.Second,
+-			DualStack: true,
+-		}).DialContext,
++		MaxIdleConns:        config.MaxIdleConns,
++		MaxIdleConnsPerHost: config.MaxIdleConnsPerHost,
++		Proxy:               http.ProxyFromEnvironment,
++		DialContext:         randomDialContext,
+ 
+-		MaxIdleConns:          config.MaxIdleConns,
+-		MaxIdleConnsPerHost:   config.MaxIdleConnsPerHost,
+ 		IdleConnTimeout:       time.Duration(config.IdleConnTimeout),
+ 		MaxConnsPerHost:       config.MaxConnsPerHost,
+ 		TLSHandshakeTimeout:   time.Duration(config.TLSHandshakeTimeout),
+@@ -67,3 +65,29 @@ func DefaultTransport(config HTTPConfig) (*http.Transport, error) {
+ 		TLSClientConfig: tlsConfig,
+ 	}, nil
+ }
++
++/*
++ * As we have no way to fix the bad caching in the resolver function inside "net",
++ * we use our own DIalCOntyext funcrtion that resolves the IP address here,
++ * and picks one at random to pass to underlying dialing function.
++ * +pro: this will balance the load across the lis of IPs.
++ * -con: if the choosed IP fails to connect, the dial will fail rather than trying a subsequent IP.
++ * To fix thiat con, we cpoild sjuffle the results and loop, instead of just trying one.
++ */
++func randomDialContext(ctx context.Context, network, address string) (net.Conn, error) {
++	dialer := &net.Dialer{
++		Timeout:   30 * time.Second,
++		KeepAlive: 30 * time.Second,
++		DualStack: true,
++	}
++	host, port, err := net.SplitHostPort(address)
++	if err != nil {
++		return nil, err
++	}
++	ip, err := net.DefaultResolver.LookupIPAddr(ctx, host)
++	if err != nil {
++		return nil, err
++	}
++	return dialer.DialContext(ctx, network, net.JoinHostPort(ip[rand.Intn(len(ip))].IP.String(), port))
++
++}
+-- 
+2.37.2
+

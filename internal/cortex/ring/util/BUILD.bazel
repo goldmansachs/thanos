@@ -1,0 +1,5 @@
+alias(
+    name = "go_default_library",
+    actual = ":util",
+    visibility = ["//:__subpackages__"],
+)

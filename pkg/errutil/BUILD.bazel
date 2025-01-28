@@ -1,0 +1,14 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "errutil",
+    srcs = ["multierror.go"],
+    importpath = "github.com/thanos-io/thanos/pkg/errutil",
+    visibility = ["//visibility:public"],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":errutil",
+    visibility = ["//visibility:public"],
+)

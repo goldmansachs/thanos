@@ -1,0 +1,42 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "prober",
+    srcs = [
+        "combiner.go",
+        "grpc.go",
+        "http.go",
+        "intrumentation.go",
+        "prober.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/pkg/prober",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/component",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_client_golang//prometheus/promauto",
+        "@org_golang_google_grpc//health",
+        "@org_golang_google_grpc//health/grpc_health_v1",
+        "@org_uber_go_atomic//:atomic",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":prober",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "prober_test",
+    srcs = ["http_test.go"],
+    embed = [":prober"],
+    deps = [
+        "@com_github_efficientgo_core//testutil",
+        "@com_github_go_kit_log//:log",
+        "@com_github_oklog_run//:run",
+        "@com_github_pkg_errors//:errors",
+    ],
+)

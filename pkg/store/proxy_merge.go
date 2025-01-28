@@ -16,7 +16,6 @@ import (
 	"github.com/go-kit/log/level"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/prometheus/model/labels"
 	grpc_opentracing "github.com/thanos-io/thanos/pkg/tracing/tracing_middleware"
 
@@ -309,7 +308,7 @@ func newLazyRespSet(
 	cl storepb.Store_SeriesClient,
 	shardMatcher *storepb.ShardMatcher,
 	applySharding bool,
-	emptyStreamResponses prometheus.Counter,
+	metrics *proxyStoreMetrics,
 ) respSet {
 	bufferedResponses := []*storepb.SeriesResponse{}
 	bufferedResponsesMtx := &sync.Mutex{}
@@ -349,7 +348,7 @@ func newLazyRespSet(
 		numResponses := 0
 		defer func() {
 			if numResponses == 0 {
-				emptyStreamResponses.Inc()
+				metrics.emptyStreamResponses.Inc()
 			}
 		}()
 
@@ -361,6 +360,7 @@ func newLazyRespSet(
 			resp, err := cl.Recv()
 			if err != nil {
 				if err == io.EOF {
+					metrics.storeResponseSuccess.Inc()
 					l.bufferedResponsesMtx.Lock()
 					l.noMoreData = true
 					l.dataOrFinishEvent.Signal()
@@ -445,14 +445,14 @@ func newAsyncRespSet(
 	buffers *sync.Pool,
 	shardInfo *storepb.ShardInfo,
 	logger log.Logger,
-	emptyStreamResponses prometheus.Counter,
+	metrics *proxyStoreMetricsm
+	metrics *proxyStoreMetrics,
 ) (respSet, error) {
 
-	var (
+	var (metrics *proxyStoreMetrics
 		span   opentracing.Span
 		cancel context.CancelFunc
 	)
-
 	storeID, storeAddr, isLocalStore := storeInfo(st)
 	seriesCtx := grpc_opentracing.ClientAddContextTags(ctx, opentracing.Tags{
 		"target": storeAddr,
@@ -484,8 +484,8 @@ func newAsyncRespSet(
 
 	var labelsToRemove map[string]struct{}
 	if !st.SupportsWithoutReplicaLabels() && len(req.WithoutReplicaLabels) > 0 {
-		level.Warn(logger).Log("msg", "detecting store that does not support without replica label setting. "+
-			"Falling back to eager retrieval with additional sort. Make sure your storeAPI supports it to speed up your queries", "store", st.String())
+		//level.Warn(logger).Log("msg", "detecting store that does not support without replica label setting. "+
+		//	"Falling back to eager retrieval with additional sort. Make sure your storeAPI supports it to speed up your queries", "store", st.String())
 		retrievalStrategy = EagerRetrieval
 
 		labelsToRemove = make(map[string]struct{})
@@ -505,7 +505,7 @@ func newAsyncRespSet(
 			cl,
 			shardMatcher,
 			applySharding,
-			emptyStreamResponses,
+			metrics,
 		), nil
 	case EagerRetrieval:
 		return newEagerRespSet(
@@ -517,7 +517,7 @@ func newAsyncRespSet(
 			cl,
 			shardMatcher,
 			applySharding,
-			emptyStreamResponses,
+			metrics,
 			labelsToRemove,
 		), nil
 	default:
@@ -570,7 +570,7 @@ func newEagerRespSet(
 	cl storepb.Store_SeriesClient,
 	shardMatcher *storepb.ShardMatcher,
 	applySharding bool,
-	emptyStreamResponses prometheus.Counter,
+	metrics *proxyStoreMetrics,
 	removeLabels map[string]struct{},
 ) respSet {
 	ret := &eagerRespSet{
@@ -611,7 +611,7 @@ func newEagerRespSet(
 		numResponses := 0
 		defer func() {
 			if numResponses == 0 {
-				emptyStreamResponses.Inc()
+				metrics.emptyStreamResponses.Inc()
 			}
 		}()
 
@@ -625,6 +625,7 @@ func newEagerRespSet(
 			resp, err := cl.Recv()
 			if err != nil {
 				if err == io.EOF {
+					metrics.storeResponseSuccess.Inc()
 					return false
 				}
 

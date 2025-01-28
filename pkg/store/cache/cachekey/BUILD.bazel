@@ -1,0 +1,22 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "cachekey",
+    srcs = ["cachekey.go"],
+    importpath = "github.com/thanos-io/thanos/pkg/store/cache/cachekey",
+    visibility = ["//visibility:public"],
+    deps = ["@com_github_pkg_errors//:errors"],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":cachekey",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "cachekey_test",
+    srcs = ["cachekey_test.go"],
+    embed = [":cachekey"],
+    deps = ["@com_github_efficientgo_core//testutil"],
+)

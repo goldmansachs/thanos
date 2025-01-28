@@ -1,0 +1,63 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "exemplars",
+    srcs = [
+        "exemplars.go",
+        "multitsdb.go",
+        "prometheus.go",
+        "proxy.go",
+        "tsdb.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/pkg/exemplars",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/exemplars/exemplarspb",
+        "//pkg/promclient",
+        "//pkg/store/labelpb",
+        "//pkg/store/storepb",
+        "//pkg/tracing",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_gogo_status//:status",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//promql/parser",
+        "@com_github_prometheus_prometheus//storage",
+        "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_google_grpc//codes",
+        "@org_golang_google_grpc//status",
+        "@org_golang_x_sync//errgroup",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":exemplars",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "exemplars_test",
+    srcs = [
+        "exemplars_test.go",
+        "proxy_test.go",
+        "tsdb_test.go",
+    ],
+    embed = [":exemplars"],
+    deps = [
+        "//pkg/exemplars/exemplarspb",
+        "//pkg/store/labelpb",
+        "//pkg/store/storepb",
+        "//pkg/testutil/custom",
+        "@com_github_efficientgo_core//testutil",
+        "@com_github_go_kit_log//:log",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//promql/parser",
+        "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_google_grpc//codes",
+        "@org_golang_google_grpc//status",
+        "@org_uber_go_atomic//:atomic",
+    ],
+)

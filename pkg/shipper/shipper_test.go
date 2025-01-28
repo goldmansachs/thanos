@@ -29,7 +29,7 @@ import (
 func TestShipperTimestamps(t *testing.T) {
 	dir := t.TempDir()
 
-	s := New(nil, nil, dir, nil, nil, metadata.TestSource, nil, false, metadata.NoneFunc, DefaultMetaFilename)
+	s := New(nil, nil, dir, nil, nil, metadata.TestSource, false, false, metadata.NoneFunc, MetaFilename, UploadDir)
 
 	// Missing thanos meta file.
 	_, _, err := s.Timestamps()
@@ -122,7 +122,7 @@ func TestIterBlockMetas(t *testing.T) {
 		},
 	}.WriteToDir(log.NewNopLogger(), path.Join(dir, id3.String())))
 
-	shipper := New(nil, nil, dir, nil, nil, metadata.TestSource, nil, false, metadata.NoneFunc, DefaultMetaFilename)
+	shipper := New(nil, nil, dir, nil, nil, metadata.TestSource, false, false, metadata.NoneFunc, MetaFilename, UploadDir)
 	metas, err := shipper.blockMetasFromOldest()
 	testutil.Ok(t, err)
 	testutil.Equals(t, sort.SliceIsSorted(metas, func(i, j int) bool {
@@ -153,8 +153,7 @@ func BenchmarkIterBlockMetas(b *testing.B) {
 	})
 	b.ResetTimer()
 
-	shipper := New(nil, nil, dir, nil, nil, metadata.TestSource, nil, false, metadata.NoneFunc, DefaultMetaFilename)
-
+	shipper := New(nil, nil, dir, nil, nil, metadata.TestSource, false, false, metadata.NoneFunc, MetaFilename, UploadDir)
 	_, err := shipper.blockMetasFromOldest()
 	testutil.Ok(b, err)
 }
@@ -165,7 +164,7 @@ func TestShipperAddsSegmentFiles(t *testing.T) {
 	inmemory := objstore.NewInMemBucket()
 
 	lbls := labels.FromStrings("test", "test")
-	s := New(nil, nil, dir, inmemory, func() labels.Labels { return lbls }, metadata.TestSource, nil, false, metadata.NoneFunc, DefaultMetaFilename)
+	s := New(nil, nil, dir, inmemory, func() labels.Labels { return lbls }, metadata.TestSource, false, false, metadata.NoneFunc, MetaFilename, UploadDir)
 
 	id := ulid.MustNew(1, nil)
 	blockDir := path.Join(dir, id.String())
@@ -203,7 +202,6 @@ func TestReadMetaFile(t *testing.T) {
 		// Create TSDB directory without meta file
 		dpath := t.TempDir()
 		fpath := filepath.Join(dpath, DefaultMetaFilename)
-
 		_, err := ReadMetaFile(fpath)
 		testutil.Equals(t, fmt.Sprintf(`failed to read %s: open %s: no such file or directory`, fpath, fpath), err.Error())
 	})

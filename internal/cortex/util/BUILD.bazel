@@ -1,0 +1,53 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "util",
+    srcs = [
+        "active_user.go",
+        "http.go",
+        "labels.go",
+        "merger.go",
+        "metrics_helper.go",
+        "time.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/internal/cortex/util",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/cortex/util/log",
+        "//internal/cortex/util/services",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_gogo_protobuf//proto",
+        "@com_github_golang_snappy//:snappy",
+        "@com_github_opentracing_opentracing_go//:opentracing-go",
+        "@com_github_opentracing_opentracing_go//log",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_client_model//go",
+        "@com_github_prometheus_common//model",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//tsdb/errors",
+        "@com_github_weaveworks_common//httpgrpc",
+        "@in_gopkg_yaml_v2//:yaml_v2",
+        "@org_uber_go_atomic//:atomic",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":util",
+    visibility = ["//:__subpackages__"],
+)
+
+go_test(
+    name = "util_test",
+    srcs = [
+        "merger_test.go",
+        "time_test.go",
+    ],
+    embed = [":util"],
+    deps = [
+        "@com_github_prometheus_common//model",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+    ],
+)

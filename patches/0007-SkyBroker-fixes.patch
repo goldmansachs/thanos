@@ -1,0 +1,78 @@
+From 7fc219fada0b58af87e99353e1a04c35b81168f0 Mon Sep 17 00:00:00 2001
+From: Objectstor Dev <objectstor@gmail.com>
+Date: Wed, 4 Jan 2023 13:59:01 +0000
+Subject: [PATCH] SkyBroker fixes
+
+Signed-off-by: Radek Ryckowski <radek.ryckowski@gmail.com>
+---
+ providers/s3/s3.go | 26 +++++++++++++-------------
+ 1 file changed, 13 insertions(+), 13 deletions(-)
+
+diff --git a/providers/s3/s3.go b/providers/s3/s3.go
+index 0e94ec8..af86f97 100644
+--- a/providers/s3/s3.go
++++ b/providers/s3/s3.go
+@@ -115,9 +115,9 @@ var DefaultConfig = Config{
+ 		ResponseHeaderTimeout: model.Duration(2 * time.Minute),
+ 		TLSHandshakeTimeout:   model.Duration(10 * time.Second),
+ 		ExpectContinueTimeout: model.Duration(1 * time.Second),
+-		MaxIdleConns:          100,
+-		MaxIdleConnsPerHost:   100,
+-		MaxConnsPerHost:       0,
++		MaxIdleConns:          6000,
++		MaxIdleConnsPerHost:   200,
++		MaxConnsPerHost:       210,
+ 	},
+ 	PartSize:         1024 * 1024 * 64, // 64MB.
+ 	BucketLookupType: AutoLookup,
+@@ -152,13 +152,13 @@ type Config struct {
+ }
+ 
+ type GsSkyConfig struct {
+-	Keytab                 string                 `yaml:"keytab"`
+-	Principal              string                 `yaml:"principal"`
+-	RoleARN                string                 `yaml:"role_arn"`
+-	GsssoTokenLifetime     model.Duration         `yaml:"gssso_token_lifetime"`
+-	GsssoRefresh           GsRefreshConfig        `yaml:"gssso_refresh"`
+-	SkyBrokerRefresh       SkyBrokerRefreshConfig `yaml:"isky_broker_refresh"`
+-	SkyBrokerTokenWaitTime model.Duration         `yaml:"sky_broker_token_wait_timeout"`
++	Keytab                    string                 `yaml:"keytab"`
++	Principal                 string                 `yaml:"principal"`
++	RoleARN                   string                 `yaml:"role_arn"`
++	GsssoTokenLifetime        model.Duration         `yaml:"gssso_token_lifetime"`
++	GsssoRefresh              GsRefreshConfig        `yaml:"gssso_refresh"`
++	SkyBrokerRefresh          SkyBrokerRefreshConfig `yaml:"isky_broker_refresh"`
++	SkyBrokerTokenWaitTimeout model.Duration         `yaml:"sky_broker_token_wait_timeout"`
+ }
+ 
+ type GsRefreshConfig struct {
+@@ -261,7 +261,7 @@ func NewBucketWithConfig(logger log.Logger, config Config, component string) (*B
+ 		if err != nil {
+ 			return nil, errors.Wrap(err, "loading kerberos keytab for Skybroker S3 authentication")
+ 		}
+-		transport, err := ghttp.NewRefreshingGSSSOTransport(http.DefaultTransport, krbc, time.Duration(config.SkyConfig.GsssoTokenLifetime), refresh.Option{
++		transport, err := ghttp.NewRefreshingGSSSOTransport(http.DefaultTransport, krbc, time.Duration(config.SkyConfig.GsssoTokenLifetime), refresh.Options{
+ 			EarlyRefresh:        time.Duration(config.SkyConfig.GsssoRefresh.EarlyRefresh),
+ 			RetryInterval:       time.Duration(config.SkyConfig.GsssoRefresh.RetryInterval),
+ 			RetryIntervalGrowth: config.SkyConfig.GsssoRefresh.RetryIntervalGrowth,
+@@ -273,7 +273,7 @@ func NewBucketWithConfig(logger log.Logger, config Config, component string) (*B
+ 			return nil, errors.Wrap(err, "constructing refreshing GSSSO transport SkyBroker S3 authentication")
+ 		}
+ 		client := &http.Client{Transport: transport}
+-		provider, err := miniocreds.NewSkyBrokerCredentialsProvider(client, config.SkyConfig.RoleARN, timer.Duration(config.SkyConfig.SkyBrokerTokenWaitTimeout), refrsh.Option{
++		provider, err := miniocreds.NewSkyBrokerCredentialsProvider(client, config.SkyConfig.RoleARN, timer.Duration(config.SkyConfig.SkyBrokerTokenWaitTimeout), refresh.Options{
+ 			EarlyRefresh:        time.Duration(config.SkyConfig.SkyBrokerRefresh.EarlyRefresh),
+ 			RetryInterval:       time.Duration(config.SkyConfig.SkyBrokerRefresh.RetryInterval),
+ 			RetryIntervalGrowth: config.SkyConfig.SkyBrokerRefresh.RetryIntervalGrowth,
+@@ -284,7 +284,7 @@ func NewBucketWithConfig(logger log.Logger, config Config, component string) (*B
+ 		if err != nil {
+ 			return nil, errors.Wrap(err, "constructing refreshing credentials provider for SkyBroker S3 authentication")
+ 		}
+-		chain = []credential.Provider{provider}
++		chain = []credentials.Provider{provider}
+ 	} else if config.AccessKey != "" {
+ 		chain = []credentials.Provider{wrapCredentialsProvider(&credentials.Static{
+ 			Value: credentials.Value{
+-- 
+2.37.2
+

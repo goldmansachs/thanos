@@ -1,0 +1,72 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "compact",
+    srcs = [
+        "blocks_cleaner.go",
+        "clean.go",
+        "compact.go",
+        "planner.go",
+        "retention.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/pkg/compact",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/block",
+        "//pkg/block/metadata",
+        "//pkg/compact/downsample",
+        "//pkg/errutil",
+        "//pkg/runutil",
+        "//pkg/tracing",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_oklog_ulid//:ulid",
+        "@com_github_opentracing_opentracing_go//:opentracing-go",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_client_golang//prometheus/promauto",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//tsdb",
+        "@com_github_thanos_io_objstore//:objstore",
+        "@org_golang_x_sync//errgroup",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":compact",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "compact_test",
+    srcs = [
+        "clean_test.go",
+        "compact_e2e_test.go",
+        "compact_test.go",
+        "planner_test.go",
+        "retention_test.go",
+    ],
+    embed = [":compact"],
+    deps = [
+        "//pkg/block",
+        "//pkg/block/metadata",
+        "//pkg/compact/downsample",
+        "//pkg/dedup",
+        "//pkg/errutil",
+        "//pkg/extprom",
+        "//pkg/testutil/e2eutil",
+        "@com_github_efficientgo_core//testutil",
+        "@com_github_go_kit_log//:log",
+        "@com_github_oklog_ulid//:ulid",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_client_golang//prometheus/promauto",
+        "@com_github_prometheus_client_golang//prometheus/testutil",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//storage",
+        "@com_github_prometheus_prometheus//tsdb",
+        "@com_github_thanos_io_objstore//:objstore",
+        "@com_github_thanos_io_objstore//objtesting",
+    ],
+)

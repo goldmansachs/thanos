@@ -21,34 +21,6 @@ export const BlockDetails: FC<BlockDetailsProps & PathPrefixProps> = ({
   const [modalAction, setModalAction] = useState<string>('');
   const [detailValue, setDetailValue] = useState<string | null>(null);
 
-  const sizeStats = getBlockSizeStats(block);
-
-  const submitMarkBlock = async (action: string, ulid: string, detail: string | null) => {
-    try {
-      const body = detail
-        ? new URLSearchParams({
-            id: ulid,
-            action,
-            detail,
-          })
-        : new URLSearchParams({
-            id: ulid,
-            action,
-          });
-
-      const response = await fetch(`${pathPrefix}/api/v1/blocks/mark`, {
-        method: 'POST',
-        body,
-      });
-
-      if (!response.ok) {
-        throw new Error(response.statusText);
-      }
-    } finally {
-      setModalAction('');
-    }
-  };
-
   return (
     <div className={`${styles.blockDetails} ${block && styles.open}`}>
       {block && (
@@ -142,30 +114,6 @@ export const BlockDetails: FC<BlockDetailsProps & PathPrefixProps> = ({
               <Button>Download meta.json</Button>
             </a>
           </div>
-          {!disableAdminOperations && (
-            <div>
-              <div style={{ marginTop: '12px' }}>
-                <Button
-                  onClick={() => {
-                    setModalAction('DELETION');
-                    setDetailValue('');
-                  }}
-                >
-                  Mark Deletion
-                </Button>
-              </div>
-              <div style={{ marginTop: '12px' }}>
-                <Button
-                  onClick={() => {
-                    setModalAction('NO_COMPACTION');
-                    setDetailValue('');
-                  }}
-                >
-                  Mark No Compaction
-                </Button>
-              </div>
-            </div>
-          )}
           <Modal isOpen={!!modalAction}>
             <ModalBody>
               <ModalHeader toggle={() => setModalAction('')}>
@@ -174,7 +122,6 @@ export const BlockDetails: FC<BlockDetailsProps & PathPrefixProps> = ({
               <Form
                 onSubmit={(e) => {
                   e.preventDefault();
-                  submitMarkBlock(modalAction, block.ulid, detailValue);
                 }}
               >
                 <Input

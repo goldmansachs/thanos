@@ -44,8 +44,7 @@ func TestShipper_SyncBlocks_e2e(t *testing.T) {
 		dir := t.TempDir()
 
 		extLset := labels.FromStrings("prometheus", "prom-1")
-		shipper := New(log.NewLogfmtLogger(os.Stderr), nil, dir, metricsBucket, func() labels.Labels { return extLset }, metadata.TestSource, nil, false, metadata.NoneFunc, DefaultMetaFilename)
-
+		shipper := New(log.NewLogfmtLogger(os.Stderr), nil, dir, metricsBucket, func() labels.Labels { return extLset }, metadata.TestSource, false, false, metadata.NoneFunc, MetaFilename, UploadDir)
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
@@ -420,7 +419,6 @@ func TestShipper_SyncOverlapBlocks_e2e(t *testing.T) {
 		b, err := shipper.Sync(ctx)
 		testutil.Ok(t, err)
 		testutil.Equals(t, 0, b)
-
 		shipMeta, err := ReadMetaFile(shipper.metadataFilePath)
 		testutil.Ok(t, err)
 		if len(shipMeta.Uploaded) == 0 {

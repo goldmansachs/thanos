@@ -1,0 +1,28 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "migration",
+    srcs = [
+        "bridge.go",
+        "sampler.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/pkg/tracing/migration",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_opentracing_opentracing_go//:opentracing-go",
+        "@io_opentelemetry_go_contrib_propagators_autoprop//:autoprop",
+        "@io_opentelemetry_go_otel//:otel",
+        "@io_opentelemetry_go_otel//attribute",
+        "@io_opentelemetry_go_otel_bridge_opentracing//:opentracing",
+        "@io_opentelemetry_go_otel_sdk//trace",
+        "@io_opentelemetry_go_otel_trace//:trace",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":migration",
+    visibility = ["//visibility:public"],
+)

@@ -1,0 +1,22 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_test")
+
+go_test(
+    name = "interactive_test",
+    srcs = ["interactive_test.go"],
+    deps = [
+        "//pkg/tracing/client",
+        "//pkg/tracing/jaeger",
+        "//test/e2e/e2ethanos",
+        "@com_github_efficientgo_core//testutil",
+        "@com_github_efficientgo_e2e//:e2e",
+        "@com_github_efficientgo_e2e//db",
+        "@com_github_efficientgo_e2e//interactive",
+        "@com_github_efficientgo_e2e//monitoring",
+        "@com_github_efficientgo_e2e//monitoring/promconfig",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_common//model",
+        "@com_github_thanos_io_objstore//client",
+        "@com_github_thanos_io_objstore//providers/s3",
+        "@in_gopkg_yaml_v2//:yaml_v2",
+    ],
+)

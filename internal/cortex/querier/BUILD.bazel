@@ -1,0 +1,15 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "querier",
+    srcs = ["querier.go"],
+    importpath = "github.com/thanos-io/thanos/internal/cortex/querier",
+    visibility = ["//:__subpackages__"],
+    deps = ["//internal/cortex/util/flagext"],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":querier",
+    visibility = ["//:__subpackages__"],
+)

@@ -1,0 +1,47 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "dedup",
+    srcs = [
+        "chunk_iter.go",
+        "iter.go",
+        "pushdown_iter.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/pkg/dedup",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/compact/downsample",
+        "//pkg/store/storepb",
+        "@com_github_prometheus_prometheus//model/histogram",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//storage",
+        "@com_github_prometheus_prometheus//tsdb/chunkenc",
+        "@com_github_prometheus_prometheus//tsdb/chunks",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":dedup",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "dedup_test",
+    srcs = [
+        "chunk_iter_test.go",
+        "iter_test.go",
+    ],
+    embed = [":dedup"],
+    deps = [
+        "//pkg/compact/downsample",
+        "//pkg/store/storepb",
+        "@com_github_efficientgo_core//testutil",
+        "@com_github_prometheus_prometheus//model/histogram",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//storage",
+        "@com_github_prometheus_prometheus//tsdb/chunkenc",
+        "@com_github_prometheus_prometheus//tsdb/chunks",
+        "@com_github_prometheus_prometheus//tsdb/tsdbutil",
+    ],
+)

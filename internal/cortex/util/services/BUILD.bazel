@@ -1,0 +1,18 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "services",
+    srcs = [
+        "basic_service.go",
+        "service.go",
+        "services.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/internal/cortex/util/services",
+    visibility = ["//:__subpackages__"],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":services",
+    visibility = ["//:__subpackages__"],
+)

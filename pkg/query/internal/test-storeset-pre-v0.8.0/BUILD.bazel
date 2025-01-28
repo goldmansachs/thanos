@@ -1,0 +1,49 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "test-storeset-pre-v0_8_0",
+    srcs = ["storeset.go"],
+    importpath = "github.com/thanos-io/thanos/pkg/query/internal/test-storeset-pre-v0.8.0",
+    visibility = ["//pkg/query:__subpackages__"],
+    deps = [
+        "//pkg/component",
+        "//pkg/runutil",
+        "//pkg/store",
+        "//pkg/store/labelpb",
+        "//pkg/store/storepb",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_client_golang//prometheus/promauto",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@org_golang_google_grpc//:go_default_library",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":test-storeset-pre-v0_8_0",
+    visibility = ["//pkg/query:__subpackages__"],
+)
+
+go_test(
+    name = "test-storeset-pre-v0_8_0_test",
+    srcs = ["storeset_test.go"],
+    embed = [":test-storeset-pre-v0_8_0"],
+    deps = [
+        "//pkg/component",
+        "//pkg/store",
+        "//pkg/store/labelpb",
+        "//pkg/store/storepb",
+        "//pkg/testutil/custom",
+        "@com_github_efficientgo_core//testutil",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_google_grpc//codes",
+        "@org_golang_google_grpc//credentials/insecure",
+        "@org_golang_google_grpc//status",
+    ],
+)

@@ -169,7 +169,7 @@ func NewRoundTripperFromConfig(cfg config_util.HTTPClientConfig, transportConfig
 		// Backwards compatibility, be nice with importers who would not have
 		// called Validate().
 		if len(cfg.BearerToken) > 0 {
-			rt = config_util.NewAuthorizationCredentialsRoundTripper("Bearer", config_util.NewInlineSecret(string(cfg.BearerToken)), rt)
+			rt = config_util.NewAuthorizationCredentialsRoundTripper("Bearer", config_util.NewInlineSecret(cfg.BearerToken), rt)
 		} else if len(cfg.BearerTokenFile) > 0 {
 			rt = config_util.NewAuthorizationCredentialsRoundTripper("Bearer", config_util.NewFileSecret(cfg.BearerTokenFile), rt)
 		}
@@ -216,7 +216,7 @@ func NewRoundTripperFromConfig(cfg config_util.HTTPClientConfig, transportConfig
 // NewHTTPClient returns a new HTTP client.
 func NewHTTPClient(cfg HTTPClientConfig, name string) (*http.Client, error) {
 	httpClientConfig := config_util.HTTPClientConfig{
-		BearerToken:     config_util.Secret(cfg.BearerToken),
+		BearerToken:     cfg.BearerToken,
 		BearerTokenFile: cfg.BearerTokenFile,
 		TLSConfig: config_util.TLSConfig{
 			CAFile:             cfg.TLSConfig.CAFile,
@@ -243,7 +243,7 @@ func NewHTTPClient(cfg HTTPClientConfig, name string) (*http.Client, error) {
 	}
 
 	if cfg.BearerToken != "" {
-		httpClientConfig.BearerToken = config_util.Secret(cfg.BearerToken)
+		httpClientConfig.BearerToken = cfg.BearerToken
 	}
 
 	if cfg.BearerTokenFile != "" {

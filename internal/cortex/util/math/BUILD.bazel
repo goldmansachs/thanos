@@ -1,0 +1,14 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "math",
+    srcs = ["math.go"],
+    importpath = "github.com/thanos-io/thanos/internal/cortex/util/math",
+    visibility = ["//:__subpackages__"],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":math",
+    visibility = ["//:__subpackages__"],
+)

@@ -1,0 +1,28 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "flagext",
+    srcs = [
+        "cidr.go",
+        "deprecated.go",
+        "register.go",
+        "secret.go",
+        "stringslice.go",
+        "time.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/internal/cortex/util/flagext",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_client_golang//prometheus/promauto",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":flagext",
+    visibility = ["//:__subpackages__"],
+)

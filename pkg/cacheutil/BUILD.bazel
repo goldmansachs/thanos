@@ -1,0 +1,65 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "cacheutil",
+    srcs = [
+        "cacheutil.go",
+        "jump_hash.go",
+        "memcached_client.go",
+        "memcached_server_selector.go",
+        "redis_client.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/pkg/cacheutil",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/discovery/dns",
+        "//pkg/discovery/memcache",
+        "//pkg/extprom",
+        "//pkg/gate",
+        "//pkg/model",
+        "//pkg/tls",
+        "@com_github_bradfitz_gomemcache//memcache",
+        "@com_github_cespare_xxhash//:xxhash",
+        "@com_github_facette_natsort//:natsort",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_client_golang//prometheus/promauto",
+        "@com_github_rueian_rueidis//:rueidis",
+        "@in_gopkg_yaml_v2//:yaml_v2",
+        "@in_gopkg_yaml_v3//:yaml_v3",
+        "@org_golang_x_sync//errgroup",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":cacheutil",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "cacheutil_test",
+    srcs = [
+        "cacheutil_test.go",
+        "memcached_client_test.go",
+        "memcached_server_selector_test.go",
+        "redis_client_test.go",
+    ],
+    embed = [":cacheutil"],
+    deps = [
+        "//pkg/gate",
+        "//pkg/model",
+        "@com_github_alicebob_miniredis_v2//:miniredis",
+        "@com_github_bradfitz_gomemcache//memcache",
+        "@com_github_efficientgo_core//testutil",
+        "@com_github_facette_natsort//:natsort",
+        "@com_github_go_kit_log//:log",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_client_golang//prometheus/testutil",
+        "@org_uber_go_atomic//:atomic",
+        "@org_uber_go_goleak//:goleak",
+    ],
+)

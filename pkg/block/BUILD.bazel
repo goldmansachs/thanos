@@ -1,0 +1,74 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "block",
+    srcs = [
+        "block.go",
+        "fetcher.go",
+        "index.go",
+        "writer.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/pkg/block",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/block/metadata",
+        "//pkg/errutil",
+        "//pkg/extprom",
+        "//pkg/model",
+        "//pkg/runutil",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_golang_groupcache//singleflight",
+        "@com_github_oklog_ulid//:ulid",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_client_golang//prometheus/promauto",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//model/relabel",
+        "@com_github_prometheus_prometheus//storage",
+        "@com_github_prometheus_prometheus//tsdb",
+        "@com_github_prometheus_prometheus//tsdb/chunks",
+        "@com_github_prometheus_prometheus//tsdb/errors",
+        "@com_github_prometheus_prometheus//tsdb/fileutil",
+        "@com_github_prometheus_prometheus//tsdb/index",
+        "@com_github_thanos_io_objstore//:objstore",
+        "@in_gopkg_yaml_v2//:yaml_v2",
+        "@org_golang_x_sync//errgroup",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":block",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "block_test",
+    srcs = [
+        "block_test.go",
+        "fetcher_test.go",
+        "index_test.go",
+    ],
+    embed = [":block"],
+    deps = [
+        "//pkg/block/metadata",
+        "//pkg/extprom",
+        "//pkg/model",
+        "//pkg/testutil/custom",
+        "//pkg/testutil/e2eutil",
+        "@com_github_efficientgo_core//testutil",
+        "@com_github_go_kit_log//:log",
+        "@com_github_oklog_ulid//:ulid",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_client_golang//prometheus/promauto",
+        "@com_github_prometheus_client_golang//prometheus/testutil",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//tsdb",
+        "@com_github_prometheus_prometheus//tsdb/chunks",
+        "@com_github_prometheus_prometheus//tsdb/index",
+        "@com_github_thanos_io_objstore//:objstore",
+        "@com_github_thanos_io_objstore//objtesting",
+    ],
+)

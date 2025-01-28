@@ -1,0 +1,74 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "cache",
+    srcs = [
+        "cache.go",
+        "caching_bucket_config.go",
+        "groupcache.go",
+        "inmemory.go",
+        "memcached.go",
+        "redis.go",
+        "tracing_cache.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/pkg/cache",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/cacheutil",
+        "//pkg/discovery/dns",
+        "//pkg/extprom",
+        "//pkg/model",
+        "//pkg/runutil",
+        "//pkg/store/cache/cachekey",
+        "//pkg/tracing",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_hashicorp_golang_lru//simplelru",
+        "@com_github_opentracing_opentracing_go//:opentracing-go",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_client_golang//prometheus/promauto",
+        "@com_github_prometheus_common//route",
+        "@com_github_thanos_io_objstore//:objstore",
+        "@com_github_vimeo_galaxycache//:galaxycache",
+        "@com_github_vimeo_galaxycache//http",
+        "@in_gopkg_yaml_v2//:yaml_v2",
+        "@org_golang_x_net//http2",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":cache",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "cache_test",
+    srcs = [
+        "groupcache_test.go",
+        "inmemory_test.go",
+        "memcached_test.go",
+        "redis_test.go",
+    ],
+    embed = [":cache"],
+    deps = [
+        "//pkg/cacheutil",
+        "//pkg/component",
+        "//pkg/discovery/dns",
+        "//pkg/model",
+        "//pkg/prober",
+        "//pkg/server/http",
+        "//pkg/store/cache/cachekey",
+        "@com_github_alicebob_miniredis_v2//:miniredis",
+        "@com_github_efficientgo_core//testutil",
+        "@com_github_go_kit_log//:log",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_client_golang//prometheus/testutil",
+        "@com_github_prometheus_common//route",
+        "@com_github_thanos_io_objstore//:objstore",
+        "@com_github_vimeo_galaxycache//http",
+        "@org_golang_x_net//http2",
+    ],
+)

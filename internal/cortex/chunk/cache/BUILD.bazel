@@ -1,0 +1,77 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "cache",
+    srcs = [
+        "background.go",
+        "cache.go",
+        "cache_gen.go",
+        "fifo_cache.go",
+        "instrumented.go",
+        "memcached.go",
+        "memcached_client.go",
+        "memcached_client_selector.go",
+        "mock.go",
+        "redis_cache.go",
+        "redis_client.go",
+        "snappy.go",
+        "tiered.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/internal/cortex/chunk/cache",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/cortex/util/flagext",
+        "//internal/cortex/util/log",
+        "//internal/cortex/util/math",
+        "//internal/cortex/util/spanlogger",
+        "//pkg/discovery/dns",
+        "@com_github_bradfitz_gomemcache//memcache",
+        "@com_github_cespare_xxhash//:xxhash",
+        "@com_github_dustin_go_humanize//:go-humanize",
+        "@com_github_facette_natsort//:natsort",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_go_redis_redis_v8//:redis",
+        "@com_github_golang_snappy//:snappy",
+        "@com_github_opentracing_opentracing_go//:opentracing-go",
+        "@com_github_opentracing_opentracing_go//log",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_client_golang//prometheus/promauto",
+        "@com_github_sony_gobreaker//:gobreaker",
+        "@com_github_weaveworks_common//instrument",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":cache",
+    visibility = ["//:__subpackages__"],
+)
+
+go_test(
+    name = "cache_test",
+    srcs = [
+        "background_extra_test.go",
+        "background_test.go",
+        "cache_gen_test.go",
+        "cache_test.go",
+        "fifo_cache_test.go",
+        "memcached_client_test.go",
+        "memcached_test.go",
+        "redis_cache_test.go",
+        "redis_client_test.go",
+        "tiered_test.go",
+    ],
+    embed = [":cache"],
+    deps = [
+        "@com_github_alicebob_miniredis_v2//:miniredis",
+        "@com_github_bradfitz_gomemcache//memcache",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_redis_redis_v8//:redis",
+        "@com_github_prometheus_client_golang//prometheus/testutil",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+        "@org_uber_go_atomic//:atomic",
+    ],
+)

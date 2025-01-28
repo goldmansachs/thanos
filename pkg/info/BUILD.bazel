@@ -1,0 +1,19 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "info",
+    srcs = ["info.go"],
+    importpath = "github.com/thanos-io/thanos/pkg/info",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/info/infopb",
+        "//pkg/store/labelpb",
+        "@org_golang_google_grpc//:go_default_library",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":info",
+    visibility = ["//visibility:public"],
+)

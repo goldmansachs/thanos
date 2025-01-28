@@ -1,0 +1,29 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "gate",
+    srcs = ["gate.go"],
+    importpath = "github.com/thanos-io/thanos/pkg/gate",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_client_golang//prometheus/promauto",
+        "@com_github_prometheus_prometheus//util/gate",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":gate",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "gate_test",
+    srcs = ["gate_test.go"],
+    embed = [":gate"],
+    deps = [
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_stretchr_testify//require",
+    ],
+)

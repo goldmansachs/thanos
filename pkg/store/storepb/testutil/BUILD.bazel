@@ -1,0 +1,34 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "testutil",
+    srcs = [
+        "client.go",
+        "series.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/pkg/store/storepb/testutil",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/store/hintspb",
+        "//pkg/store/labelpb",
+        "//pkg/store/storepb",
+        "@com_github_cespare_xxhash//:xxhash",
+        "@com_github_efficientgo_core//testutil",
+        "@com_github_gogo_protobuf//types",
+        "@com_github_prometheus_prometheus//model/histogram",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//storage",
+        "@com_github_prometheus_prometheus//tsdb",
+        "@com_github_prometheus_prometheus//tsdb/chunkenc",
+        "@com_github_prometheus_prometheus//tsdb/chunks",
+        "@com_github_prometheus_prometheus//tsdb/index",
+        "@com_github_prometheus_prometheus//tsdb/wlog",
+        "@org_uber_go_atomic//:atomic",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":testutil",
+    visibility = ["//visibility:public"],
+)

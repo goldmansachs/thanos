@@ -94,6 +94,8 @@ type ProxyStore struct {
 
 type proxyStoreMetrics struct {
 	emptyStreamResponses prometheus.Counter
+	storeResponseFailure prometheus.Counter
+	storeResponseSuccess prometheus.Counter
 }
 
 func newProxyStoreMetrics(reg prometheus.Registerer) *proxyStoreMetrics {
@@ -103,7 +105,14 @@ func newProxyStoreMetrics(reg prometheus.Registerer) *proxyStoreMetrics {
 		Name: "thanos_proxy_store_empty_stream_responses_total",
 		Help: "Total number of empty responses received.",
 	})
-
+	m.storeResponseFailure = promauto.With(reg).NewCounter(prometheus.CounterOpts{
+		Name: "thanos_proxy_store_response_failure_total",
+		Help: "Total number of store request failed.",
+	})
+	m.storeResponseSuccess = promauto.With(reg).NewCounter(prometheus.CounterOpts{
+		Name: "thanos_proxy_store_response_success_total",
+		Help: "Total number of store request succeeded.",
+	})
 	return &m
 }
 
@@ -299,7 +308,7 @@ func (s *ProxyStore) Series(originalRequest *storepb.SeriesRequest, srv storepb.
 	for _, st := range stores {
 		st := st
 
-		respSet, err := newAsyncRespSet(ctx, st, r, s.responseTimeout, s.retrievalStrategy, &s.buffers, r.ShardInfo, reqLogger, s.metrics.emptyStreamResponses)
+		respSet, err := newAsyncRespSet(ctx, st, r, s.responseTimeout, s.retrievalStrategy, &s.buffers, r.ShardInfo, reqLogger, s.metrics)
 		if err != nil {
 			level.Error(reqLogger).Log("err", err)
 

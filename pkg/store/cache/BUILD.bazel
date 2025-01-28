@@ -1,0 +1,71 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "cache",
+    srcs = [
+        "cache.go",
+        "caching_bucket.go",
+        "caching_bucket_factory.go",
+        "factory.go",
+        "inmemory.go",
+        "memcached.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/pkg/store/cache",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/block/metadata",
+        "//pkg/cache",
+        "//pkg/cacheutil",
+        "//pkg/model",
+        "//pkg/runutil",
+        "//pkg/store/cache/cachekey",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_hashicorp_golang_lru//simplelru",
+        "@com_github_oklog_ulid//:ulid",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_client_golang//prometheus/promauto",
+        "@com_github_prometheus_common//route",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//storage",
+        "@com_github_thanos_io_objstore//:objstore",
+        "@in_gopkg_yaml_v2//:yaml_v2",
+        "@org_golang_x_crypto//blake2b",
+        "@org_golang_x_sync//errgroup",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":cache",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "cache_test",
+    srcs = [
+        "cache_test.go",
+        "caching_bucket_test.go",
+        "inmemory_test.go",
+        "memcached_test.go",
+    ],
+    embed = [":cache"],
+    deps = [
+        "//pkg/cache",
+        "//pkg/runutil",
+        "//pkg/store/cache/cachekey",
+        "//pkg/testutil/custom",
+        "@com_github_efficientgo_core//testutil",
+        "@com_github_go_kit_log//:log",
+        "@com_github_hashicorp_golang_lru//simplelru",
+        "@com_github_oklog_ulid//:ulid",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_client_golang//prometheus/testutil",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//storage",
+        "@com_github_thanos_io_objstore//:objstore",
+        "@org_golang_x_crypto//blake2b",
+    ],
+)

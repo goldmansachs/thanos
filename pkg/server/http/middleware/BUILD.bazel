@@ -1,0 +1,15 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "middleware",
+    srcs = ["request_id.go"],
+    importpath = "github.com/thanos-io/thanos/pkg/server/http/middleware",
+    visibility = ["//visibility:public"],
+    deps = ["@com_github_oklog_ulid//:ulid"],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":middleware",
+    visibility = ["//visibility:public"],
+)

@@ -1,0 +1,28 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "tenant",
+    srcs = [
+        "resolver.go",
+        "tenant.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/internal/cortex/tenant",
+    visibility = ["//:__subpackages__"],
+    deps = ["@com_github_weaveworks_common//user"],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":tenant",
+    visibility = ["//:__subpackages__"],
+)
+
+go_test(
+    name = "tenant_test",
+    srcs = ["resolver_test.go"],
+    embed = [":tenant"],
+    deps = [
+        "@com_github_stretchr_testify//assert",
+        "@com_github_weaveworks_common//user",
+    ],
+)
