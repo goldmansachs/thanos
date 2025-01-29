@@ -14,7 +14,6 @@ go_library(
         "@com_github_gogo_protobuf//proto",
         "@com_github_gogo_protobuf//types",
         "@com_github_weaveworks_common//httpgrpc",
-        "@io_bazel_rules_go//proto/wkt:duration_go_proto",
     ],
 )
 

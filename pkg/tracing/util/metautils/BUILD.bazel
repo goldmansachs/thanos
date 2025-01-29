@@ -1,0 +1,29 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "metautils",
+    srcs = [
+        "doc.go",
+        "nicemd.go",
+        "single_key.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/pkg/tracing/util/metautils",
+    visibility = ["//visibility:public"],
+    deps = ["@org_golang_google_grpc//metadata"],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":metautils",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "metautils_test",
+    srcs = ["nicemd_test.go"],
+    deps = [
+        ":metautils",
+        "@com_github_stretchr_testify//assert",
+        "@org_golang_google_grpc//metadata",
+    ],
+)

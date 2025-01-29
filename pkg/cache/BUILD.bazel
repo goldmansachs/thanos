@@ -23,7 +23,7 @@ go_library(
         "//pkg/tracing",
         "@com_github_go_kit_log//:log",
         "@com_github_go_kit_log//level",
-        "@com_github_hashicorp_golang_lru//simplelru",
+        "@com_github_hashicorp_golang_lru//v2/simplelru",
         "@com_github_opentracing_opentracing_go//:opentracing-go",
         "@com_github_pkg_errors//:errors",
         "@com_github_prometheus_client_golang//prometheus",

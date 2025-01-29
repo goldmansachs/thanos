@@ -5,7 +5,6 @@ go_library(
     srcs = ["component.go"],
     importpath = "github.com/thanos-io/thanos/pkg/component",
     visibility = ["//visibility:public"],
-    deps = ["//pkg/store/storepb"],
 )
 
 alias(

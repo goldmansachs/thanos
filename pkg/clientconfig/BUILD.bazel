@@ -26,7 +26,7 @@ go_library(
 
 alias(
     name = "go_default_library",
-    actual = ":httpconfig",
+    actual = ":clientconfig",
     visibility = ["//visibility:public"],
 )
 
@@ -34,5 +34,43 @@ go_test(
     name = "httpconfig_test",
     srcs = ["config_test.go"],
     embed = [":httpconfig"],
+    deps = ["@com_github_efficientgo_core//testutil"],
+)
+
+go_library(
+    name = "clientconfig",
+    srcs = [
+        "config.go",
+        "grpc.go",
+        "http.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/pkg/clientconfig",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/discovery/cache",
+        "//pkg/extprom/http",
+        "@com_github_go_kit_log//:log",
+        "@com_github_mwitkow_go_conntrack//:go-conntrack",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_common//config",
+        "@com_github_prometheus_common//model",
+        "@com_github_prometheus_common//version",
+        "@com_github_prometheus_prometheus//discovery",
+        "@com_github_prometheus_prometheus//discovery/file",
+        "@com_github_prometheus_prometheus//discovery/targetgroup",
+        "@in_gopkg_yaml_v2//:yaml_v2",
+        "@org_golang_x_net//http2",
+    ],
+)
+
+go_test(
+    name = "clientconfig_test",
+    srcs = [
+        "config_test.go",
+        "http_test.go",
+    ],
+    data = glob(["testdata/**"]),
+    embed = [":clientconfig"],
     deps = ["@com_github_efficientgo_core//testutil"],
 )

@@ -1,0 +1,37 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "tenancy",
+    srcs = ["tenancy.go"],
+    importpath = "github.com/thanos-io/thanos/pkg/tenancy",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/extpromql",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_community_prom_label_proxy//injectproxy:go_default_library",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@org_golang_google_grpc//metadata",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":tenancy",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "tenancy_test",
+    srcs = ["tenancy_test.go"],
+    deps = [
+        ":tenancy",
+        "//pkg/component",
+        "//pkg/store",
+        "//pkg/store/storepb",
+        "//pkg/store/storepb/testutil",
+        "@com_github_efficientgo_core//testutil",
+        "@com_github_pkg_errors//:errors",
+        "@org_golang_google_grpc//:grpc",
+        "@org_golang_google_grpc//metadata",
+    ],
+)

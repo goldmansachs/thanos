@@ -6,8 +6,8 @@ go_library(
     importpath = "github.com/thanos-io/thanos/pkg/promclient",
     visibility = ["//visibility:public"],
     deps = [
+        "//pkg/clientconfig",
         "//pkg/exemplars/exemplarspb",
-        "//pkg/httpconfig",
         "//pkg/metadata/metadatapb",
         "//pkg/rules/rulespb",
         "//pkg/runutil",
@@ -18,8 +18,8 @@ go_library(
         "@com_github_go_kit_log//level",
         "@com_github_gogo_status//:status",
         "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_common//expfmt",
         "@com_github_prometheus_common//model",
-        "@com_github_prometheus_prometheus//config",
         "@com_github_prometheus_prometheus//model/labels",
         "@com_github_prometheus_prometheus//model/timestamp",
         "@com_github_prometheus_prometheus//promql",
@@ -37,13 +37,17 @@ alias(
 
 go_test(
     name = "promclient_test",
-    srcs = ["promclient_e2e_test.go"],
+    srcs = [
+        "promclient_e2e_test.go",
+        "promclient_test.go",
+    ],
     embed = [":promclient"],
     deps = [
         "//pkg/block/metadata",
         "//pkg/runutil",
         "//pkg/testutil/e2eutil",
         "@com_github_efficientgo_core//testutil",
+        "@com_github_go_kit_log//:log",
         "@com_github_oklog_ulid//:ulid",
         "@com_github_prometheus_common//model",
         "@com_github_prometheus_prometheus//config",

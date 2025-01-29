@@ -3,7 +3,6 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 go_library(
     name = "log",
     srcs = [
-        "experimental.go",
         "log.go",
         "wrappers.go",
     ],
@@ -12,11 +11,6 @@ go_library(
     deps = [
         "//internal/cortex/tenant",
         "@com_github_go_kit_log//:log",
-        "@com_github_go_kit_log//level",
-        "@com_github_prometheus_client_golang//prometheus",
-        "@com_github_prometheus_client_golang//prometheus/promauto",
-        "@com_github_weaveworks_common//logging",
-        "@com_github_weaveworks_common//server",
         "@com_github_weaveworks_common//tracing",
     ],
 )

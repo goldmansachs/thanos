@@ -1,0 +1,21 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "filter",
+    srcs = [
+        "cuckoo.go",
+        "filter.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/pkg/filter",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_seiflotfy_cuckoofilter//:go_default_library",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":filter",
+    visibility = ["//visibility:public"],
+)

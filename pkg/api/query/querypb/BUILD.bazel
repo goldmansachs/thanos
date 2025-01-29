@@ -3,6 +3,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 go_library(
     name = "querypb",
     srcs = [
+        "plan.go",
         "query.pb.go",
         "responses.go",
         "store_matchers.go",
@@ -14,8 +15,11 @@ go_library(
         "//pkg/store/storepb/prompb",
         "@com_github_gogo_protobuf//gogoproto",
         "@com_github_gogo_protobuf//proto",
+        "@com_github_pkg_errors//:errors",
         "@com_github_prometheus_prometheus//model/labels",
-        "@org_golang_google_grpc//:go_default_library",
+        "@com_github_thanos_io_promql_engine//api:go_default_library",
+        "@com_github_thanos_io_promql_engine//logicalplan:go_default_library",
+        "@org_golang_google_grpc//:grpc",
         "@org_golang_google_grpc//codes",
         "@org_golang_google_grpc//status",
     ],

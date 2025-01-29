@@ -11,6 +11,7 @@ go_library(
         "@com_github_prometheus_prometheus//model/labels",
         "@com_github_prometheus_prometheus//storage",
         "@com_github_prometheus_prometheus//tsdb/chunkenc",
+        "@com_github_prometheus_prometheus//util/annotations",
     ],
 )
 

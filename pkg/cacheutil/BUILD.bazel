@@ -3,6 +3,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 go_library(
     name = "cacheutil",
     srcs = [
+        "async_op.go",
         "cacheutil.go",
         "jump_hash.go",
         "memcached_client.go",
@@ -26,7 +27,8 @@ go_library(
         "@com_github_pkg_errors//:errors",
         "@com_github_prometheus_client_golang//prometheus",
         "@com_github_prometheus_client_golang//prometheus/promauto",
-        "@com_github_rueian_rueidis//:rueidis",
+        "@com_github_redis_rueidis//:go_default_library",
+        "@com_github_sony_gobreaker//:gobreaker",
         "@in_gopkg_yaml_v2//:yaml_v2",
         "@in_gopkg_yaml_v3//:yaml_v3",
         "@org_golang_x_sync//errgroup",
@@ -56,10 +58,13 @@ go_test(
         "@com_github_efficientgo_core//testutil",
         "@com_github_facette_natsort//:natsort",
         "@com_github_go_kit_log//:log",
+        "@com_github_onsi_gomega//:gomega",
+        "@com_github_onsi_gomega//gleak",
         "@com_github_pkg_errors//:errors",
         "@com_github_prometheus_client_golang//prometheus",
         "@com_github_prometheus_client_golang//prometheus/testutil",
+        "@com_github_sony_gobreaker//:gobreaker",
+        "@com_github_stretchr_testify//require",
         "@org_uber_go_atomic//:atomic",
-        "@org_uber_go_goleak//:goleak",
     ],
 )

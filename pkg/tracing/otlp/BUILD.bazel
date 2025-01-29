@@ -15,6 +15,8 @@ go_library(
         "@com_github_go_kit_log//level",
         "@com_github_pkg_errors//:errors",
         "@in_gopkg_yaml_v2//:yaml_v2",
+        "@io_opentelemetry_go_otel//attribute",
+        "@io_opentelemetry_go_otel//semconv/v1.7.0:v1_7_0",
         "@io_opentelemetry_go_otel_exporters_otlp_otlptrace//:otlptrace",
         "@io_opentelemetry_go_otel_exporters_otlp_otlptrace_otlptracegrpc//:otlptracegrpc",
         "@io_opentelemetry_go_otel_exporters_otlp_otlptrace_otlptracehttp//:otlptracehttp",

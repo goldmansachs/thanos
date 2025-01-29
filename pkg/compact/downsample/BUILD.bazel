@@ -28,7 +28,6 @@ go_library(
         "@com_github_prometheus_prometheus//tsdb/chunks",
         "@com_github_prometheus_prometheus//tsdb/fileutil",
         "@com_github_prometheus_prometheus//tsdb/index",
-        "@com_github_prometheus_prometheus//tsdb/tsdbutil",
         "@com_github_thanos_io_objstore//:objstore",
         "@org_golang_x_sync//errgroup",
     ],
@@ -50,6 +49,8 @@ go_test(
     deps = [
         "//pkg/block",
         "//pkg/block/metadata",
+        "//pkg/testutil/custom",
+        "//pkg/testutil/testiters",
         "@com_github_efficientgo_core//testutil",
         "@com_github_go_kit_log//:log",
         "@com_github_pkg_errors//:errors",
@@ -63,6 +64,5 @@ go_test(
         "@com_github_prometheus_prometheus//tsdb/index",
         "@com_github_prometheus_prometheus//tsdb/tombstones",
         "@com_github_prometheus_prometheus//tsdb/tsdbutil",
-        "@org_uber_go_goleak//:goleak",
     ],
 )

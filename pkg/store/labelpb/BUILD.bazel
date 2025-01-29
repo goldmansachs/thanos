@@ -26,7 +26,10 @@ alias(
 
 go_test(
     name = "labelpb_test",
-    srcs = ["label_test.go"],
+    srcs = [
+        "label_test.go",
+        "label_zlabel_test.go",
+    ],
     embed = [":labelpb"],
     deps = [
         "@com_github_efficientgo_core//testutil",

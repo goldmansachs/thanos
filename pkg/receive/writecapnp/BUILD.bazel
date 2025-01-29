@@ -1,0 +1,60 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "writecapnp",
+    srcs = [
+        "client.go",
+        "marshal.go",
+        "write_request.capnp.go",
+        "write_request.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/pkg/receive/writecapnp",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/pool",
+        "//pkg/store/labelpb",
+        "//pkg/store/storepb",
+        "//pkg/store/storepb/prompb",
+        "@com_github_go_kit_log//:log",
+        "@com_github_go_kit_log//level",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_prometheus//model/exemplar",
+        "@com_github_prometheus_prometheus//model/histogram",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@org_capnproto_go_capnp_v3//:go_default_library",
+        "@org_capnproto_go_capnp_v3//encoding/text:go_default_library",
+        "@org_capnproto_go_capnp_v3//flowcontrol:go_default_library",
+        "@org_capnproto_go_capnp_v3//rpc:go_default_library",
+        "@org_capnproto_go_capnp_v3//schemas:go_default_library",
+        "@org_capnproto_go_capnp_v3//server:go_default_library",
+        "@org_golang_google_grpc//:grpc",
+        "@org_golang_google_grpc//codes",
+        "@org_golang_google_grpc//status",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":writecapnp",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "writecapnp_test",
+    srcs = [
+        "marshal_bench_test.go",
+        "marshal_test.go",
+        "write_request_test.go",
+    ],
+    embed = [":writecapnp"],
+    deps = [
+        "//pkg/store/labelpb",
+        "//pkg/store/storepb",
+        "//pkg/store/storepb/prompb",
+        "@com_github_prometheus_prometheus//model/histogram",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//tsdb/tsdbutil",
+        "@com_github_stretchr_testify//require",
+        "@org_capnproto_go_capnp_v3//:go_default_library",
+    ],
+)

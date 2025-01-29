@@ -1,0 +1,48 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "tracing_middleware",
+    srcs = [
+        "client.go",
+        "doc.go",
+        "metadata.go",
+        "options.go",
+        "server.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/pkg/tracing/tracing_middleware",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/tracing/interceptors",
+        "//pkg/tracing/util/metautils",
+        "@com_github_opentracing_opentracing_go//:opentracing-go",
+        "@com_github_opentracing_opentracing_go//ext",
+        "@com_github_opentracing_opentracing_go//log",
+        "@org_golang_google_grpc//:grpc",
+        "@org_golang_google_grpc//grpclog",
+        "@org_golang_google_grpc//metadata",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":tracing_middleware",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "tracing_middleware_test",
+    srcs = ["interceptors_test.go"],
+    deps = [
+        ":tracing_middleware",
+        "//pkg/tracing/tracing_middleware/grpctesting",
+        "//pkg/tracing/tracing_middleware/grpctesting/testpb",
+        "@com_github_opentracing_opentracing_go//:opentracing-go",
+        "@com_github_opentracing_opentracing_go//mocktracer",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+        "@com_github_stretchr_testify//suite",
+        "@org_golang_google_grpc//:grpc",
+        "@org_golang_google_grpc//codes",
+    ],
+)

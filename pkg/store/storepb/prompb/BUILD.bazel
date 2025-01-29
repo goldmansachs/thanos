@@ -3,6 +3,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 go_library(
     name = "prompb",
     srcs = [
+        "custom.go",
         "remote.pb.go",
         "samples.go",
         "types.pb.go",
@@ -14,6 +15,7 @@ go_library(
         "@com_github_gogo_protobuf//gogoproto",
         "@com_github_gogo_protobuf//proto",
         "@com_github_prometheus_common//model",
+        "@com_github_prometheus_prometheus//model/histogram",
         "@com_github_prometheus_prometheus//promql",
     ],
 )

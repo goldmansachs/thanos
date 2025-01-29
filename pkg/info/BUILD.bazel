@@ -8,7 +8,7 @@ go_library(
     deps = [
         "//pkg/info/infopb",
         "//pkg/store/labelpb",
-        "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_google_grpc//:grpc",
     ],
 )
 

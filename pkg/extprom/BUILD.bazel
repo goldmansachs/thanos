@@ -28,8 +28,9 @@ go_test(
     embed = [":extprom"],
     deps = [
         "@com_github_efficientgo_core//testutil",
-        "@com_github_pkg_errors//:errors",
         "@com_github_prometheus_client_golang//prometheus",
         "@com_github_prometheus_client_model//go",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@org_golang_google_protobuf//proto",
     ],
 )

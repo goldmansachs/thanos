@@ -2,7 +2,10 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "pool",
-    srcs = ["pool.go"],
+    srcs = [
+        "pool.go",
+        "worker_pool.go",
+    ],
     importpath = "github.com/thanos-io/thanos/pkg/pool",
     visibility = ["//visibility:public"],
     deps = ["@com_github_pkg_errors//:errors"],
@@ -16,11 +19,15 @@ alias(
 
 go_test(
     name = "pool_test",
-    srcs = ["pool_test.go"],
+    srcs = [
+        "pool_test.go",
+        "worker_pool_test.go",
+    ],
     embed = [":pool"],
     deps = [
         "@com_github_efficientgo_core//testutil",
         "@com_github_pkg_errors//:errors",
+        "@com_github_stretchr_testify//require",
         "@org_uber_go_goleak//:goleak",
     ],
 )

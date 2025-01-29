@@ -1,0 +1,31 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "extpromql",
+    srcs = ["parser.go"],
+    importpath = "github.com/thanos-io/thanos/pkg/extpromql",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_pkg_errors//:errors",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//promql/parser",
+        "@com_github_thanos_io_promql_engine//execution/function:go_default_library",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":extpromql",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "extpromql_test",
+    srcs = ["parser_test.go"],
+    deps = [
+        ":extpromql",
+        "@com_github_efficientgo_core//testutil",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//promql/parser",
+    ],
+)

@@ -15,9 +15,7 @@ go_library(
         "@com_github_gogo_protobuf//proto",
         "@com_github_json_iterator_go//:go",
         "@com_github_prometheus_common//model",
-        "@com_github_prometheus_prometheus//model/exemplar",
         "@com_github_prometheus_prometheus//model/labels",
-        "@com_github_prometheus_prometheus//model/textparse",
     ],
 )
 

@@ -1,0 +1,18 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "testiters",
+    srcs = ["iterators.go"],
+    importpath = "github.com/thanos-io/thanos/pkg/testutil/testiters",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_prometheus_prometheus//model/histogram",
+        "@com_github_prometheus_prometheus//tsdb/chunkenc",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":testiters",
+    visibility = ["//visibility:public"],
+)

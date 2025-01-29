@@ -11,16 +11,17 @@ go_library(
     importpath = "github.com/thanos-io/thanos/pkg/tracing",
     visibility = ["//visibility:public"],
     deps = [
+        "//pkg/server/http/middleware",
         "//pkg/tracing/migration",
+        "//pkg/tracing/tracing_middleware",
         "@com_github_efficientgo_core//testutil",
         "@com_github_go_kit_log//:log",
         "@com_github_go_kit_log//level",
         "@com_github_grpc_ecosystem_go_grpc_middleware_v2//:go-grpc-middleware",
-        "@com_github_grpc_ecosystem_go_grpc_middleware_v2//interceptors/tracing",
         "@com_github_opentracing_opentracing_go//:opentracing-go",
         "@com_github_opentracing_opentracing_go//ext",
         "@io_opentelemetry_go_otel_sdk//trace/tracetest",
-        "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_google_grpc//:grpc",
     ],
 )
 

@@ -8,7 +8,7 @@ go_library(
     deps = [
         "//pkg/alert",
         "//pkg/cacheutil",
-        "//pkg/httpconfig",
+        "//pkg/clientconfig",
         "//pkg/logging",
         "//pkg/queryfrontend",
         "//pkg/store/cache",

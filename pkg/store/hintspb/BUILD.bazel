@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "hintspb",
@@ -12,6 +12,7 @@ go_library(
         "//pkg/store/storepb",
         "@com_github_gogo_protobuf//gogoproto",
         "@com_github_gogo_protobuf//proto",
+        "@com_github_gogo_protobuf//types",
         "@com_github_oklog_ulid//:ulid",
     ],
 )
@@ -20,4 +21,11 @@ alias(
     name = "go_default_library",
     actual = ":hintspb",
     visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "hintspb_test",
+    srcs = ["custom_test.go"],
+    embed = [":hintspb"],
+    deps = ["@com_github_efficientgo_core//testutil"],
 )

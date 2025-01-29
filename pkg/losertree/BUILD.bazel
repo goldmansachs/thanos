@@ -1,0 +1,20 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "losertree",
+    srcs = ["tree.go"],
+    importpath = "github.com/thanos-io/thanos/pkg/losertree",
+    visibility = ["//visibility:public"],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":losertree",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "losertree_test",
+    srcs = ["tree_test.go"],
+    embed = [":losertree"],
+)

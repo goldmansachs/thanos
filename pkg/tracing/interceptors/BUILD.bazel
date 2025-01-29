@@ -1,0 +1,22 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "interceptors",
+    srcs = [
+        "client.go",
+        "reporter.go",
+        "server.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/pkg/tracing/interceptors",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@org_golang_google_grpc//:grpc",
+        "@org_golang_google_grpc//codes",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":interceptors",
+    visibility = ["//visibility:public"],
+)

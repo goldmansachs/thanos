@@ -1,0 +1,28 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "grpctesting",
+    srcs = [
+        "interceptor_suite.go",
+        "mutex_readerwriter.go",
+        "pingservice.go",
+    ],
+    importpath = "github.com/thanos-io/thanos/pkg/tracing/tracing_middleware/grpctesting",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/tracing/tracing_middleware/grpctesting/testpb",
+        "@com_github_stretchr_testify//require",
+        "@com_github_stretchr_testify//suite",
+        "@org_golang_google_grpc//:grpc",
+        "@org_golang_google_grpc//codes",
+        "@org_golang_google_grpc//credentials",
+        "@org_golang_google_grpc//credentials/insecure",
+        "@org_golang_google_grpc//status",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":grpctesting",
+    visibility = ["//visibility:public"],
+)

@@ -1,0 +1,19 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "gogotestpb",
+    srcs = ["fields.pb.go"],
+    importpath = "github.com/thanos-io/thanos/pkg/tracing/tracing_middleware/grpctesting/gogotestpb",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_gogo_protobuf//gogoproto",
+        "@com_github_gogo_protobuf//types",
+        "@com_github_golang_protobuf//proto",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":gogotestpb",
+    visibility = ["//visibility:public"],
+)

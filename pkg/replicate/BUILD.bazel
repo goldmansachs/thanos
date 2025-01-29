@@ -33,6 +33,7 @@ go_library(
         "@com_github_prometheus_prometheus//model/labels",
         "@com_github_thanos_io_objstore//:objstore",
         "@com_github_thanos_io_objstore//client",
+        "@com_github_thanos_io_objstore//tracing/opentracing",
     ],
 )
 

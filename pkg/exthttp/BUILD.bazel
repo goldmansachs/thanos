@@ -3,12 +3,17 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 go_library(
     name = "exthttp",
     srcs = [
+        "hedging.go",
         "tlsconfig.go",
         "transport.go",
     ],
     importpath = "github.com/thanos-io/thanos/pkg/exthttp",
     visibility = ["//visibility:public"],
-    deps = ["@com_github_prometheus_common//model"],
+    deps = [
+        "@com_github_caio_go_tdigest//:go_default_library",
+        "@com_github_cristalhq_hedgedhttp//:go_default_library",
+        "@com_github_prometheus_common//model",
+    ],
 )
 
 alias(

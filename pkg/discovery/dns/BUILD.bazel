@@ -3,6 +3,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 go_library(
     name = "dns",
     srcs = [
+        "grpc.go",
         "provider.go",
         "resolver.go",
     ],
@@ -18,6 +19,7 @@ go_library(
         "@com_github_pkg_errors//:errors",
         "@com_github_prometheus_client_golang//prometheus",
         "@com_github_prometheus_client_golang//prometheus/promauto",
+        "@org_golang_google_grpc//resolver",
     ],
 )
 

@@ -50,6 +50,7 @@ go_test(
         "fetcher_test.go",
         "index_test.go",
     ],
+    data = glob(["testdata/**"]),
     embed = [":block"],
     deps = [
         "//pkg/block/metadata",

@@ -5,7 +5,6 @@ go_library(
     srcs = [
         "chunk_iter.go",
         "iter.go",
-        "pushdown_iter.go",
     ],
     importpath = "github.com/thanos-io/thanos/pkg/dedup",
     visibility = ["//visibility:public"],
@@ -17,6 +16,7 @@ go_library(
         "@com_github_prometheus_prometheus//storage",
         "@com_github_prometheus_prometheus//tsdb/chunkenc",
         "@com_github_prometheus_prometheus//tsdb/chunks",
+        "@com_github_prometheus_prometheus//util/annotations",
     ],
 )
 
@@ -36,6 +36,7 @@ go_test(
     deps = [
         "//pkg/compact/downsample",
         "//pkg/store/storepb",
+        "//pkg/testutil/testiters",
         "@com_github_efficientgo_core//testutil",
         "@com_github_prometheus_prometheus//model/histogram",
         "@com_github_prometheus_prometheus//model/labels",
@@ -43,5 +44,7 @@ go_test(
         "@com_github_prometheus_prometheus//tsdb/chunkenc",
         "@com_github_prometheus_prometheus//tsdb/chunks",
         "@com_github_prometheus_prometheus//tsdb/tsdbutil",
+        "@com_github_prometheus_prometheus//util/annotations",
+        "@com_github_stretchr_testify//require",
     ],
 )

@@ -1,8 +1,11 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "strutil",
-    srcs = ["merge.go"],
+    srcs = [
+        "labels.go",
+        "merge.go",
+    ],
     importpath = "github.com/thanos-io/thanos/pkg/strutil",
     visibility = ["//visibility:public"],
 )
@@ -11,4 +14,14 @@ alias(
     name = "go_default_library",
     actual = ":strutil",
     visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "strutil_test",
+    srcs = [
+        "labels_test.go",
+        "merge_test.go",
+    ],
+    embed = [":strutil"],
+    deps = ["@com_github_efficientgo_core//testutil"],
 )

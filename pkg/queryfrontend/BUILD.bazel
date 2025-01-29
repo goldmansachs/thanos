@@ -31,10 +31,13 @@ go_library(
         "//pkg/api/query",
         "//pkg/cacheutil",
         "//pkg/compact/downsample",
+        "//pkg/exthttp",
+        "//pkg/extpromql",
         "//pkg/model",
         "//pkg/querysharding",
         "//pkg/store/labelpb",
         "//pkg/store/storepb",
+        "//pkg/tenancy",
         "@com_github_efficientgo_tools_extkingpin//:extkingpin",
         "@com_github_go_kit_log//:log",
         "@com_github_go_kit_log//level",
@@ -76,6 +79,7 @@ go_test(
     deps = [
         "//internal/cortex/chunk/cache",
         "//internal/cortex/cortexpb",
+        "//internal/cortex/frontend/transport",
         "//internal/cortex/querier/queryrange",
         "//internal/cortex/util/validation",
         "//pkg/api/query",
@@ -89,5 +93,6 @@ go_test(
         "@com_github_stretchr_testify//require",
         "@com_github_weaveworks_common//httpgrpc",
         "@com_github_weaveworks_common//user",
+        "@org_uber_go_atomic//:atomic",
     ],
 )

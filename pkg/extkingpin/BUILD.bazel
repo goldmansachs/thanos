@@ -11,7 +11,6 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "@com_github_efficientgo_tools_extkingpin//:extkingpin",
-        "@com_github_fsnotify_fsnotify//:fsnotify",
         "@com_github_go_kit_log//:log",
         "@com_github_go_kit_log//level",
         "@com_github_oklog_run//:run",
@@ -34,7 +33,10 @@ go_test(
     srcs = ["path_content_reloader_test.go"],
     embed = [":extkingpin"],
     deps = [
+        "//pkg/runutil",
         "@com_github_efficientgo_core//testutil",
         "@com_github_go_kit_log//:log",
+        "@com_github_pkg_errors//:errors",
+        "@org_uber_go_atomic//:atomic",
     ],
 )

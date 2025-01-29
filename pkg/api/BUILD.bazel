@@ -6,16 +6,19 @@ go_library(
     importpath = "github.com/thanos-io/thanos/pkg/api",
     visibility = ["//visibility:public"],
     deps = [
+        "//pkg/extannotations",
         "//pkg/extprom/http",
         "//pkg/logging",
         "//pkg/server/http/middleware",
         "//pkg/tracing",
         "@com_github_go_kit_log//:log",
         "@com_github_go_kit_log//level",
-        "@com_github_nytimes_gziphandler//:gziphandler",
+        "@com_github_json_iterator_go//:go",
+        "@com_github_klauspost_compress//gzhttp",
         "@com_github_opentracing_opentracing_go//:opentracing-go",
         "@com_github_prometheus_common//route",
         "@com_github_prometheus_common//version",
+        "@com_github_prometheus_prometheus//web/api/v1:api",
     ],
 )
 
@@ -37,5 +40,9 @@ go_test(
         "@com_github_opentracing_opentracing_go//:opentracing-go",
         "@com_github_pkg_errors//:errors",
         "@com_github_prometheus_common//route",
+        "@com_github_prometheus_prometheus//model/labels",
+        "@com_github_prometheus_prometheus//promql",
+        "@com_github_prometheus_prometheus//promql/parser",
+        "@com_github_prometheus_prometheus//web/api/v1:api",
     ],
 )

@@ -26,6 +26,7 @@ go_library(
         "@com_github_prometheus_prometheus//tsdb/errors",
         "@com_github_prometheus_prometheus//tsdb/index",
         "@com_github_prometheus_prometheus//tsdb/tombstones",
+        "@com_github_prometheus_prometheus//util/annotations",
     ],
 )
 
