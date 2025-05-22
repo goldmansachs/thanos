@@ -1,5 +1,0 @@
-alias(
-    name = "go_default_library",
-    actual = ":frontendv2pb",
-    visibility = ["//:__subpackages__"],
-)

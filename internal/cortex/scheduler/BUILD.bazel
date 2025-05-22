@@ -1,5 +1,0 @@
-alias(
-    name = "go_default_library",
-    actual = ":scheduler",
-    visibility = ["//:__subpackages__"],
-)

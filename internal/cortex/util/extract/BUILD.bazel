@@ -1,5 +1,0 @@
-alias(
-    name = "go_default_library",
-    actual = ":extract",
-    visibility = ["//:__subpackages__"],
-)

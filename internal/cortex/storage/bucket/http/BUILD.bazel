@@ -1,5 +1,0 @@
-alias(
-    name = "go_default_library",
-    actual = ":http",
-    visibility = ["//:__subpackages__"],
-)
