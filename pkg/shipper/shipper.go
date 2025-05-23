@@ -79,8 +79,8 @@ type Shipper struct {
 	uploadCompactedFunc    func() bool
 	allowOutOfOrderUploads bool
 	hashFunc               metadata.HashFunc
-	labels func() labels.Labels
-	mtx    sync.RWMutex
+	labels                 func() labels.Labels
+	mtx                    sync.RWMutex
 	metaFilename           string
 	uploadDir              string
 }

@@ -1590,7 +1590,6 @@ func (s *BucketStore) Series(req *storepb.SeriesRequest, seriesSrv storepb.Store
 					stats = blockClient.MergeStats(stats)
 					mtx.Unlock()
 				}
-<<<<<<< HEAD
 
 				if err := blockClient.ExpandPostings(
 					sortedBlockMatchers,
