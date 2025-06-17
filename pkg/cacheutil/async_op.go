@@ -54,14 +54,7 @@ func (p *AsyncOperationProcessor) asyncQueueProcessLoop() {
 		case op := <-p.asyncQueue:
 			op()
 		case <-p.stop:
-			// Run all remaining operations before stopping
-			select {
-			case op := <-p.asyncQueue:
-				op()
-				continue
-			default:
-				return
-			}
+			return
 		}
 	}
 }

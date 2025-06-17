@@ -15,11 +15,6 @@ const (
 	LogFormatJSON   = "json"
 )
 
-type LevelLogger struct {
-	log.Logger
-	LogLevel string
-}
-
 // NewLogger returns a log.Logger that prints in the provided format at the
 // provided level with a UTC timestamp and the caller of the log entry. If non
 // empty, the debug name is also appended as a field to all log lines. Panics
@@ -60,8 +55,5 @@ func NewLogger(logLevel, logFormat, debugName string) log.Logger {
 		logger = log.With(logger, "name", debugName)
 	}
 
-	return LevelLogger{
-		Logger:   logger,
-		LogLevel: logLevel,
-	}
+	return logger
 }

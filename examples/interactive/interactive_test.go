@@ -8,7 +8,6 @@ import (
 	"os"
 	execlib "os/exec"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/efficientgo/e2e"
@@ -330,25 +329,19 @@ func TestReadOnlyThanosSetup(t *testing.T) {
 	//                                                                         │   Sidecar  │◄─────┘
 	//                                                                         └────────────┘
 	//
-
-	storeAPIEndpoints := []string{
-		store1.InternalEndpoint("grpc"),
-		store2.InternalEndpoint("grpc"),
-		sidecarHA0.InternalEndpoint("grpc"),
-		sidecarHA1.InternalEndpoint("grpc"),
-		sidecar2.InternalEndpoint("grpc"),
-		receive1.InternalEndpoint("grpc"),
-	}
-
 	query1 := e2edb.NewThanosQuerier(
 		e,
 		"query1",
-		[]string{},
+		[]string{
+			store1.InternalEndpoint("grpc"),
+			store2.InternalEndpoint("grpc"),
+			sidecarHA0.InternalEndpoint("grpc"),
+			sidecarHA1.InternalEndpoint("grpc"),
+			sidecar2.InternalEndpoint("grpc"),
+			receive1.InternalEndpoint("grpc"),
+		},
 		e2edb.WithImage("thanos:latest"),
-		e2edb.WithFlagOverride(map[string]string{
-			"--tracing.config": string(jaegerConfig),
-			"--endpoint":       strings.Join(storeAPIEndpoints, ","),
-		}),
+		e2edb.WithFlagOverride(map[string]string{"--tracing.config": string(jaegerConfig)}),
 	)
 	testutil.Ok(t, e2e.StartAndWaitReady(query1))
 

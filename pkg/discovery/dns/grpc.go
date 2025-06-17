@@ -23,7 +23,7 @@ type builder struct {
 	logger          log.Logger
 }
 
-func RegisterGRPCResolver(logger log.Logger, provider *Provider, interval time.Duration) {
+func RegisterGRPCResolver(provider *Provider, interval time.Duration, logger log.Logger) {
 	grpcresolver.Register(&builder{
 		resolveInterval: interval,
 		provider:        provider,

@@ -211,7 +211,8 @@ type EndpointSet struct {
 
 	// Endpoint specifications can change dynamically. If some component is missing from the list, we assume it is no longer
 	// accessible and we close gRPC client for it, unless it is strict.
-	endpointSpecs            func() map[string]*GRPCEndpointSpec
+	endpointSpec             func() map[string]*GRPCEndpointSpec
+	dialOpts                 []grpc.DialOption
 	endpointInfoTimeout      time.Duration
 	unhealthyEndpointTimeout time.Duration
 
@@ -234,6 +235,7 @@ func NewEndpointSet(
 	logger log.Logger,
 	reg prometheus.Registerer,
 	endpointSpecs func() []*GRPCEndpointSpec,
+	dialOpts []grpc.DialOption,
 	unhealthyEndpointTimeout time.Duration,
 	endpointInfoTimeout time.Duration,
 	endpointMetricLabels ...string,
@@ -252,17 +254,19 @@ func NewEndpointSet(
 	}
 
 	return &EndpointSet{
-		now:                      now,
-		logger:                   log.With(logger, "component", "endpointset"),
-		endpointsMetric:          endpointsMetric,
+		now:             now,
+		logger:          log.With(logger, "component", "endpointset"),
+		endpointsMetric: endpointsMetric,
+
+		dialOpts:                 dialOpts,
 		endpointInfoTimeout:      endpointInfoTimeout,
 		unhealthyEndpointTimeout: unhealthyEndpointTimeout,
-		endpointSpecs: func() map[string]*GRPCEndpointSpec {
-			res := make(map[string]*GRPCEndpointSpec)
+		endpointSpec: func() map[string]*GRPCEndpointSpec {
+			specs := make(map[string]*GRPCEndpointSpec)
 			for _, s := range endpointSpecs() {
-				res[s.addr] = s
+				specs[s.addr] = s
 			}
-			return res
+			return specs
 		},
 		endpoints: make(map[string]*endpointRef),
 	}
@@ -284,7 +288,7 @@ func (e *EndpointSet) Update(ctx context.Context) {
 		mu sync.Mutex
 	)
 
-	for _, spec := range e.endpointSpecs() {
+	for _, spec := range e.endpointSpec() {
 		spec := spec
 
 		if er, existingRef := e.endpoints[spec.Addr()]; existingRef {
@@ -366,7 +370,7 @@ func (e *EndpointSet) Update(ctx context.Context) {
 		if er.HasStoreAPI() && (er.ComponentType() == component.Sidecar || er.ComponentType() == component.Rule) &&
 			stats[component.Sidecar.String()][extLset]+stats[component.Rule.String()][extLset] > 0 {
 
-			level.Warn(e.logger).Log("msg", "found duplicate storeEndpoints producer (sidecar or ruler). This is not advised as it will malform data in in the same bucket",
+			level.Warn(e.logger).Log("msg", "found duplicate storeEndpoints producer (sidecar or ruler). This is not advices as it will malform data in in the same bucket",
 				"address", addr, "extLset", extLset, "duplicates", fmt.Sprintf("%v", stats[component.Sidecar.String()][extLset]+stats[component.Rule.String()][extLset]+1))
 		}
 		stats[er.ComponentType().String()][extLset]++
@@ -567,7 +571,11 @@ type endpointRef struct {
 // newEndpointRef creates a new endpointRef with a gRPC channel to the given the IP address.
 // The call to newEndpointRef will return an error if establishing the channel fails.
 func (e *EndpointSet) newEndpointRef(spec *GRPCEndpointSpec) (*endpointRef, error) {
-	conn, err := grpc.NewClient(spec.Addr(), spec.dialOpts...)
+	var dialOpts []grpc.DialOption
+
+	dialOpts = append(dialOpts, e.dialOpts...)
+	dialOpts = append(dialOpts, spec.dialOpts...)
+	conn, err := grpc.NewClient(spec.Addr(), dialOpts...)
 	if err != nil {
 		return nil, errors.Wrap(err, "dialing connection")
 	}

@@ -4,9 +4,8 @@
 package store
 
 import (
-	"slices"
-
 	"github.com/prometheus/prometheus/model/labels"
+	"golang.org/x/exp/slices"
 
 	"github.com/thanos-io/thanos/pkg/store/labelpb"
 	"github.com/thanos-io/thanos/pkg/store/storepb"

@@ -34,7 +34,6 @@ import (
 	"github.com/go-kit/log"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/prometheus/common/promslog"
 	"github.com/prometheus/common/route"
 	"github.com/prometheus/prometheus/model/histogram"
 	"github.com/prometheus/prometheus/model/labels"
@@ -53,7 +52,6 @@ import (
 	baseAPI "github.com/thanos-io/thanos/pkg/api"
 	"github.com/thanos-io/thanos/pkg/compact"
 	"github.com/thanos-io/thanos/pkg/component"
-	"github.com/thanos-io/thanos/pkg/dedup"
 	"github.com/thanos-io/thanos/pkg/gate"
 	"github.com/thanos-io/thanos/pkg/query"
 	"github.com/thanos-io/thanos/pkg/rules/rulespb"
@@ -86,30 +84,6 @@ func lookupStats(a, b interface{}) bool {
 	rb := b.(*queryData)
 	return (ra.Stats == nil && rb.Stats == nil) || (ra.Stats != nil && rb.Stats != nil)
 }
-
-var (
-	timeout = 100 * time.Second
-
-	queryFactory = NewQueryFactory(
-		prometheus.NewRegistry(),
-		log.NewNopLogger(),
-		timeout,
-		5*time.Minute,
-		30*time.Second,
-		true,
-		nil,
-		PromqlQueryModeLocal,
-	)
-
-	emptyRemoteEndpointsCreate = query.NewRemoteEndpointsCreator(
-		log.NewNopLogger(),
-		func() []query.Client { return nil },
-		nil,
-		timeout,
-		true,
-		true,
-	)
-)
 
 func testEndpoint(t *testing.T, test endpointTestCase, name string, responseCompareFunc responeCompareFunction) bool {
 	return t.Run(name, func(t *testing.T) {
@@ -210,15 +184,21 @@ func TestQueryEndpoints(t *testing.T) {
 	testutil.Ok(t, app.Commit())
 
 	now := time.Now()
+	timeout := 100 * time.Second
+	ef := NewQueryEngineFactory(promql.EngineOpts{
+		Logger:     nil,
+		Reg:        nil,
+		MaxSamples: 10000,
+		Timeout:    timeout,
+	}, nil, false)
 	api := &QueryAPI{
 		baseAPI: &baseAPI.BaseAPI{
 			Now: func() time.Time { return now },
 		},
-		queryableCreate:       query.NewQueryableCreator(nil, nil, newProxyStoreWithTSDBStore(db), 2, timeout, dedup.AlgorithmPenalty),
-		remoteEndpointsCreate: emptyRemoteEndpointsCreate,
-		queryCreate:           queryFactory,
-		lookbackDeltaCreate:   func(m int64) time.Duration { return time.Duration(0) },
+		queryableCreate:       query.NewQueryableCreator(nil, nil, newProxyStoreWithTSDBStore(db), 2, timeout),
+		engineFactory:         ef,
 		defaultEngine:         PromqlEnginePrometheus,
+		lookbackDeltaCreate:   func(m int64) time.Duration { return time.Duration(0) },
 		gate:                  gate.New(nil, 4, gate.Queries),
 		defaultRangeQueryStep: time.Second,
 		queryRangeHist: promauto.With(prometheus.NewRegistry()).NewHistogram(prometheus.HistogramOpts{
@@ -658,13 +638,18 @@ func TestQueryExplainEndpoints(t *testing.T) {
 
 	now := time.Now()
 	timeout := 100 * time.Second
+	ef := NewQueryEngineFactory(promql.EngineOpts{
+		Logger:     nil,
+		Reg:        nil,
+		MaxSamples: 10000,
+		Timeout:    timeout,
+	}, nil, false)
 	api := &QueryAPI{
 		baseAPI: &baseAPI.BaseAPI{
 			Now: func() time.Time { return now },
 		},
-		queryableCreate:       query.NewQueryableCreator(nil, nil, newProxyStoreWithTSDBStore(db), 2, timeout, dedup.AlgorithmPenalty),
-		remoteEndpointsCreate: emptyRemoteEndpointsCreate,
-		queryCreate:           queryFactory,
+		queryableCreate:       query.NewQueryableCreator(nil, nil, newProxyStoreWithTSDBStore(db), 2, timeout),
+		engineFactory:         ef,
 		defaultEngine:         PromqlEnginePrometheus,
 		lookbackDeltaCreate:   func(m int64) time.Duration { return time.Duration(0) },
 		gate:                  gate.New(nil, 4, gate.Queries),
@@ -722,13 +707,18 @@ func TestQueryAnalyzeEndpoints(t *testing.T) {
 
 	now := time.Now()
 	timeout := 100 * time.Second
+	ef := NewQueryEngineFactory(promql.EngineOpts{
+		Logger:     nil,
+		Reg:        nil,
+		MaxSamples: 10000,
+		Timeout:    timeout,
+	}, nil, false)
 	api := &QueryAPI{
 		baseAPI: &baseAPI.BaseAPI{
 			Now: func() time.Time { return now },
 		},
-		queryableCreate:       query.NewQueryableCreator(nil, nil, newProxyStoreWithTSDBStore(db), 2, timeout, dedup.AlgorithmPenalty),
-		remoteEndpointsCreate: emptyRemoteEndpointsCreate,
-		queryCreate:           queryFactory,
+		queryableCreate:       query.NewQueryableCreator(nil, nil, newProxyStoreWithTSDBStore(db), 2, timeout),
+		engineFactory:         ef,
 		defaultEngine:         PromqlEnginePrometheus,
 		lookbackDeltaCreate:   func(m int64) time.Duration { return time.Duration(0) },
 		gate:                  gate.New(nil, 4, gate.Queries),
@@ -867,7 +857,7 @@ func TestMetadataEndpoints(t *testing.T) {
 		series = append(series, storage.NewListSeries(lbl, samples))
 	}
 
-	_, err := tsdb.CreateBlock(series, dir, chunkRange, promslog.NewNopLogger())
+	_, err := tsdb.CreateBlock(series, dir, chunkRange, log.NewNopLogger())
 	testutil.Ok(t, err)
 
 	opts := tsdb.DefaultOptions()
@@ -891,16 +881,21 @@ func TestMetadataEndpoints(t *testing.T) {
 
 	now := time.Now()
 	timeout := 100 * time.Second
+	ef := NewQueryEngineFactory(promql.EngineOpts{
+		Logger:     nil,
+		Reg:        nil,
+		MaxSamples: 10000,
+		Timeout:    timeout,
+	}, nil, false)
 	api := &QueryAPI{
 		baseAPI: &baseAPI.BaseAPI{
 			Now: func() time.Time { return now },
 		},
-		queryableCreate:       query.NewQueryableCreator(nil, nil, newProxyStoreWithTSDBStore(db), 2, timeout, dedup.AlgorithmPenalty),
-		remoteEndpointsCreate: emptyRemoteEndpointsCreate,
-		queryCreate:           queryFactory,
-		defaultEngine:         PromqlEnginePrometheus,
-		lookbackDeltaCreate:   func(m int64) time.Duration { return time.Duration(0) },
-		gate:                  gate.New(nil, 4, gate.Queries),
+		queryableCreate:     query.NewQueryableCreator(nil, nil, newProxyStoreWithTSDBStore(db), 2, timeout),
+		engineFactory:       ef,
+		defaultEngine:       PromqlEnginePrometheus,
+		lookbackDeltaCreate: func(m int64) time.Duration { return time.Duration(0) },
+		gate:                gate.New(nil, 4, gate.Queries),
 		queryRangeHist: promauto.With(prometheus.NewRegistry()).NewHistogram(prometheus.HistogramOpts{
 			Name: "query_range_hist",
 		}),
@@ -912,9 +907,8 @@ func TestMetadataEndpoints(t *testing.T) {
 		baseAPI: &baseAPI.BaseAPI{
 			Now: func() time.Time { return now },
 		},
-		queryableCreate:          query.NewQueryableCreator(nil, nil, newProxyStoreWithTSDBStore(db), 2, timeout, dedup.AlgorithmPenalty),
-		remoteEndpointsCreate:    emptyRemoteEndpointsCreate,
-		queryCreate:              queryFactory,
+		queryableCreate:          query.NewQueryableCreator(nil, nil, newProxyStoreWithTSDBStore(db), 2, timeout),
+		engineFactory:            ef,
 		defaultEngine:            PromqlEnginePrometheus,
 		lookbackDeltaCreate:      func(m int64) time.Duration { return time.Duration(0) },
 		gate:                     gate.New(nil, 4, gate.Queries),
@@ -2178,9 +2172,4 @@ func (s sample) FH() *histogram.FloatHistogram {
 
 func (s sample) Type() chunkenc.ValueType {
 	return chunkenc.ValFloat
-}
-
-func (s sample) Copy() chunks.Sample {
-	c := sample{t: s.t, f: s.f}
-	return c
 }

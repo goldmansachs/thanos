@@ -71,20 +71,10 @@ fi
 # Setup alert / rules config file.
 cat >data/rules.yml <<-EOF
 	groups:
-    - name: example
-      rules:
-        - record: job:go_threads:sum
-          expr: sum(go_threads) by (job)
-          labels:
-            test: label
-
-    - name: alert
-      rules:
-        - alert: HighGoThreads
-          expr: sum(go_threads) by (job) > 100
-          for: 1m
-          labels:
-            severity: page
+	  - name: example
+	    rules:
+	    - record: job:go_threads:sum
+	      expr: sum(go_threads) by (job)
 EOF
 
 STORES=""

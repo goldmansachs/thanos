@@ -15,15 +15,9 @@ import (
 	"github.com/thanos-io/thanos/pkg/store/storepb"
 )
 
-const (
-	AlgorithmPenalty = "penalty"
-	AlgorithmChain   = "chain"
-)
-
 type dedupSeriesSet struct {
-	set               storage.SeriesSet
-	isCounter         bool
-	deduplicationFunc string
+	set       storage.SeriesSet
+	isCounter bool
 
 	replicas []storage.Series
 
@@ -108,9 +102,9 @@ func (o *overlapSplitSet) Err() error {
 
 // NewSeriesSet returns seriesSet that deduplicates the same series.
 // The series in series set are expected be sorted by all labels.
-func NewSeriesSet(set storage.SeriesSet, f string, deduplicationFunc string) storage.SeriesSet {
+func NewSeriesSet(set storage.SeriesSet, f string) storage.SeriesSet {
 	// TODO: remove dependency on knowing whether it is a counter.
-	s := &dedupSeriesSet{set: set, isCounter: isCounter(f), f: f, deduplicationFunc: deduplicationFunc}
+	s := &dedupSeriesSet{set: set, isCounter: isCounter(f), f: f}
 	s.ok = s.set.Next()
 	if s.ok {
 		s.peek = s.set.At()
@@ -160,11 +154,7 @@ func (s *dedupSeriesSet) At() storage.Series {
 	repl := make([]storage.Series, len(s.replicas))
 	copy(repl, s.replicas)
 
-	if s.deduplicationFunc == AlgorithmChain {
-		return seriesWithLabels{Series: storage.ChainedSeriesMerge(repl...), lset: s.lset}
-	} else {
-		return newDedupSeries(s.lset, repl, s.f)
-	}
+	return newDedupSeries(s.lset, repl, s.f)
 }
 
 func (s *dedupSeriesSet) Err() error {

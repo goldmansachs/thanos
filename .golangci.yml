@@ -38,6 +38,7 @@ linters:
     - typecheck
     - unparam
     - unused
+    - exportloopref
     - promlinter
 
 linters-settings:

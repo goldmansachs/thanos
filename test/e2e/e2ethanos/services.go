@@ -17,7 +17,9 @@ import (
 	e2edb "github.com/efficientgo/e2e/db"
 	e2eobs "github.com/efficientgo/e2e/observable"
 	"github.com/pkg/errors"
+	"github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/config"
+	"github.com/prometheus/prometheus/discovery/targetgroup"
 	"github.com/prometheus/prometheus/model/relabel"
 	"gopkg.in/yaml.v2"
 
@@ -63,11 +65,6 @@ const (
 // DefaultPrometheusImage sets default Prometheus image used in e2e service.
 func DefaultPrometheusImage() string {
 	return "quay.io/prometheus/prometheus:v2.41.0"
-}
-
-// DefaultOtelImage sets default Otel image used in e2e service.
-func DefaultOtelImage() string {
-	return "otel/opentelemetry-collector-contrib:0.116.1"
 }
 
 // DefaultAlertmanagerImage sets default Alertmanager image used in e2e service.
@@ -130,30 +127,6 @@ func NewPrometheus(e e2e.Environment, name, promConfig, webConfig, promImage str
 		Image:     promImage,
 		Command:   e2e.NewCommandWithoutEntrypoint("prometheus", args...),
 		Readiness: probe,
-	})), "http")
-}
-
-func NewOtel(e e2e.Environment, name, otelConfig, otelImage string) *e2eobs.Observable {
-	f := e.Runnable(name).WithPorts(map[string]int{"http": 9090}).Future()
-	if err := os.MkdirAll(f.Dir(), 0750); err != nil {
-		return &e2eobs.Observable{Runnable: e2e.NewFailedRunnable(name, errors.Wrap(err, "create otel dir"))}
-	}
-
-	if err := os.WriteFile(filepath.Join(f.Dir(), "otel.yaml"), []byte(otelConfig), 0600); err != nil {
-		return &e2eobs.Observable{Runnable: e2e.NewFailedRunnable(name, errors.Wrap(err, "creating otel config"))}
-	}
-
-	//probe := e2e.NewHTTPReadinessProbe("http", "/-/ready", 200, 200)
-	args := e2e.BuildArgs(map[string]string{
-		"--config": filepath.Join(f.InternalDir(), "otel.yaml"),
-		//"--log.level":                       infoLogLevel,
-		//"--web.listen-address":              ":9090",
-	})
-
-	return e2eobs.AsObservable(f.Init(wrapWithDefaults(e2e.StartOptions{
-		Image:   otelImage,
-		Command: e2e.NewCommandWithoutEntrypoint("/otelcol-contrib", args...),
-		//Readiness: probe,
 	})), "http")
 }
 
@@ -281,11 +254,9 @@ type QuerierBuilder struct {
 	endpoints               []string
 	strictEndpoints         []string
 
-	engine                                  apiv1.PromqlEngineType
-	queryMode                               string
-	queryDistributedWithOverlappingInterval bool
-	enableXFunctions                        bool
-	deduplicationFunc                       string
+	engine           apiv1.PromqlEngineType
+	queryMode        string
+	enableXFunctions bool
 
 	replicaLabels []string
 	tracingConfig string
@@ -405,18 +376,9 @@ func (q *QuerierBuilder) WithQueryMode(mode string) *QuerierBuilder {
 	q.queryMode = mode
 	return q
 }
-func (q *QuerierBuilder) WithDistributedOverlap(overlap bool) *QuerierBuilder {
-	q.queryDistributedWithOverlappingInterval = overlap
-	return q
-}
 
 func (q *QuerierBuilder) WithEnableXFunctions() *QuerierBuilder {
 	q.enableXFunctions = true
-	return q
-}
-
-func (q *QuerierBuilder) WithDeduplicationFunc(deduplicationFunc string) *QuerierBuilder {
-	q.deduplicationFunc = deduplicationFunc
 	return q
 }
 
@@ -467,25 +429,26 @@ func (q *QuerierBuilder) collectArgs() ([]string, error) {
 		"--store.sd-dns-interval": "5s",
 		"--log.level":             infoLogLevel,
 		"--query.max-concurrent":  "1",
+		"--store.sd-interval":     "5s",
 	})
 
 	for _, repl := range q.replicaLabels {
 		args = append(args, "--query.replica-label="+repl)
 	}
 	for _, addr := range q.storeAddresses {
-		args = append(args, "--endpoint="+addr)
+		args = append(args, "--store="+addr)
 	}
 	for _, addr := range q.ruleAddresses {
-		args = append(args, "--endpoint="+addr)
+		args = append(args, "--rule="+addr)
 	}
 	for _, addr := range q.targetAddresses {
-		args = append(args, "--endpoint="+addr)
+		args = append(args, "--target="+addr)
 	}
 	for _, addr := range q.metadataAddresses {
-		args = append(args, "--endpoint="+addr)
+		args = append(args, "--metadata="+addr)
 	}
 	for _, addr := range q.exemplarAddresses {
-		args = append(args, "--endpoint="+addr)
+		args = append(args, "--exemplar="+addr)
 	}
 	for _, feature := range q.enableFeatures {
 		args = append(args, "--enable-feature="+feature)
@@ -507,27 +470,21 @@ func (q *QuerierBuilder) collectArgs() ([]string, error) {
 			return nil, errors.Wrap(err, "create query dir failed")
 		}
 
-		type EndpointSpec struct{ Address string }
-
-		endpoints := make([]EndpointSpec, 0)
+		fileSD := []*targetgroup.Group{{}}
 		for _, a := range q.fileSDStoreAddresses {
-			endpoints = append(endpoints, EndpointSpec{Address: a})
+			fileSD[0].Targets = append(fileSD[0].Targets, model.LabelSet{model.AddressLabel: model.LabelValue(a)})
 		}
 
-		endpointSDConfig := struct {
-			Endpoints []EndpointSpec `yaml:"endpoints"`
-		}{Endpoints: endpoints}
-		b, err := yaml.Marshal(endpointSDConfig)
+		b, err := yaml.Marshal(fileSD)
 		if err != nil {
 			return nil, err
 		}
 
-		if err := os.WriteFile(q.Dir()+"/endpoint-sd-config.yaml", b, 0600); err != nil {
+		if err := os.WriteFile(q.Dir()+"/filesd.yaml", b, 0600); err != nil {
 			return nil, errors.Wrap(err, "creating query SD config failed")
 		}
 
-		args = append(args, "--endpoint.sd-config-file="+filepath.Join(q.InternalDir(), "endpoint-sd-config.yaml"))
-		args = append(args, "--endpoint.sd-config-reload-interval=5s")
+		args = append(args, "--store.sd-files="+filepath.Join(q.InternalDir(), "filesd.yaml"))
 	}
 	if q.routePrefix != "" {
 		args = append(args, "--web.route-prefix="+q.routePrefix)
@@ -556,23 +513,15 @@ func (q *QuerierBuilder) collectArgs() ([]string, error) {
 	if q.queryMode != "" {
 		args = append(args, "--query.mode="+q.queryMode)
 	}
-	if q.queryDistributedWithOverlappingInterval {
-		args = append(args, "--query.distributed-with-overlapping-interval")
-	}
 	if q.engine != "" {
 		args = append(args, "--query.promql-engine="+string(q.engine))
 	}
 	if q.relabelConfig != "" {
 		args = append(args, "--selector.relabel-config="+q.relabelConfig)
 	}
-	if q.deduplicationFunc != "" {
-		args = append(args, "--deduplication.func="+q.deduplicationFunc)
-	}
 
 	return args, nil
 }
-
-func OTLPEndpoint(addr string) string { return fmt.Sprintf("http://%s", addr) }
 
 func RemoteWriteEndpoint(addr string) string { return fmt.Sprintf("http://%s/api/v1/receive", addr) }
 
@@ -589,21 +538,20 @@ type ReceiveBuilder struct {
 
 	f e2e.FutureRunnable
 
-	maxExemplars          int
-	capnp                 bool
-	ingestion             bool
-	expandedPostingsCache bool
-	limit                 int
-	tenantsLimits         receive.TenantsWriteLimitsConfig
-	metaMonitoring        string
-	metaMonitoringQuery   string
-	hashringConfigs       []receive.HashringConfig
-	relabelConfigs        []*relabel.Config
-	replication           int
-	image                 string
-	nativeHistograms      bool
-	labels                []string
-	tenantSplitLabel      string
+	maxExemplars        int
+	capnp               bool
+	ingestion           bool
+	limit               int
+	tenantsLimits       receive.TenantsWriteLimitsConfig
+	metaMonitoring      string
+	metaMonitoringQuery string
+	hashringConfigs     []receive.HashringConfig
+	relabelConfigs      []*relabel.Config
+	replication         int
+	image               string
+	nativeHistograms    bool
+	labels              []string
+	tenantSplitLabel    string
 }
 
 func NewReceiveBuilder(e e2e.Environment, name string) *ReceiveBuilder {
@@ -631,11 +579,6 @@ func (r *ReceiveBuilder) WithExemplarsInMemStorage(maxExemplars int) *ReceiveBui
 
 func (r *ReceiveBuilder) WithIngestionEnabled() *ReceiveBuilder {
 	r.ingestion = true
-	return r
-}
-
-func (r *ReceiveBuilder) WithExpandedPostingsCache() *ReceiveBuilder {
-	r.expandedPostingsCache = true
 	return r
 }
 
@@ -716,11 +659,6 @@ func (r *ReceiveBuilder) Init() *e2eobs.Observable {
 	hashring := r.hashringConfigs
 	if len(hashring) > 0 && r.ingestion {
 		args["--receive.local-endpoint"] = r.InternalEndpoint("grpc")
-	}
-
-	if r.expandedPostingsCache {
-		args["--tsdb.head.expanded-postings-cache-size"] = "1000"
-		args["--tsdb.block.expanded-postings-cache-size"] = "1000"
 	}
 
 	if r.limit != 0 && r.metaMonitoring != "" {
@@ -1297,53 +1235,6 @@ rule_files:
 -  "%s"
 `, config, ruleFile)
 	}
-
-	return config
-}
-
-// DefaultOtelConfig returns Otel config that sets Otel to:
-// * expose 2 external labels, source and replica.
-// * optionally scrape self. This will produce up == 0 metric which we can assert on.
-// * optionally remote write endpoint to write into.
-func DefaultOtelConfig(remoteWriteEndpoint string) string {
-	config := fmt.Sprintf(`
-receivers:
-  otlp:
-    protocols:
-      grpc:
-        endpoint: 0.0.0.0:4317
-      http:
-        endpoint: 0.0.0.0:4318
-  prometheus:
-    config:
-      scrape_configs:
-        - job_name: otel-collector
-          scrape_interval: 5s
-          static_configs:
-            - targets: [localhost:8888]
-exporters:
-  otlphttp/thanos:
-    metrics_endpoint: "%s/api/v1/otlp"
-    tls:
-      insecure: true
-  debug:
-    verbosity: detailed
-extensions:
-  health_check:
-  pprof:
-service:
-  telemetry:
-    logs:
-      level: "debug"
-  extensions: [pprof, health_check]
-  pipelines:
-    metrics:
-      receivers:
-        - prometheus
-        - otlp
-      exporters:
-        - otlphttp/thanos
-`, remoteWriteEndpoint)
 
 	return config
 }

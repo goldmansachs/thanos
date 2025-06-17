@@ -6,7 +6,6 @@ package store
 import (
 	"context"
 	"math"
-	"slices"
 	"strings"
 
 	"github.com/go-kit/log/level"
@@ -15,6 +14,7 @@ import (
 	"github.com/prometheus/prometheus/model/labels"
 	"github.com/prometheus/prometheus/storage"
 	"github.com/prometheus/prometheus/tsdb/index"
+	"golang.org/x/exp/slices"
 
 	"github.com/thanos-io/thanos/pkg/block/indexheader"
 )
@@ -39,15 +39,7 @@ func (p *lazyExpandedPostings) lazyExpanded() bool {
 	return p != nil && len(p.matchers) > 0
 }
 
-func optimizePostingsFetchByDownloadedBytes(
-	r *bucketIndexReader,
-	postingGroups []*postingGroup,
-	seriesMaxSize int64,
-	seriesMatchRatio float64,
-	postingGroupMaxKeySeriesRatio float64,
-	lazyExpandedPostingSizeBytes prometheus.Counter,
-	lazyExpandedPostingGroupsByReason *prometheus.CounterVec,
-) ([]*postingGroup, bool, error) {
+func optimizePostingsFetchByDownloadedBytes(r *bucketIndexReader, postingGroups []*postingGroup, seriesMaxSize int64, seriesMatchRatio float64, lazyExpandedPostingSizeBytes prometheus.Counter) ([]*postingGroup, bool, error) {
 	if len(postingGroups) <= 1 {
 		return postingGroups, false, nil
 	}
@@ -63,7 +55,6 @@ func optimizePostingsFetchByDownloadedBytes(
 			return nil, false, errors.Wrapf(err, "postings offsets for %s", pg.name)
 		}
 
-		existentKeys := 0
 		for _, rng := range rngs {
 			if rng == indexheader.NotFoundRange {
 				continue
@@ -72,16 +63,14 @@ func optimizePostingsFetchByDownloadedBytes(
 				level.Error(r.logger).Log("msg", "invalid index range, fallback to non lazy posting optimization")
 				return postingGroups, false, nil
 			}
-			existentKeys++
 			// Each range starts from the #entries field which is 4 bytes.
 			// Need to subtract it when calculating number of postings.
 			// https://github.com/prometheus/prometheus/blob/v2.46.0/tsdb/docs/format/index.md.
 			pg.cardinality += (rng.End - rng.Start - 4) / 4
 		}
-		pg.existentKeys = existentKeys
 		// If the posting group adds keys, 0 cardinality means the posting doesn't exist.
 		// If the posting group removes keys, no posting ranges found is fine as it is a noop.
-		if len(pg.addKeys) > 0 && pg.existentKeys == 0 {
+		if len(pg.addKeys) > 0 && pg.cardinality == 0 {
 			return nil, true, nil
 		}
 	}
@@ -153,7 +142,6 @@ func optimizePostingsFetchByDownloadedBytes(
 
 	// Assume only seriesMatchRatio postings will be matched every posting group.
 	seriesMatched := postingGroups[i].cardinality - int64(math.Ceil(float64(negativeCardinalities)*seriesMatchRatio))
-	maxSeriesMatched := seriesMatched
 	i++ // Start from next posting group as we always need to fetch at least one posting group with add keys.
 	for i < len(postingGroups) {
 		pg := postingGroups[i]
@@ -165,13 +153,6 @@ func optimizePostingsFetchByDownloadedBytes(
 		// is <= 0, we stop early and mark rest of posting groups as lazy.
 		if seriesMatched <= 0 {
 			break
-		}
-		// Only mark posting group as lazy due to too many keys when those keys are known to be existent.
-		if postingGroupMaxKeySeriesRatio > 0 && maxSeriesMatched > 0 &&
-			float64(pg.existentKeys)/float64(maxSeriesMatched) > postingGroupMaxKeySeriesRatio {
-			markPostingGroupLazy(pg, "keys_limit", lazyExpandedPostingSizeBytes, lazyExpandedPostingGroupsByReason)
-			i++
-			continue
 		}
 		if pg.addAll {
 			// For posting group that has negative matchers, we assume we can underfetch
@@ -195,16 +176,11 @@ func optimizePostingsFetchByDownloadedBytes(
 		i++
 	}
 	for i < len(postingGroups) {
-		markPostingGroupLazy(postingGroups[i], "postings_size", lazyExpandedPostingSizeBytes, lazyExpandedPostingGroupsByReason)
+		postingGroups[i].lazy = true
+		lazyExpandedPostingSizeBytes.Add(float64(4 * postingGroups[i].cardinality))
 		i++
 	}
 	return postingGroups, false, nil
-}
-
-func markPostingGroupLazy(pg *postingGroup, reason string, lazyExpandedPostingSizeBytes prometheus.Counter, lazyExpandedPostingGroupsByReason *prometheus.CounterVec) {
-	pg.lazy = true
-	lazyExpandedPostingSizeBytes.Add(float64(4 * pg.cardinality))
-	lazyExpandedPostingGroupsByReason.WithLabelValues(reason).Inc()
 }
 
 func fetchLazyExpandedPostings(
@@ -214,10 +190,7 @@ func fetchLazyExpandedPostings(
 	bytesLimiter BytesLimiter,
 	addAllPostings bool,
 	lazyExpandedPostingEnabled bool,
-	seriesMatchRatio float64,
-	postingGroupMaxKeySeriesRatio float64,
 	lazyExpandedPostingSizeBytes prometheus.Counter,
-	lazyExpandedPostingGroupsByReason *prometheus.CounterVec,
 	tenant string,
 ) (*lazyExpandedPostings, error) {
 	var (
@@ -238,10 +211,8 @@ func fetchLazyExpandedPostings(
 			r,
 			postingGroups,
 			int64(r.block.estimatedMaxSeriesSize),
-			seriesMatchRatio,
-			postingGroupMaxKeySeriesRatio,
+			0.5, // TODO(yeya24): Expose this as a flag.
 			lazyExpandedPostingSizeBytes,
-			lazyExpandedPostingGroupsByReason,
 		)
 		if err != nil {
 			return nil, err
@@ -272,25 +243,27 @@ func keysToFetchFromPostingGroups(postingGroups []*postingGroup) ([]labels.Label
 	for i < len(postingGroups) {
 		pg := postingGroups[i]
 		if pg.lazy {
-			if len(lazyMatchers) == 0 {
-				lazyMatchers = make([]*labels.Matcher, 0)
-			}
-			lazyMatchers = append(lazyMatchers, postingGroups[i].matchers...)
-		} else {
-			// Postings returned by fetchPostings will be in the same order as keys
-			// so it's important that we iterate them in the same order later.
-			// We don't have any other way of pairing keys and fetched postings.
-			for _, key := range pg.addKeys {
-				keys = append(keys, labels.Label{Name: pg.name, Value: key})
-			}
-			for _, key := range pg.removeKeys {
-				keys = append(keys, labels.Label{Name: pg.name, Value: key})
-			}
+			break
 		}
 
+		// Postings returned by fetchPostings will be in the same order as keys
+		// so it's important that we iterate them in the same order later.
+		// We don't have any other way of pairing keys and fetched postings.
+		for _, key := range pg.addKeys {
+			keys = append(keys, labels.Label{Name: pg.name, Value: key})
+		}
+		for _, key := range pg.removeKeys {
+			keys = append(keys, labels.Label{Name: pg.name, Value: key})
+		}
 		i++
 	}
-
+	if i < len(postingGroups) {
+		lazyMatchers = make([]*labels.Matcher, 0)
+		for i < len(postingGroups) {
+			lazyMatchers = append(lazyMatchers, postingGroups[i].matchers...)
+			i++
+		}
+	}
 	return keys, lazyMatchers
 }
 
@@ -306,19 +279,6 @@ func fetchAndExpandPostingGroups(ctx context.Context, r *bucketIndexReader, post
 		return nil, nil, errors.Wrap(err, "get postings")
 	}
 
-	result := mergeFetchedPostings(ctx, fetchedPostings, postingGroups)
-	if err := ctx.Err(); err != nil {
-		return nil, nil, err
-	}
-	ps, err := ExpandPostingsWithContext(ctx, result)
-	r.postings = ps
-	if err != nil {
-		return nil, nil, errors.Wrap(err, "expand")
-	}
-	return ps, lazyMatchers, nil
-}
-
-func mergeFetchedPostings(ctx context.Context, fetchedPostings []index.Postings, postingGroups []*postingGroup) index.Postings {
 	// Get "add" and "remove" postings from groups. We iterate over postingGroups and their keys
 	// again, and this is exactly the same order as before (when building the groups), so we can simply
 	// use one incrementing index to fetch postings from returned slice.
@@ -327,7 +287,7 @@ func mergeFetchedPostings(ctx context.Context, fetchedPostings []index.Postings,
 	var groupAdds, groupRemovals []index.Postings
 	for _, g := range postingGroups {
 		if g.lazy {
-			continue
+			break
 		}
 		// We cannot add empty set to groupAdds, since they are intersected.
 		if len(g.addKeys) > 0 {
@@ -347,5 +307,13 @@ func mergeFetchedPostings(ctx context.Context, fetchedPostings []index.Postings,
 	}
 
 	result := index.Without(index.Intersect(groupAdds...), index.Merge(ctx, groupRemovals...))
-	return result
+
+	if err := ctx.Err(); err != nil {
+		return nil, nil, err
+	}
+	ps, err := ExpandPostingsWithContext(ctx, result)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "expand")
+	}
+	return ps, lazyMatchers, nil
 }

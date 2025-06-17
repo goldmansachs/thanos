@@ -7,18 +7,21 @@ import (
 	"fmt"
 	"math"
 	"path/filepath"
-	"slices"
 	"sort"
 	"strconv"
 	"strings"
 	"sync"
 
-	"github.com/cespare/xxhash/v2"
+	"github.com/cespare/xxhash"
+	"golang.org/x/exp/slices"
+
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
+
 	"github.com/pkg/errors"
 
 	"github.com/thanos-io/thanos/pkg/store/labelpb"
+
 	"github.com/thanos-io/thanos/pkg/store/storepb/prompb"
 )
 
@@ -241,42 +244,13 @@ func (c ketamaHashring) GetN(tenant string, ts *prompb.TimeSeries, n uint64) (En
 	return c.endpoints[endpointIndex], nil
 }
 
-type tenantSet map[string]tenantMatcher
-
-func (t tenantSet) match(tenant string) (bool, error) {
-	// Fast path for the common case of direct match.
-	if mt, ok := t[tenant]; ok && isExactMatcher(mt) {
-		return true, nil
-	} else {
-		for tenantPattern, matcherType := range t {
-			switch matcherType {
-			case TenantMatcherGlob:
-				matches, err := filepath.Match(tenantPattern, tenant)
-				if err != nil {
-					return false, fmt.Errorf("error matching tenant pattern %s (tenant %s): %w", tenantPattern, tenant, err)
-				}
-				if matches {
-					return true, nil
-				}
-			case TenantMatcherTypeExact:
-				// Already checked above, skipping.
-				fallthrough
-			default:
-				continue
-			}
-
-		}
-	}
-	return false, nil
-}
-
 // multiHashring represents a set of hashrings.
 // Which hashring to use for a tenant is determined
 // by the tenants field of the hashring configuration.
 type multiHashring struct {
 	cache      map[string]Hashring
 	hashrings  []Hashring
-	tenantSets []tenantSet
+	tenantSets []map[string]tenantMatcher
 
 	// We need a mutex to guard concurrent access
 	// to the cache map, as this is both written to
@@ -313,9 +287,21 @@ func (m *multiHashring) GetN(tenant string, ts *prompb.TimeSeries, n uint64) (En
 			if mt, ok := t[tenant]; ok && isExactMatcher(mt) {
 				found = true
 			} else {
-				var err error
-				if found, err = t.match(tenant); err != nil {
-					return Endpoint{}, err
+				for tenantPattern, matcherType := range t {
+					switch matcherType {
+					case TenantMatcherGlob:
+						matches, err := filepath.Match(tenantPattern, tenant)
+						if err != nil {
+							return Endpoint{}, fmt.Errorf("error matching tenant pattern %s (tenant %s): %w", tenantPattern, tenant, err)
+						}
+						found = matches
+					case TenantMatcherTypeExact:
+						// Already checked above, skipping.
+						fallthrough
+					default:
+						continue
+					}
+
 				}
 			}
 
