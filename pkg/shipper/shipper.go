@@ -80,8 +80,10 @@ type Shipper struct {
 	allowOutOfOrderUploads bool
 	hashFunc               metadata.HashFunc
 
-	labels func() labels.Labels
-	mtx    sync.RWMutex
+	labels       func() labels.Labels
+	mtx          sync.RWMutex
+	UploadDir    string
+	MetaFilename string
 }
 
 // New creates a new shipper that detects new TSDB blocks in dir and uploads them to
@@ -98,6 +100,7 @@ func New(
 	allowOutOfOrderUploads bool,
 	hashFunc metadata.HashFunc,
 	metaFileName string,
+	dataDir string,
 ) *Shipper {
 	if logger == nil {
 		logger = log.NewNopLogger()
@@ -126,6 +129,8 @@ func New(
 		uploadCompactedFunc:    uploadCompactedFunc,
 		hashFunc:               hashFunc,
 		metadataFilePath:       filepath.Join(dir, filepath.Clean(metaFileName)),
+		UploadDir:              dataDir,
+		MetaFilename:           metaFileName,
 	}
 }
 
@@ -373,7 +378,7 @@ func (s *Shipper) upload(ctx context.Context, meta *metadata.Meta) error {
 
 	// We hard-link the files into a temporary upload directory so we are not affected
 	// by other operations happening against the TSDB directory.
-	updir := filepath.Join(s.dir, "thanos", "upload", meta.ULID.String())
+	updir := filepath.Join(s.dir, "thanos", s.UploadDir, meta.ULID.String())
 
 	// Remove updir just in case.
 	if err := os.RemoveAll(updir); err != nil {
@@ -482,6 +487,9 @@ const (
 
 	// MetaVersion1 represents 1 version of meta.
 	MetaVersion1 = 1
+
+	// DefaultUploadDir is the default directory where shipper uploads blocks.
+	DefaultUploadDir = "upload"
 )
 
 // WriteMetaFile writes the given meta into <dir>/thanos.shipper.json.

@@ -718,6 +718,7 @@ func (t *MultiTSDB) startTSDB(logger log.Logger, tenantID string, tenant *tenant
 			t.allowOutOfOrderUpload,
 			t.hashFunc,
 			shipper.DefaultMetaFilename,
+			shipper.DefaultUploadDir,
 		)
 	}
 	options := []store.TSDBStoreOption{}

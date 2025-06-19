@@ -157,8 +157,9 @@ const PanelList: FC<RouteComponentProps & PathPrefixProps> = ({ pathPrefix = '' 
   const [enableAutocomplete, setEnableAutocomplete] = useLocalStorage('enable-autocomplete', true);
   const [enableHighlighting, setEnableHighlighting] = useLocalStorage('enable-syntax-highlighting', true);
   const [enableLinter, setEnableLinter] = useLocalStorage('enable-linter', true);
-
-  const { response: metricsRes, error: metricsErr } = useFetch<string[]>(`${pathPrefix}/api/v1/label/__name__/values`);
+  // hack to avoid timeouts for huge number of metrics > 1M as there is no pagination in the metrics list
+  // so instead __name__ label is used to fetch all metrics
+  const { response: metricsRes, error: metricsErr } = useFetch<string[]>(`${pathPrefix}/api/v1/labels`);
   const {
     response: storesRes,
     error: storesErr,

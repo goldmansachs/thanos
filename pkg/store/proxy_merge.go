@@ -310,6 +310,7 @@ func newLazyRespSet(
 	shardMatcher *storepb.ShardMatcher,
 	applySharding bool,
 	emptyStreamResponses prometheus.Counter,
+	metrics *proxyStoreMetrics,
 ) respSet {
 	bufferedResponses := []*storepb.SeriesResponse{}
 	bufferedResponsesMtx := &sync.Mutex{}
@@ -365,6 +366,9 @@ func newLazyRespSet(
 					l.noMoreData = true
 					l.dataOrFinishEvent.Signal()
 					l.bufferedResponsesMtx.Unlock()
+					if metrics != nil {
+						metrics.storeResponseSuccess.Inc()
+					}
 					return false
 				}
 
@@ -380,7 +384,9 @@ func newLazyRespSet(
 				}
 
 				l.span.SetTag("err", rerr.Error())
-
+				if metrics != nil {
+					metrics.storeResponseFailure.Inc()
+				}
 				l.bufferedResponsesMtx.Lock()
 				l.bufferedResponses = append(l.bufferedResponses, storepb.NewWarnSeriesResponse(rerr))
 				l.noMoreData = true
@@ -445,7 +451,7 @@ func newAsyncRespSet(
 	buffers *sync.Pool,
 	shardInfo *storepb.ShardInfo,
 	logger log.Logger,
-	emptyStreamResponses prometheus.Counter,
+	metrics *proxyStoreMetrics,
 ) (respSet, error) {
 
 	var (
@@ -484,8 +490,8 @@ func newAsyncRespSet(
 
 	var labelsToRemove map[string]struct{}
 	if !st.SupportsWithoutReplicaLabels() && len(req.WithoutReplicaLabels) > 0 {
-		level.Warn(logger).Log("msg", "detecting store that does not support without replica label setting. "+
-			"Falling back to eager retrieval with additional sort. Make sure your storeAPI supports it to speed up your queries", "store", st.String())
+		//level.Warn(logger).Log("msg", "detecting store that does not support without replica label setting. "+
+		//	"Falling back to eager retrieval with additional sort. Make sure your storeAPI supports it to speed up your queries", "store", st.String())
 		retrievalStrategy = EagerRetrieval
 
 		labelsToRemove = make(map[string]struct{})
@@ -505,7 +511,8 @@ func newAsyncRespSet(
 			cl,
 			shardMatcher,
 			applySharding,
-			emptyStreamResponses,
+			metrics.emptyStreamResponses,
+			metrics,
 		), nil
 	case EagerRetrieval:
 		return newEagerRespSet(
@@ -517,7 +524,8 @@ func newAsyncRespSet(
 			cl,
 			shardMatcher,
 			applySharding,
-			emptyStreamResponses,
+			metrics.emptyStreamResponses,
+			metrics,
 			labelsToRemove,
 		), nil
 	default:
@@ -571,6 +579,7 @@ func newEagerRespSet(
 	shardMatcher *storepb.ShardMatcher,
 	applySharding bool,
 	emptyStreamResponses prometheus.Counter,
+	metrics *proxyStoreMetrics,
 	removeLabels map[string]struct{},
 ) respSet {
 	ret := &eagerRespSet{
@@ -625,6 +634,9 @@ func newEagerRespSet(
 			resp, err := cl.Recv()
 			if err != nil {
 				if err == io.EOF {
+					if metrics != nil {
+						metrics.storeResponseSuccess.Inc()
+					}
 					return false
 				}
 
@@ -641,6 +653,9 @@ func newEagerRespSet(
 
 				l.bufferedResponses = append(l.bufferedResponses, storepb.NewWarnSeriesResponse(rerr))
 				l.span.SetTag("err", rerr.Error())
+				if metrics != nil {
+					metrics.storeResponseFailure.Inc()
+				}
 				return false
 			}
 
