@@ -43,7 +43,7 @@ rule_files:
 	testutil.Ok(t, err)
 
 	promRules := NewPrometheus(u, promclient.NewDefaultClient(), func() labels.Labels {
-		return labels.FromStrings("replica", "test1")
-	})
+		return labels.Labels{{Name: "cluster", Value: "test"}}
+	}, log.NewNopLogger())
 	testRulesAgainstExamples(t, filepath.Join(root, "examples/alerts"), promRules, true)
 }

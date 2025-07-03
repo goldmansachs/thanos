@@ -26,7 +26,6 @@ import (
 	"github.com/thanos-io/thanos/pkg/block/metadata"
 )
 
-
 func TestShipperTimestamps(t *testing.T) {
 	dir := t.TempDir()
 
