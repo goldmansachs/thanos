@@ -4,9 +4,11 @@
 package rules
 
 import (
+	"crypto/sha256"
+	"fmt"
 	"net/url"
 	"strings"
-	"unicode/utf8"
+	"sync"
 
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
@@ -16,6 +18,143 @@ import (
 	"github.com/thanos-io/thanos/pkg/rules/rulespb"
 	"github.com/thanos-io/thanos/pkg/store/labelpb"
 )
+
+// Simple LRU cache implementation
+type LRUCache struct {
+	capacity int
+	cache    map[string]*Node
+	head     *Node
+	tail     *Node
+	mutex    sync.RWMutex
+}
+
+type Node struct {
+	key  string
+	prev *Node
+	next *Node
+}
+
+func NewLRUCache(capacity int) *LRUCache {
+	head := &Node{}
+	tail := &Node{}
+	head.next = tail
+	tail.prev = head
+
+	return &LRUCache{
+		capacity: capacity,
+		cache:    make(map[string]*Node),
+		head:     head,
+		tail:     tail,
+	}
+}
+
+func (c *LRUCache) Get(key string) bool {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	if node, exists := c.cache[key]; exists {
+		c.moveToHead(node)
+		return true
+	}
+	return false
+}
+
+func (c *LRUCache) Put(key string) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	if node, exists := c.cache[key]; exists {
+		c.moveToHead(node)
+		return
+	}
+
+	newNode := &Node{key: key}
+	c.cache[key] = newNode
+	c.addToHead(newNode)
+
+	if len(c.cache) > c.capacity {
+		tail := c.removeTail()
+		delete(c.cache, tail.key)
+	}
+}
+
+func (c *LRUCache) addToHead(node *Node) {
+	node.prev = c.head
+	node.next = c.head.next
+	c.head.next.prev = node
+	c.head.next = node
+}
+
+func (c *LRUCache) removeNode(node *Node) {
+	node.prev.next = node.next
+	node.next.prev = node.prev
+}
+
+func (c *LRUCache) moveToHead(node *Node) {
+	c.removeNode(node)
+	c.addToHead(node)
+}
+
+func (c *LRUCache) removeTail() *Node {
+	lastNode := c.tail.prev
+	c.removeNode(lastNode)
+	return lastNode
+}
+
+// Global LRU cache for annotation debugging
+var annotationCache = NewLRUCache(10000)
+
+// generateAnnotationSHA256 creates a SHA256 hash for the annotation debug entry
+func generateAnnotationSHA256(stage, source, baseURL, group, alert, annotationKey, annotationValue string) string {
+	data := fmt.Sprintf("%s|%s|%s|%s|%s|%s|%s", stage, source, baseURL, group, alert, annotationKey, annotationValue)
+	hash := sha256.Sum256([]byte(data))
+	return fmt.Sprintf("%x", hash)
+}
+
+// DebugRuleGroups validates rule groups and logs issues (made public)
+func DebugRuleGroups(logger log.Logger, groups []*rulespb.RuleGroup, stage, source string, baseURL *url.URL) {
+	// Extract base URL information
+	var urlInfo string
+	if baseURL != nil {
+		urlInfo = baseURL.String()
+	} else {
+		urlInfo = "unknown"
+	}
+
+	for _, g := range groups {
+		for _, r := range g.Rules {
+			// Only check rule annotations (only for alerting rules)
+			if alertRule := r.GetAlert(); alertRule != nil {
+				if len(alertRule.Annotations.Labels) > 0 {
+					for _, annotation := range alertRule.Annotations.Labels {
+						// Generate SHA256 hash for this annotation entry
+						sha256Key := generateAnnotationSHA256(stage, source, urlInfo, g.Name, alertRule.Name, annotation.Name, annotation.Value)
+
+						// Check if this annotation combination already exists in cache
+						if !annotationCache.Get(sha256Key) {
+							// Add to cache and log the entry
+							annotationCache.Put(sha256Key)
+
+							level.Debug(logger).Log(
+								"msg", "ANNOTATION DEBUG",
+								"stage", stage,
+								"source", source,
+								"base_url", urlInfo,
+								"group", g.Name,
+								"alert", alertRule.Name,
+								"annotation_key", annotation.Name,
+								"annotation_value", annotation.Value,
+								"annotation_key_hex", []byte(annotation.Name),
+								"annotation_value_hex", []byte(annotation.Value),
+								"sha256", sha256Key,
+							)
+						}
+					}
+				}
+			}
+		}
+	}
+}
 
 // Prometheus implements rulespb.Rules gRPC that allows to fetch rules from Prometheus HTTP api/v1/rules endpoint.
 type Prometheus struct {
@@ -48,13 +187,13 @@ func (p *Prometheus) Rules(r *rulespb.RulesRequest, s rulespb.Rules_RulesServer)
 	}
 
 	// Debug UTF-8 validation before enrichment
-	debugRuleGroupsUTF8(p.logger, groups, "before_enrichment", p.base.String())
+	DebugRuleGroups(p.logger, groups, "before_enrichment", p.base.String(), p.base)
 
 	// Prometheus does not add external labels, so we need to add on our own.
 	enrichRulesWithExtLabels(groups, p.extLabels())
 
 	// Debug UTF-8 validation after enrichment
-	debugRuleGroupsUTF8(p.logger, groups, "after_enrichment", p.base.String())
+	DebugRuleGroups(p.logger, groups, "after_enrichment", p.base.String(), p.base)
 
 	for _, g := range groups {
 		if err := s.Send(&rulespb.RulesResponse{Result: &rulespb.RulesResponse_Group{Group: g}}); err != nil {
@@ -69,79 +208,6 @@ func enrichRulesWithExtLabels(groups []*rulespb.RuleGroup, extLset labels.Labels
 	for _, g := range groups {
 		for _, r := range g.Rules {
 			r.SetLabels(labelpb.ExtendSortedLabels(r.GetLabels(), extLset))
-		}
-	}
-}
-
-// debugRuleGroupsUTF8 validates UTF-8 encoding in rule groups and logs issues
-func debugRuleGroupsUTF8(logger log.Logger, groups []*rulespb.RuleGroup, stage, source string) {
-	for _, g := range groups {
-		for _, r := range g.Rules {
-			// Get rule identifier
-			var ruleID string
-			if recording := r.GetRecording(); recording != nil {
-				ruleID = recording.Name
-			} else if alert := r.GetAlert(); alert != nil {
-				ruleID = alert.Name
-			}
-
-			// Check rule labels
-			for _, lbl := range r.GetLabels() {
-				if !utf8.ValidString(lbl.Name) {
-					level.Debug(logger).Log(
-						"msg", "invalid UTF-8 in rule label name",
-						"stage", stage,
-						"source", source,
-						"group", g.Name,
-						"rule", ruleID,
-						"label_name", lbl.Name,
-						"label_name_hex", []byte(lbl.Name),
-					)
-				}
-				if !utf8.ValidString(lbl.Value) {
-					level.Debug(logger).Log(
-						"msg", "invalid UTF-8 in rule label value",
-						"stage", stage,
-						"source", source,
-						"group", g.Name,
-						"rule", ruleID,
-						"label_name", lbl.Name,
-						"label_value", lbl.Value,
-						"label_value_hex", []byte(lbl.Value),
-					)
-				}
-			}
-
-			// Check rule annotations (only for alerting rules)
-			if alertRule := r.GetAlert(); alertRule != nil {
-				if len(alertRule.Annotations.Labels) > 0 {
-					for _, annotation := range alertRule.Annotations.Labels {
-						if !utf8.ValidString(annotation.Name) {
-							level.Debug(logger).Log(
-								"msg", "invalid UTF-8 in rule annotation key",
-								"stage", stage,
-								"source", source,
-								"group", g.Name,
-								"alert", alertRule.Name,
-								"annotation_key", annotation.Name,
-								"annotation_key_hex", []byte(annotation.Name),
-							)
-						}
-						if !utf8.ValidString(annotation.Value) {
-							level.Debug(logger).Log(
-								"msg", "invalid UTF-8 in rule annotation value",
-								"stage", stage,
-								"source", source,
-								"group", g.Name,
-								"alert", alertRule.Name,
-								"annotation_key", annotation.Name,
-								"annotation_value", annotation.Value,
-								"annotation_value_hex", []byte(annotation.Value),
-							)
-						}
-					}
-				}
-			}
 		}
 	}
 }
