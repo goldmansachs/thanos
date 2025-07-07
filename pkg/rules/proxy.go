@@ -75,8 +75,7 @@ func (s *Proxy) Rules(req *rulespb.RulesRequest, srv rulespb.Rules_RulesServer) 
 		return err
 	}
 
-	// Debug UTF-8 validation in querier before sending response
-	DebugRuleGroups(s.logger, groups, "querier_proxy_before_send", "querier", nil)
+	DebugRuleGroups(s.logger, groups, "querier_proxy_before_send", "proxy_rules", nil)
 
 	for _, g := range groups {
 		tracing.DoInSpan(srv.Context(), "send_rules_response", func(_ context.Context) {
@@ -153,10 +152,15 @@ func (stream *rulesStream) receive(ctx context.Context) error {
 			continue
 		}
 
-		select {
-		case stream.channel <- rule.GetGroup():
-		case <-ctx.Done():
-			return ctx.Err()
+		// Debug rule group before sending to stream channel
+		if ruleGroup := rule.GetGroup(); ruleGroup != nil {
+			DebugRuleGroups(log.NewNopLogger(), []*rulespb.RuleGroup{ruleGroup}, "proxy_stream_before_send", "proxy_recv", nil)
+
+			select {
+			case stream.channel <- ruleGroup:
+			case <-ctx.Done():
+				return ctx.Err()
+			}
 		}
 	}
 }

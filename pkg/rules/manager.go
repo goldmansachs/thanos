@@ -14,6 +14,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/go-kit/log"
 	"github.com/gogo/protobuf/proto"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
@@ -91,6 +92,10 @@ func (g Group) toProto() *rulespb.RuleGroup {
 			panic(fmt.Sprintf("rule %q: unsupported type %T", r.Name(), rule))
 		}
 	}
+
+	// Debug rules manager proto conversion with meaningful component identifier
+	DebugRuleGroups(log.NewNopLogger(), []*rulespb.RuleGroup{ret}, "rules_manager_proto_conversion", "rules_manager", nil)
+
 	return ret
 }
 

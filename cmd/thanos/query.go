@@ -772,6 +772,9 @@ func runQuery(
 			tenantLabel,
 		)
 
+		// Add the rules debug UI route at the root level
+		router.Get("/rules_debug_ui", api.RulesDebugUI)
+
 		api.Register(router.WithPrefix("/api/v1"), tracer, logger, ins, logMiddleware)
 
 		srv := httpserver.New(logger, reg, comp, httpProbe,
