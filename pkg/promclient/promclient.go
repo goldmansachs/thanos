@@ -870,10 +870,6 @@ func (c *Client) RulesInGRPC(ctx context.Context, base *url.URL, typeRules strin
 		g.PartialResponseStrategy = storepb.PartialResponseStrategy_ABORT
 	}
 
-	// Debug rules fetched from Prometheus API - moved from prometheus.go to avoid import cycle
-	// Import would cause cycle: promclient -> rules -> promclient, so we use log.NewNopLogger()
-	// Note: In practice this would be called from rules.Prometheus.Rules() which has proper logger
-
 	return m.Data.Groups, nil
 }
 

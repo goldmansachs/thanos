@@ -75,7 +75,7 @@ func (s *Proxy) Rules(req *rulespb.RulesRequest, srv rulespb.Rules_RulesServer) 
 		return err
 	}
 
-	DebugRuleGroups(s.logger, groups, "querier_proxy_before_send", "proxy_rules", nil)
+	DebugRuleGroups(s.logger, groups, "proxy_chain_before_send", "proxy_rules", nil)
 
 	for _, g := range groups {
 		tracing.DoInSpan(srv.Context(), "send_rules_response", func(_ context.Context) {

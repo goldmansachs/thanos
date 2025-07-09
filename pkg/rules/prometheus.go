@@ -298,12 +298,39 @@ func CollectRuleDebugInfoWithID(groups []*rulespb.RuleGroup, stage string, baseU
 	return CollectRuleDebugInfo(groups, componentID)
 }
 
+// CollectSidecarDebugInfo collects debug information specifically from sidecar processing stages
+func CollectSidecarDebugInfo(groups []*rulespb.RuleGroup, stage string, baseURL *url.URL) []*rulespb.RuleDebugInfo {
+	componentID := getComponentIdentifier(stage, baseURL)
+	debugInfo := CollectRuleDebugInfo(groups, componentID)
+
+	// Store in global cache with sidecar-specific identifier that includes URL
+	var stageKey string
+	if baseURL != nil {
+		stageKey = fmt.Sprintf("%s_%s", stage, baseURL.Host)
+	} else {
+		stageKey = stage
+	}
+
+	// Log debug info collection for troubleshooting
+	if len(debugInfo) > 0 {
+		fmt.Printf("DEBUG: Collecting sidecar debug info for stage=%s, stageKey=%s, rules=%d\n", stage, stageKey, len(debugInfo))
+	}
+
+	StoreDebugInfo(stageKey, debugInfo)
+
+	return debugInfo
+}
+
 // CollectMultiComponentDebugInfo collects debug information from multiple pipeline stages
 func CollectMultiComponentDebugInfo(groups []*rulespb.RuleGroup, baseURL *url.URL) []*rulespb.RuleDebugInfo {
 	var allDebugInfo []*rulespb.RuleDebugInfo
 
 	stages := []string{
-		"prometheus_fetch",
+		"sidecar_prometheus_raw",
+		"sidecar_prometheus_parsed",
+		"sidecar_before_annotations",
+		"sidecar_after_annotations",
+		"sidecar_grpc_response",
 		"rules_manager_conversion",
 		"querier_proxy_processing",
 		"grpc_client_response",
@@ -401,10 +428,19 @@ func (p *Prometheus) Rules(r *rulespb.RulesRequest, s rulespb.Rules_RulesServer)
 		return err
 	}
 
+	// Debug tracking: Raw data from Prometheus HTTP API
+	CollectSidecarDebugInfo(groups, "sidecar_prometheus_raw", p.base)
+
 	DebugRuleGroups(p.logger, groups, "before_enrichment", p.base.String(), p.base)
+
+	// Debug tracking: Before annotations are added
+	CollectSidecarDebugInfo(groups, "sidecar_before_annotations", p.base)
 
 	// Prometheus does not add external labels, so we need to add on our own.
 	enrichRulesWithExtLabels(groups, p.extLabels())
+
+	// Debug tracking: After annotations are added
+	CollectSidecarDebugInfo(groups, "sidecar_after_annotations", p.base)
 
 	// Debug UTF-8 validation after enrichment
 	DebugRuleGroups(p.logger, groups, "after_enrichment", p.base.String(), p.base)
