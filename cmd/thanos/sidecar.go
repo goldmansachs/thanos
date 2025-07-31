@@ -109,9 +109,6 @@ func (p *rulesProxy) Rules(req *rulespb.RulesRequest, srv rulespb.Rules_RulesSer
 		return err
 	}
 
-	// Debug tracking: Raw data from Prometheus after gRPC conversion
-	rules.CollectSidecarDebugInfo(collector.Groups, "sidecar_prometheus_parsed", nil)
-
 	// Perform the caching logic.
 	var recordingRules []*enrichedRecordingRule
 	for _, group := range collector.Groups {
@@ -129,9 +126,6 @@ func (p *rulesProxy) Rules(req *rulespb.RulesRequest, srv rulespb.Rules_RulesSer
 	p.mtx.Lock()
 	p.lastRecordingRules = recordingRules
 	p.mtx.Unlock()
-
-	// Debug tracking: Before sending final gRPC response
-	rules.CollectSidecarDebugInfo(collector.Groups, "sidecar_grpc_response", nil)
 
 	// Finally, send the collected groups to the actual client.
 	for _, group := range collector.Groups {

@@ -1452,7 +1452,7 @@ func NewRulesHandler(client rules.UnaryClient, enablePartialResponse bool) func(
 		}
 
 		// Debug rules in query API handler before response
-		rules.DebugRuleGroups(log.NewNopLogger(), groups.Groups, "query_api_rules_raw_response", "query_api", nil)
+		rules.DebugRuleGroups(log.NewNopLogger(), groups.Groups, "query_api_response", "query_api", nil)
 
 		return groups, warnings.AsErrors(), nil, func() {}
 	}
@@ -1785,18 +1785,6 @@ func (qapi *QueryAPI) RulesDebugUI(w http.ResponseWriter, r *http.Request) {
         .component-box { border: 2px solid #e9ecef; border-radius: 6px; padding: 15px; }
         .component-box.corrupted { border-color: #dc3545; background: #f8d7da; }
         .component-box.clean { border-color: #28a745; background: #d4edda; }
-        .call-graph { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; margin: 20px 0; }
-        .call-graph h3 { margin-top: 0; color: #495057; }
-        .call-flow { display: flex; align-items: center; margin: 10px 0; }
-        .call-step { background: #007bff; color: white; padding: 8px 16px; border-radius: 4px; margin: 0 10px; position: relative; }
-        .call-step.corrupted { background: #dc3545; }
-        .call-step.clean { background: #28a745; }
-        .call-arrow { width: 0; height: 0; border-left: 10px solid #6c757d; border-top: 8px solid transparent; border-bottom: 8px solid transparent; }
-        .call-details { font-size: 0.8em; color: #6c757d; margin: 5px 0; }
-        .corruption-timeline { background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; padding: 15px; margin: 10px 0; }
-        .timeline-item { margin: 8px 0; padding: 8px; border-left: 3px solid #28a745; }
-        .timeline-item.corrupted { border-left-color: #dc3545; }
-        .change-details { background: #f1f3f4; padding: 10px; border-radius: 4px; margin: 10px 0; font-family: monospace; font-size: 0.9em; }
         .component-name { font-weight: bold; margin-bottom: 10px; font-size: 0.9em; word-break: break-word; line-height: 1.3; }
         .sha256-hash { font-family: monospace; font-size: 0.8em; word-break: break-all; background: #f1f3f4; padding: 8px; border-radius: 4px; }
         .status-indicator { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; }
@@ -1915,7 +1903,6 @@ func (qapi *QueryAPI) RulesDebugUI(w http.ResponseWriter, r *http.Request) {
                     '</div>' +
                 '</div>' +
                 (isCorrupted ? createCorruptionDetails(rule) : '') +
-                createCallGraphVisualization(rule) +
                 '<div class="components-grid">' +
                     (rule.component_sha256s && rule.component_sha256s.length > 0 ?
                         rule.component_sha256s.map(comp => createComponentBox(comp, rule)).join('') :
@@ -1996,8 +1983,36 @@ func (qapi *QueryAPI) RulesDebugUI(w http.ResponseWriter, r *http.Request) {
             const components = rule.component_sha256s;
             const referenceHash = components[0].sha256;
 
-            analysis += '<div style="margin-bottom: 10px;"><strong>Corruption Summary:</strong> ' +
-                corruptedComponents.length + ' out of ' + components.length + ' components are corrupted.</div>';
+            analysis += '<div style="margin-bottom: 10px;"><strong>Pipeline Analysis:</strong></div>' +
+                '<div style="font-family: monospace; font-size: 0.9em; margin-left: 10px;">';
+
+            components.forEach((comp, index) => {
+                const isCorrupted = comp.sha256 !== referenceHash;
+                const icon = isCorrupted ? '✗' : '✓';
+                const status = isCorrupted ? 'CORRUPTED' : (index === 0 ? 'Reference' : 'Unchanged');
+                const color = isCorrupted ? '#dc3545' : '#28a745';
+                const compName = parseComponentName(comp.component);
+
+                analysis += '<div style="margin: 5px 0; color: ' + color + ';">' +
+                    icon + ' Component ' + (index + 1) + ': <strong>' + escapeHtml(compName) + '</strong> (' + status + ': ' + comp.sha256.substring(0, 16) + '...)</div>';
+
+                if (isCorrupted && index > 0) {
+                    const prevComp = components[index - 1];
+                    const prevName = parseComponentName(prevComp.component);
+                    analysis += '<div style="margin-left: 20px; color: #856404; font-size: 0.85em;">' +
+                        '└─ Corruption occurred between "' + escapeHtml(prevName) + '" and "' + escapeHtml(compName) + '"</div>' +
+                        '<div style="margin-left: 20px; color: #856404; font-size: 0.85em;">' +
+                        '└─ Previous hash: ' + prevComp.sha256.substring(0, 16) + '... → Current hash: ' + comp.sha256.substring(0, 16) + '...</div>';
+
+                    // Add troubleshooting guidance
+                    const guidance = getCorruptionGuidance(prevComp.component, comp.component);
+                    guidance.forEach(guide => {
+                        analysis += '<div style="margin-left: 20px; color: #856404; font-size: 0.85em;">💡 ' + escapeHtml(guide) + '</div>';
+                    });
+                }
+            });
+
+            analysis += '</div>';
 
             // Show exact field differences if available
             if (rule.field_differences && rule.field_differences.length > 0) {
@@ -2036,16 +2051,6 @@ func (qapi *QueryAPI) RulesDebugUI(w http.ResponseWriter, r *http.Request) {
         }
 
         function parseComponentName(fullComponent) {
-            // Handle sidecar components specially: sidecar_host_stage_host
-            if (fullComponent.startsWith('sidecar_host_')) {
-                const parts = fullComponent.split('_');
-                if (parts.length >= 4) {
-                    const stage = parts[2];
-                    const host = parts[3];
-                    return getSidecarStageName(fullComponent) + ' [' + host + ']';
-                }
-            }
-
             // Format: hostname_file_function_line_stage_url
             const parts = fullComponent.split('_');
             if (parts.length < 5) {
@@ -2062,255 +2067,6 @@ func (qapi *QueryAPI) RulesDebugUI(w http.ResponseWriter, r *http.Request) {
             }
 
             return file + ':' + func + ' [' + stage + ']';
-        }
-
-        function createCallGraphVisualization(rule) {
-            if (!rule.component_sha256s || rule.component_sha256s.length < 2) {
-                return '';
-            }
-
-            const referenceHash = rule.component_sha256s[0].sha256;
-            let callGraph = '<div class="call-graph">' +
-                '<h3>📊 Call Graph & Rule Processing Pipeline</h3>' +
-                '<div style="margin-bottom: 15px; padding: 10px; background: #e3f2fd; border-radius: 4px;">' +
-                '<strong>🔍 Sidecar Processing Analysis:</strong> Shows rule transformation from raw Prometheus data to final gRPC response' +
-                '</div>' +
-                '<div class="call-flow">';
-
-            // Create the call flow visualization
-            rule.component_sha256s.forEach((comp, index) => {
-                const isCorrupted = comp.sha256 !== referenceHash;
-                const isSidecarComponent = comp.component.includes('sidecar_');
-                const isQuerierComponent = comp.component.includes('proxy_') || comp.component.includes('grpc_client_');
-                const stepClass = isCorrupted ? 'corrupted' : 'clean';
-                const compName = parseComponentName(comp.component);
-
-                let componentBadge = '';
-                if (isSidecarComponent) {
-                    componentBadge = ' <span style="font-size: 0.8em; color: #0066cc;">🔧 SIDECAR</span>';
-                } else if (isQuerierComponent) {
-                    componentBadge = ' <span style="font-size: 0.8em; color: #ff6600;">🔍 QUERIER</span>';
-                }
-
-                callGraph += '<div class="call-step ' + stepClass + '">' +
-                    '<div>' + escapeHtml(compName) + componentBadge + '</div>' +
-                    '<div class="call-details">Hash: ' + comp.sha256.substring(0, 12) + '...</div>' +
-                '</div>';
-
-                if (index < rule.component_sha256s.length - 1) {
-                    callGraph += '<div class="call-arrow"></div>';
-                }
-            });
-
-            callGraph += '</div>';
-
-            // Add corruption timeline if there are corrupted components
-            const corruptedComponents = rule.component_sha256s.filter(comp => comp.sha256 !== referenceHash);
-            if (corruptedComponents.length > 0) {
-                callGraph += '<div class="corruption-timeline">' +
-                    '<h4>⚠️ Corruption Timeline</h4>';
-
-                rule.component_sha256s.forEach((comp, index) => {
-                    const isCorrupted = comp.sha256 !== referenceHash;
-                    const compName = parseComponentName(comp.component);
-                    const itemClass = isCorrupted ? 'corrupted' : '';
-
-                    callGraph += '<div class="timeline-item ' + itemClass + '">' +
-                        '<strong>Step ' + (index + 1) + ':</strong> ' + escapeHtml(compName) +
-                        (isCorrupted ? ' <span style="color: #dc3545;">→ CORRUPTION DETECTED</span>' : ' <span style="color: #28a745;">→ Clean</span>') +
-                        '</div>';
-                });
-
-                callGraph += '</div>';
-            }
-
-            // Add sidecar-specific analysis
-            callGraph += createSidecarAnalysis(rule);
-
-            // Add detailed change tracking
-            callGraph += createChangeTrackingDetails(rule);
-
-            callGraph += '</div>';
-            return callGraph;
-        }
-
-        function createSidecarAnalysis(rule) {
-            if (!rule.component_sha256s || rule.component_sha256s.length < 2) {
-                return '';
-            }
-
-            const sidecarComponents = rule.component_sha256s.filter(comp => comp.component.includes('sidecar_'));
-            const querierComponents = rule.component_sha256s.filter(comp =>
-                comp.component.includes('proxy_') || comp.component.includes('grpc_client_')
-            );
-
-            if (sidecarComponents.length === 0 && querierComponents.length === 0) {
-                return '';
-            }
-
-            const referenceHash = rule.component_sha256s[0].sha256;
-            let analysis = '<div style="margin-top: 15px; padding: 15px; background: #f0f8ff; border: 1px solid #b3d9ff; border-radius: 4px;">' +
-                '<h4>🔧 Component Processing Analysis</h4>' +
-                '<p style="margin-bottom: 10px;">This section shows how the rule was processed through the pipeline:</p>';
-
-            // Show sidecar components
-            if (sidecarComponents.length > 0) {
-                analysis += '<div style="margin-bottom: 15px;"><h5>📡 Sidecar Components:</h5>';
-                sidecarComponents.forEach((comp, index) => {
-                    analysis += createComponentAnalysisItem(comp, referenceHash, 'sidecar');
-                });
-                analysis += '</div>';
-            }
-
-            // Show querier components
-            if (querierComponents.length > 0) {
-                analysis += '<div style="margin-bottom: 15px;"><h5>🔍 Querier Components:</h5>';
-                querierComponents.forEach((comp, index) => {
-                    analysis += createComponentAnalysisItem(comp, referenceHash, 'querier');
-                });
-                analysis += '</div>';
-            }
-
-            analysis += '</div>';
-            return analysis;
-        }
-
-        function createComponentAnalysisItem(comp, referenceHash, type) {
-            const isCorrupted = comp.sha256 !== referenceHash;
-            const statusIcon = isCorrupted ? '❌' : '✅';
-            const statusColor = isCorrupted ? '#dc3545' : '#28a745';
-            const stageName = getSidecarStageName(comp.component);
-            const hostName = extractSidecarHost(comp.component);
-
-            let item = '<div style="margin: 8px 0; padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px;">' +
-                '<div style="font-weight: bold; color: ' + statusColor + ';">' + statusIcon + ' ' + stageName + '</div>' +
-                '<div style="font-size: 0.8em; color: #666; margin-top: 3px;">' +
-                (type === 'sidecar' ? 'Sidecar: ' : 'Querier: ') + escapeHtml(hostName) + '</div>' +
-                '<div style="font-size: 0.9em; color: #666; margin-top: 5px;">Hash: ' + comp.sha256.substring(0, 16) + '...</div>';
-
-            if (isCorrupted) {
-                item += '<div style="color: #dc3545; font-size: 0.9em; margin-top: 5px;">⚠️ Rule data was modified at this stage</div>';
-            }
-
-            item += '</div>';
-            return item;
-        }
-
-
-        function getSidecarStageName(component) {
-            if (component.includes('sidecar_prometheus_raw')) return 'Raw Prometheus API Response';
-            if (component.includes('sidecar_prometheus_parsed')) return 'Parsed Prometheus Rules';
-            if (component.includes('sidecar_before_annotations')) return 'Before Annotations Added';
-            if (component.includes('sidecar_after_annotations')) return 'After Annotations Added';
-            if (component.includes('sidecar_grpc_response')) return 'Final gRPC Response';
-
-            // Querier stages
-            if (component.includes('proxy_stream_before_send')) return 'Querier Proxy Stream Receive';
-            if (component.includes('proxy_chain_before_send')) return 'Querier Proxy Chain Processing';
-            if (component.includes('grpc_client_before_dedup')) return 'Querier gRPC Client Before Dedup';
-            if (component.includes('grpc_client_after_filtering')) return 'Querier gRPC Client After Filtering';
-
-            return 'Unknown Stage';
-        }
-
-        function extractSidecarHost(component) {
-            // Extract sidecar host from component name for multiple sidecar support
-            const parts = component.split('_');
-            if (parts.length > 5) {
-                return parts[parts.length - 1]; // Last part should be the host
-            }
-            return 'unknown';
-        }
-
-        function createChangeTrackingDetails(rule) {
-            if (!rule.component_sha256s || rule.component_sha256s.length < 2) {
-                return '';
-            }
-
-            let changeDetails = '<div style="margin-top: 15px;"><h4>🔍 Exact Rule Values at Each Step</h4>';
-
-            rule.component_sha256s.forEach((comp, index) => {
-                const stageName = parseComponentName(comp.component);
-                const isCorrupted = index > 0 && comp.sha256 !== rule.component_sha256s[0].sha256;
-                const statusIcon = isCorrupted ? '❌' : '✅';
-                const statusColor = isCorrupted ? '#dc3545' : '#28a745';
-
-                changeDetails += '<div class="change-details" style="margin: 15px 0; padding: 15px; border: 2px solid ' + (isCorrupted ? '#dc3545' : '#28a745') + '; border-radius: 8px;">' +
-                    '<div style="font-weight: bold; color: ' + statusColor + '; margin-bottom: 10px;">' +
-                    statusIcon + ' Step ' + (index + 1) + ': ' + escapeHtml(stageName) + '</div>' +
-                    '<div style="font-size: 0.9em; color: #666; margin-bottom: 10px;">Hash: ' + comp.sha256 + '</div>' +
-
-                    '<div style="margin: 10px 0;"><strong>Query:</strong><br>' +
-                    '<code style="background: #f8f9fa; padding: 8px; display: block; border-radius: 4px; word-wrap: break-word;">' +
-                    escapeHtml(comp.query || 'N/A') + '</code></div>';
-
-                // Show labels
-                changeDetails += '<div style="margin: 10px 0;"><strong>Labels:</strong><br>';
-                if (comp.labels && comp.labels.labels && comp.labels.labels.length > 0) {
-                    changeDetails += '<div style="background: #f8f9fa; padding: 8px; border-radius: 4px;">';
-                    comp.labels.labels.forEach(label => {
-                        changeDetails += '<div style="margin: 2px 0;"><code>' + escapeHtml(label.name) + '=' + escapeHtml(label.value) + '</code></div>';
-                    });
-                    changeDetails += '</div>';
-                } else {
-                    changeDetails += '<div style="color: #666; font-style: italic;">No labels</div>';
-                }
-
-                // Show annotations
-                changeDetails += '<div style="margin: 10px 0;"><strong>Annotations:</strong><br>';
-                if (comp.annotations && comp.annotations.labels && comp.annotations.labels.length > 0) {
-                    changeDetails += '<div style="background: #f8f9fa; padding: 8px; border-radius: 4px;">';
-                    comp.annotations.labels.forEach(annotation => {
-                        changeDetails += '<div style="margin: 2px 0;"><code>' + escapeHtml(annotation.name) + '=' + escapeHtml(annotation.value) + '</code></div>';
-                    });
-                    changeDetails += '</div>';
-                } else {
-                    changeDetails += '<div style="color: #666; font-style: italic;">No annotations</div>';
-                }
-
-                // Show differences from previous step
-                if (index > 0) {
-                    const prevComp = rule.component_sha256s[index - 1];
-                    let hasDifferences = false;
-                    let diffDetails = '<div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-radius: 4px;"><strong>Changes from previous step:</strong><br>';
-
-                    // Check query differences
-                    if (comp.query !== prevComp.query) {
-                        hasDifferences = true;
-                        diffDetails += '<div style="margin: 8px 0;"><strong>Query changed:</strong><br>' +
-                            '<div style="color: #dc3545;">- ' + escapeHtml(prevComp.query) + '</div>' +
-                            '<div style="color: #28a745;">+ ' + escapeHtml(comp.query) + '</div></div>';
-                    }
-
-                    // Check label differences
-                    const prevLabelsStr = JSON.stringify(prevComp.labels);
-                    const currLabelsStr = JSON.stringify(comp.labels);
-                    if (prevLabelsStr !== currLabelsStr) {
-                        hasDifferences = true;
-                        diffDetails += '<div style="margin: 8px 0;"><strong>Labels changed</strong></div>';
-                    }
-
-                    // Check annotation differences
-                    const prevAnnotationsStr = JSON.stringify(prevComp.annotations);
-                    const currAnnotationsStr = JSON.stringify(comp.annotations);
-                    if (prevAnnotationsStr !== currAnnotationsStr) {
-                        hasDifferences = true;
-                        diffDetails += '<div style="margin: 8px 0;"><strong>Annotations changed</strong></div>';
-                    }
-
-                    if (hasDifferences) {
-                        diffDetails += '</div>';
-                        changeDetails += diffDetails;
-                    } else {
-                        changeDetails += '<div style="margin-top: 10px; color: #28a745; font-style: italic;">No changes from previous step</div>';
-                    }
-                }
-
-                changeDetails += '</div>';
-            });
-
-            changeDetails += '</div>';
-            return changeDetails;
         }
 
         function getCorruptionGuidance(fromComponent, toComponent) {

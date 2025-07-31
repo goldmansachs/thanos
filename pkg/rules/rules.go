@@ -62,7 +62,6 @@ func (rr *GRPCClient) Rules(ctx context.Context, req *rulespb.RulesRequest) (*ru
 		return nil, nil, errors.Wrap(err, "proxy Rules")
 	}
 
-	DebugRuleGroups(log.NewNopLogger(), resp.groups, "grpc_client_before_dedup", "grpc_client", nil)
 	var err error
 	matcherSets := make([][]*labels.Matcher, len(req.MatcherString))
 	for i, s := range req.MatcherString {
