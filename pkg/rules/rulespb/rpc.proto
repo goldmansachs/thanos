@@ -57,30 +57,6 @@ message RulesResponse {
     }
 }
 
-message RulesDebugResponse {
-    repeated RuleDebugInfo rules = 1;
-}
-
-message RuleDebugInfo {
-    string group_name = 1;
-    string rule_name = 2;
-    string rule_type = 3;
-    string query = 4;
-    repeated ComponentSha256 component_sha256s = 5;
-    ZLabelSet labels = 6 [(gogoproto.nullable) = false];
-    ZLabelSet annotations = 7 [(gogoproto.nullable) = false];
-    repeated string field_differences = 8; // Exact field differences for corruption analysis
-}
-
-message ComponentSha256 {
-    string component = 1;
-    string sha256 = 2;
-    // Store actual rule content for field-by-field comparison
-    string query = 3;
-    ZLabelSet labels = 4 [(gogoproto.nullable) = false];
-    ZLabelSet annotations = 5 [(gogoproto.nullable) = false];
-}
-
 
 /// RuleGroups is set of rule groups.
 /// This and below APIs are meant to be used for unmarshaling and marshsaling rules from/to Prometheus API.
