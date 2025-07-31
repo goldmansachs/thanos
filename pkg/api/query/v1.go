@@ -1431,7 +1431,14 @@ func NewRulesHandler(client rules.UnaryClient, enablePartialResponse bool) func(
 		typeParam := r.URL.Query().Get("type")
 		typ, ok := rulespb.RulesRequest_Type_value[strings.ToUpper(typeParam)]
 		if !ok {
+			if typeParam != "" {
+				return nil, nil, &api.ApiError{Typ: api.ErrorBadData, Err: errors.Errorf("invalid rules parameter type='%v'", typeParam)}, func() {}
+			}
 			typ = int32(rulespb.RulesRequest_ALL)
+		}
+
+		if err := r.ParseForm(); err != nil {
+			return nil, nil, &api.ApiError{Typ: api.ErrorInternal, Err: errors.Errorf("error parsing request form='%v'", MatcherParam)}, func() {}
 		}
 
 		// TODO(bwplotka): Allow exactly the same functionality as query API: passing replica, dedup and partial response as HTTP params as well.
@@ -1447,12 +1454,8 @@ func NewRulesHandler(client rules.UnaryClient, enablePartialResponse bool) func(
 			groups, warnings, err = client.Rules(ctx, req)
 		})
 		if err != nil {
-			return nil, nil, &api.ApiError{Typ: api.ErrorExec, Err: err}, func() {}
+			return nil, nil, &api.ApiError{Typ: api.ErrorInternal, Err: errors.Errorf("error retrieving rules: %v", err)}, func() {}
 		}
-
-		// Debug UTF-8 validation in query API handler before response
-		rules.DebugRuleGroups(log.NewNopLogger(), groups.Groups, "query_api_before_response", "query_api", nil)
-
 		return groups, warnings.AsErrors(), nil, func() {}
 	}
 }

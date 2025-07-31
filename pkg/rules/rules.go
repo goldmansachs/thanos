@@ -10,7 +10,6 @@ import (
 	"text/template"
 	"text/template/parse"
 
-	"github.com/go-kit/log"
 	"github.com/pkg/errors"
 	"github.com/prometheus/prometheus/model/labels"
 	"github.com/prometheus/prometheus/util/annotations"
@@ -62,9 +61,6 @@ func (rr *GRPCClient) Rules(ctx context.Context, req *rulespb.RulesRequest) (*ru
 		return nil, nil, errors.Wrap(err, "proxy Rules")
 	}
 
-	// Debug UTF-8 validation after receiving from proxy
-	DebugRuleGroups(log.NewNopLogger(), resp.groups, "grpc_client_after_proxy", "grpc_client", nil)
-
 	var err error
 	matcherSets := make([][]*labels.Matcher, len(req.MatcherString))
 	for i, s := range req.MatcherString {
@@ -82,9 +78,6 @@ func (rr *GRPCClient) Rules(ctx context.Context, req *rulespb.RulesRequest) (*ru
 	for _, g := range resp.groups {
 		g.Rules = dedupRules(g.Rules, rr.replicaLabels)
 	}
-
-	// Debug UTF-8 validation after filtering and deduplication
-	DebugRuleGroups(log.NewNopLogger(), resp.groups, "grpc_client_after_processing", "grpc_client", nil)
 
 	return &rulespb.RuleGroups{Groups: resp.groups}, resp.warnings, nil
 }

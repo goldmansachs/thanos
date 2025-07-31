@@ -75,9 +75,6 @@ func (s *Proxy) Rules(req *rulespb.RulesRequest, srv rulespb.Rules_RulesServer) 
 		return err
 	}
 
-	// Debug UTF-8 validation in querier before sending response
-	DebugRuleGroups(s.logger, groups, "querier_proxy_before_send", "querier", nil)
-
 	for _, g := range groups {
 		tracing.DoInSpan(srv.Context(), "send_rules_response", func(_ context.Context) {
 			err = srv.Send(rulespb.NewRuleGroupRulesResponse(g))
