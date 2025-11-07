@@ -5,6 +5,7 @@ package main
 
 import (
 	"context"
+	_ "embed"
 	"fmt"
 	"io"
 	"os"
@@ -30,20 +31,22 @@ import (
 	"github.com/thanos-io/thanos/pkg/extkingpin"
 	"github.com/thanos-io/thanos/pkg/logging"
 	"github.com/thanos-io/thanos/pkg/tracing/client"
-)  import (
-        _ "embed"
-        "yourmodule/common/version"
-  )
+)
 
-  //go:embed VERSION
-  var embeddedVersion string
+//go:embed VERSION
+var embeddedVersion string
 
-  //go:embed VERSION_EXTRA
-  var embeddedVersionExtra string
+//go:embed VERSION_EXTRA
+var embeddedRevision string
 
 func init() {
-      version.SetVersion(embeddedVersion, embeddedVersionExtra)
-} 
+	// Set static version from embedded VERSION file
+	version.Version = embeddedVersion
+	version.Revision = embeddedRevision
+	version.Branch = "HEAD"
+	version.BuildUser = "thanos"
+	version.BuildDate = "static"
+}
 
 func main() {
 	// We use mmaped resources in most of the components so hardcode PanicOnFault to true. This allows us to recover (if we can e.g if queries
