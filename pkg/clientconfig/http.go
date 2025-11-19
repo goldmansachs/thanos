@@ -273,7 +273,7 @@ func NewHTTPClient(cfg HTTPClientConfig, name string) (*http.Client, error) {
 	return client, nil
 }
 
-var ThanosUserAgent = fmt.Sprintf("Thanos/%s", version.Version)
+var ThanosUserAgent = fmt.Sprintf("Thanos/%s", strings.Join(strings.Fields(version.Version), ""))
 
 type userAgentRoundTripper struct {
 	name string
