@@ -41,8 +41,8 @@ var embeddedRevision string
 
 func init() {
 	// Set static version from embedded VERSION file
-	version.Version = embeddedVersion
-	version.Revision = embeddedRevision
+	version.Version = strings.TrimSpace(strings.ReplaceAll(embeddedVersion, "\n", ""))
+	version.Revision = strings.TrimSpace(strings.ReplaceAll(embeddedRevision, "\n", ""))
 	version.Branch = "HEAD"
 	version.BuildUser = "thanos"
 	version.BuildDate = "static"
