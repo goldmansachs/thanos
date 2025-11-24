@@ -14,6 +14,7 @@ import (
 	"regexp"
 	"runtime"
 	"runtime/debug"
+	"strings"
 	"syscall"
 
 	"github.com/go-kit/log"
